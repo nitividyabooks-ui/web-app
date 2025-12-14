@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // bcrypt hash
+  name      String?
+  createdAt DateTime @default(now())
+}
+
+model Order {
+  id            String       @id @default(cuid())
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  status        OrderStatus  @default(PENDING_WHATSAPP)
+  customerName  String
+  customerPhone String
+  customerEmail String?
+  address       String?
+  totalAmount   Int
+  currency      String       @default("INR")
+  notes         String?
+  whatsappSent  Boolean      @default(false)
+  items         OrderItem[]
+  meta          Json?
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  order     Order    @relation(fields: [orderId], references: [id])
+  orderId   String
+  productId String
+  title     String
+  price     Int
+  quantity  Int
+  metadata  Json?
+}
+
+enum OrderStatus {
+  PENDING_WHATSAPP
+  CONFIRMED
+  CANCELLED
+  SHIPPED
+  FULFILLED
+}
+
+model Product {
+  id                String   @id
+  slug              String   @unique
+  title             String
+  shortDescription  String
+  longDescription   String
+  price             Int
+  currency          String   @default("INR")
+  ageRange          String
+  coverPath         String
+  images            Json
+  inventoryQuantity Int
+  inventoryStatus   String
+  sku               String   @unique
+  weightGrams       Int
+  dimensionsCm      Json
+  pages             Int
+  format            String
+  author            String
+  illustrator       String
+  publisher         String
+  language          String
+  isbn              String
+  metaTitle         String
+  metaDescription   String
+  ogImagePath       String
+  twitterCard       String
+  hasHeroSlide      Boolean  @default(false)
+  heroPriority      Int      @default(0)
+  bannerBgPath      String?
+  bannerTitle       String?
+  bannerSubtitle    String?
+  bannerCtaText     String?
+  bannerCtaType     String?
+  bannerTarget      String?
+  bannerAltText     String?
+  tags              String[]
+  collections       String[]
+  isFeatured        Boolean  @default(false)
+  published         Boolean  @default(true)
+  publishedAt       DateTime
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  status            String
+  meta              Json?
+}

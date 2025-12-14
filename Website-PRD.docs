@@ -1,0 +1,556 @@
+Product Requirements Document (PRD) — NitiVidya Books (MVP)
+
+Scope: Next.js MVP hosted on your domain. Pages: Landing (Home), PLP (Product Listing), PDP (Product Detail). Catalog sourced from data/products.json. Orders collected via WhatsApp (server records stored in Prisma).
+Tech decisions (confirmed): Next.js (App Router) + Tailwind CSS, Prisma, Supabase (Postgres) free tier → scalable, Vercel hosting recommended, admin auth via simple email/password, no online payments at launch.
+Special focus: SEO-first (I’ll act as an SEO expert with 15+ years experience), Core Web Vitals within Google guidelines, beautiful responsive minimal-pastel design with Miko mascot.
+
+1 — Executive summary & goals
+
+Business goal: Launch a high-converting, brand-forward D2C website for kids’ books that showcases your catalog, introduces Miko, captures orders via WhatsApp, and records orders in a durable database for fulfillment and analytics.
+
+Success metrics (MVP):
+
+Launch live on your domain within ~7–12 days.
+
+Conversion rate (visitors → WhatsApp order click) ≥ 1% in early tests.
+
+Email capture rate ≥ 3% of site visitors.
+
+SEO: pages indexed, sitemap submitted, core product pages ranking for long-tail queries within 3 months.
+
+Core Web Vitals: LCP < 2.5s, CLS < 0.10, INP/FID within recommended.
+
+2 — Target users & personas
+
+New parent (Primary) — 25–40 yrs, searches for “board books for 1 year old”, cares about safety, age-appropriate content, and simple shopping experience. Mobile-first.
+
+Gift buyer (Secondary) — looks for quick gifting options, values visuals and quick checkout via WhatsApp; likely on desktop or mobile.
+
+Preschool / daycare buyer (Tertiary) — may buy in bulk later; will want clear product specs (age, dimensions, weight).
+
+User intent: discover, preview inside pages, ask questions, order via WhatsApp.
+
+3 — Pages & user journeys
+Pages (MVP)
+
+/ — Landing / Home (hero, featured books, Miko intro, email capture)
+
+/books — PLP (grid, filters: age, tags)
+
+/books/[slug] — PDP (images, description, price, age, specs, “Order on WhatsApp” CTA)
+
+/admin — Admin panel (protected; view & manage orders)
+
+/privacy, /terms, /shipping-returns — minimal legal pages
+
+/sitemap.xml & /robots.txt — auto-generated
+
+User journeys (examples)
+
+Visitor → Landing → PLP → PDP → fills name/phone → clicks “Order on WhatsApp” → server creates order record → browser opens WhatsApp with pre-filled message → user sends → admin receives and confirms.
+
+Visitor sees hero → signs up for sample pages via email → receives welcome email + sample PDF → converts later.
+
+4 — Functional requirements
+4.1 Product catalog (source)
+
+Single source: data/products.json in repo.
+
+Product fields (canonical): id, slug, title, price, currency, age, shortDescription, longDescription, images[], weight_g, dimensions_cm, inventory, isbn, tags[].
+
+PLP uses this JSON to render product cards. PDP loads product from JSON at build-time (SSG) or server-side.
+
+4.2 Cart & Checkout (WhatsApp)
+
+Cart stored client-side (localStorage).
+
+Cart page (modal or route) shows items, qty, subtotal, CTA “Order on WhatsApp”.
+
+Checkout flow:
+
+User clicks CTA → open checkout modal collecting name and phone (phone required); optionally address and email.
+
+Frontend POSTs to /api/orders/create.
+
+Server validates cart items against products.json, computes total, stores Order & OrderItem in Prisma (PENDING_WHATSAPP).
+
+Server returns orderId and generated WhatsApp deep-link.
+
+Frontend opens WhatsApp deep link (https://wa.me/<number>?text=${encodedMessage}).
+
+Admin receives WhatsApp and processes order; admin updates status via admin UI.
+
+4.3 Orders & Admin
+
+Orders persisted in Prisma (Postgres via Supabase).
+
+Admin auth: simple email/password; password hashed with bcrypt in database.
+
+Admin panel features:
+
+List orders (searchable by id/phone), filter by status.
+
+View order detail & mark CONFIRMED, SHIPPED, CANCELLED.
+
+Export orders (CSV).
+
+Optional: send shipping email (SendGrid) with tracking.
+
+4.4 API endpoints (minimal)
+
+GET /api/products — return JSON list (cache with ISR).
+
+GET /api/products/[slug] — single product.
+
+POST /api/orders/create — create Order + items.
+
+GET /api/orders/[id] — admin-protected fetch.
+
+POST /api/admin/login — admin login (returns session cookie/JWT).
+
+POST /api/orders/[id]/status — admin update (protected).
+
+4.5 Admin auth & sessions
+
+Implement simple session-based auth using NextAuth Credentials provider or custom auth:
+
+POST to login endpoint with email/password.
+
+Server validates against Prisma AdminUser table (bcrypt compare).
+
+Set secure httpOnly cookie session (JWT / session token).
+
+Protect /admin pages & admin API routes via middleware.
+
+5 — Data model (Prisma) — final schema (starter)
+
+Use PostgreSQL via Supabase (free tier).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // bcrypt hash
+  name      String?
+  createdAt DateTime @default(now())
+}
+
+model Order {
+  id            String       @id @default(cuid())
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  status        OrderStatus  @default(PENDING_WHATSAPP)
+  customerName  String
+  customerPhone String
+  customerEmail String?
+  address       String?
+  totalAmount   Int
+  currency      String       @default("INR")
+  notes         String?
+  whatsappSent  Boolean      @default(false)
+  items         OrderItem[]
+  meta          Json?
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  order     Order    @relation(fields: [orderId], references: [id])
+  orderId   String
+  productId String
+  title     String
+  price     Int
+  quantity  Int
+  metadata  Json?
+}
+
+enum OrderStatus {
+  PENDING_WHATSAPP
+  CONFIRMED
+  CANCELLED
+  SHIPPED
+  FULFILLED
+}
+
+
+Note: price and totalAmount must be stored as integers in paise.
+
+6 — SEO & Core Web Vitals (expert-level implementation checklist)
+
+I’ll treat SEO as first-class. Below are exact, prescriptive requirements to embed in the implementation.
+
+6.1 On-page SEO (must-haves)
+
+Unique page titles and meta descriptions for each page. Template:
+
+PDP title: {Product Title} — NitiVidya Books | Board books for 0–3 yrs
+
+PLP title: Books for 0–3 years — NitiVidya Books
+
+Canonical tags for all pages. Implement canonical generation to avoid duplicate content.
+
+Structured Data (JSON-LD):
+
+Product pages must include Product schema: name, description, image[], sku/isbn, brand, offers{price, priceCurrency, availability, url}. Use application/ld+json.
+
+BreadcrumbList structured data on PDP & PLP.
+
+Open Graph (OG) and Twitter Card meta tags for every page; dynamic OG image featuring Miko + product title. Use Vercel OG or a dynamic OG image generator for each PDP (improves share CTR).
+
+H1/H2 structure: one H1 per page (product title on PDP). Use descriptive H2s (What’s inside, Age & specs, About the author).
+
+Alt text on all images with relevant keywords (e.g., “Miko’s Manners board book cover — board book for 1-year-olds”).
+
+Page speed & mobile-first: pages must be optimized for mobile. Use server-side rendering (SSG/ISR) for PDP and PLP where possible.
+
+Sitemap.xml auto-generated and submitted to Google Search Console; include lastmod.
+
+robots.txt allowing indexing of product pages; block staging paths and query-heavy URLs.
+
+URL structure: /books for PLP; /books/miko-manners for PDP. Use hyphenated slugs.
+
+Breadcrumbs visible and marked with schema.
+
+Pagination: If PLP paginates, use rel="prev/next" and parameterized canonicalization.
+
+6.2 Content & keyword strategy (MVP)
+
+Primary long-tail focus per product page: “board book for 1 year old”, “baby manners book”, “bilingual baby book India”.
+
+Each PDP must have a 150–300 word unique product description (not just marketing copy) that answers parent queries: age-appropriateness, learning outcomes, materials, safety.
+
+Add a short FAQ section on PDP answering shipping, returns, material, and reading tips; this supports rich snippets.
+
+6.3 Technical SEO & performance (Core Web Vitals)
+
+LCP optimization:
+
+Ensure hero/product cover images are preloaded: <link rel="preload" as="image" href="..."> for largest visible image.
+
+Use next/image with priority for LCP images.
+
+Serve images in WebP/AVIF via Next.js Image Optimization or Cloudinary. Keep image dimension attributes to avoid layout shift.
+
+CLS mitigation:
+
+Always include width & height for images or CSS aspect-ratio.
+
+Avoid inserting content above existing content (don’t show late-loading banners).
+
+Use font-display: swap and preload key fonts.
+
+INP / FID:
+
+Minimize main-thread JS; split code and lazy-load non-essential scripts.
+
+Avoid heavy third-party scripts on initial load (defer chat widget or load via interaction).
+
+Server response & caching:
+
+Use SSG with ISR for PDP/PLP. Revalidate on catalog changes.
+
+Cache API responses and use CDNs (Vercel globally).
+
+Accessibility (affects SEO indirectly):
+
+Use semantic HTML, ARIA labels where necessary.
+
+Ensure contrast ratios meet AA.
+
+Analytics & monitoring:
+
+GA4, Search Console, Lighthouse CI in CI pipeline to detect regressions.
+
+6.4 Backlink & local SEO (initial actions)
+
+Register site with Google Business (if you have physical shop) and ensure NAP consistency.
+
+Social share images with Miko to drive social backlinks.
+
+Submit sitemap to Search Console after launch.
+
+7 — UX & Visual system (design spec)
+
+Style: Minimal + pastel. Soft rounded cards, generous spacing, big CTAs in Miko sky-blue and scarf yellow accent.
+
+7.1 Color tokens
+
+--miko-blue: #60AEF0
+
+--miko-yellow: #FFD93D
+
+--miko-cheek: #FF7BA9
+
+--bg-soft: #FFF8F6 (example)
+
+Text: #0F172A (dark slate), muted #6B7280
+
+7.2 Typography
+
+Headings: Poppins or Rubik (700 for H1).
+
+Body: Inter (400), line-height 1.6.
+
+Font formats: variable fonts; preload heading font.
+
+7.3 Components
+
+Header: Logo left; nav simple (Home, Books, About, Contact). Cart icon top-right with badge.
+
+Hero: left text + CTA, right Miko illustration (vector) partially overlapping a soft rounded card.
+
+Product Card: cover image (aspect ratio 1:1), title, age tag, price, CTA.
+
+PDP layout: two-column on desktop (images left, details right); mobile single column with sticky CTA at bottom.
+
+Footer: simple, social icons, newsletter.
+
+7.4 Miko integration rules
+
+Miko illustration appears in hero, empty states, and subtle microcopy (e.g., tooltips “Miko recommends!”).
+
+Use provided assets only; keep proportions consistent.
+
+If animation desired, use small Lottie (blink/bob). Defer Lottie after interaction to avoid blocking LCP.
+
+7.5 Responsiveness
+
+Mobile-first breakpoints: sm (640px), md (768px), lg (1024px), xl (1280px).
+
+PLP: 1 column (mobile), 2 columns (tablet), 3 columns (desktop).
+
+PDP: image full width on mobile; two-column on md+.
+
+8 — Non-functional requirements
+Performance
+
+LCP < 2.5s on 3G simulated mobile (target better on real devices).
+
+CLS < 0.10.
+
+Use Lighthouse and WebPageTest for validation.
+
+Security
+
+HTTPS mandatory (Vercel).
+
+Admin passwords hashed (bcrypt). Session cookies flagged httpOnly, secure, SameSite=strict.
+
+Env vars never stored in repo.
+
+Rate-limit admin endpoints and order creation (prevent spam).
+
+Accessibility
+
+Alt text for images, keyboard navigability, form labels, color contrast AA.
+
+Scalability & infra
+
+Use Supabase (Postgres) free tier now — scales to paid plan; works well with Prisma.
+
+Vercel platform for Next.js with automatic scaling.
+
+Plan for Stripe integration and higher concurrency later.
+
+9 — Implementation details & file structure
+Tech stack recap
+
+Frontend: Next.js (App Router), TypeScript
+
+Styling: Tailwind CSS (+ Tailwind Forms plugin)
+
+DB: Prisma + Postgres (Supabase)
+
+Hosting: Vercel
+
+Auth: NextAuth Credentials or custom auth (email/password) with bcrypt
+
+Email: SendGrid (for admin notifications & optional customer emails)
+
+Analytics: GA4, Search Console
+
+Images: Next.js Image Optimization or Cloudinary
+
+Optional tools: Vercel OG image for dynamic OG images, Lottie for subtle animations
+
+Project file map (recommended)
+/app
+  /(public)            // public static assets
+  /books
+    /[slug]/page.tsx   // PDP (SSG)
+  /books/page.tsx      // PLP (SSG with ISR)
+  /api
+    /products.ts
+    /orders/create.ts
+    /orders/[id].ts
+    /admin/login.ts
+    /admin/orders/[id]/status.ts
+/components
+  Header.tsx
+  Footer.tsx
+  ProductCard.tsx
+  Cart.tsx
+  WhatsAppCheckoutModal.tsx
+/lib
+  prisma.ts
+  products.ts         // loads data/products.json
+/styles
+  globals.css         // tailwind config
+/data
+  products.json
+/prisma
+  schema.prisma
+
+10 — Example API contract (samples)
+POST /api/orders/create
+
+Request
+
+{
+  "customer": {
+    "name": "Nitin Sharma",
+    "phone": "+919876543210",
+    "email": "nitin@example.com",
+    "address": "Address here"
+  },
+  "cart": [
+    {"productId": "miko-manners", "quantity": 1},
+    {"productId": "miko-colors", "quantity": 2}
+  ],
+  "meta": {"utm_source":"instagram"}
+}
+
+
+Response
+
+{
+  "orderId": "ckxyz123",
+  "totalAmount": 1297,
+  "currency":"INR",
+  "whatsappUrl":"https://wa.me/91999XXXXX?text=..."
+}
+
+11 — SEO-specific deliverables (I will provide)
+
+Title & meta template for Homepage, PLP, PDP.
+
+JSON-LD templates to embed on PDP for product schema + breadcrumb.
+
+Open Graph & Twitter meta tag templates & a dynamic OG image approach.
+
+Sitemap.xml generation script (based on products.json).
+
+Robots.txt template.
+
+SEO checklist & launch tasks for Search Console submission.
+
+Content brief for 3 PDPs with keyword suggestions and on-page copy examples (150–300 words each).
+
+Lighthouse/Core Web Vitals testing plan (how to run, acceptance criteria).
+
+12 — QA & acceptance criteria
+
+All pages responsive at common breakpoints (mobile/tablet/desktop).
+
+PDPs pre-rendered (SSG/ISR) and load within performance targets.
+
+Order create persists order in database and returns a working WhatsApp link.
+
+Admin login works and admin can change order statuses.
+
+Structured data present and valid for PDP (validate with Rich Results test).
+
+Sitemap accessible at /sitemap.xml.
+
+OG and Twitter cards present and show correct metadata when shared.
+
+13 — Monitoring, analytics, & testing
+
+GA4 setup on all pages; key events: view_product, add_to_cart, whatsapp_checkout, signup_newsletter.
+
+Lighthouse CI in GitHub Actions to prevent CWV regressions.
+
+Error reporting via Sentry (optional).
+
+Uptime/availability monitoring (Vercel dashboard + Health checks).
+
+14 — Timeline & milestones (realistic)
+
+Day 0–1: Finalize assets (logos, Miko images), domain & Supabase account.
+
+Day 1–3: Design (desktop + mobile): hero, PLP, PDP mocks + components.
+
+Day 3–7: Dev — implement Next.js pages, Tailwind, Prisma, API endpoints, admin UI.
+
+Day 7–9: SEO, analytics, tests, accessibility fixes, performance tuning.
+
+Day 9–10: Deploy to Vercel, connect domain, submit sitemap to Search Console, smoke tests.
+
+Day 10–12: Buffer for revisions & QA.
+
+15 — Cost & infra estimate (first 6 months)
+
+Domain: ₹800–₹1,500/yr
+
+Vercel: free tier OK for MVP → paid from $20–$40/month as needed
+
+Supabase: free tier (includes Postgres) → paid as you scale
+
+SendGrid: free tier available for low email volume
+
+Misc: GA4 free, Next.js & Tailwind free
+
+16 — Deliverables I will produce (if you want me to)
+
+If you confirm, I will produce the full developer-ready package:
+
+Complete PRD (this + additional attachments).
+
+products.json sample with 3 products.
+
+Prisma schema file ready to prisma migrate dev.
+
+Next.js starter scaffold code (App Router) with pages and key components (Header, PLP, PDP).
+
+API route examples (/api/orders/create) with server validation and Prisma writes.
+
+Admin login flow example (credentials provider) and admin UI routes.
+
+SEO assets: JSON-LD templates, sitemap generation script, meta tag templates.
+
+Deployment guide (Vercel env vars, Supabase setup).
+
+QA checklist & Lighthouse CI workflow for GitHub Actions.
+
+17 — Environment variables (to set up)
+
+DATABASE_URL (Supabase)
+
+NEXT_PUBLIC_WHATSAPP_NUMBER (for links)
+
+ADMIN_AUTH_SECRET (for session)
+
+SENDGRID_API_KEY (optional)
+
+NEXTAUTH_SECRET (if using NextAuth)
+
+VERCEL_URL (deployment)
+
+18 — Small decisions I’ve assumed (callouts)
+
+DB host: Supabase (free, scales, easy Prisma connection).
+
+Admin auth: email/password stored in database (bcrypt) — NextAuth Credentials can be used.
+
+Host: Vercel recommended for Next.js (fast deployments, image optimization).
+
+Images: use next/image with remote providers/Cloudinary for CDN.
+
+If any of these assumptions are wrong, tell me which to change and I’ll update the PRD.

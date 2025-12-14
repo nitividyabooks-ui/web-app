@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+:root {
+  /* Premium Montessori Palette (calm + trustworthy) */
+  --miko-blue: #4A9EEA;
+  --miko-yellow: #F6D66B;
+  --miko-pink: #FF7BA9;
+  --charcoal: #1F2937;
+
+  /* Backgrounds */
+  --bg-soft: #FFFBF5; /* warm cream */
+  --bg-alt: #F2F7FF;  /* gentle blue tint */
+  --surface: #FFFFFF;
+  --surface-2: rgba(255, 255, 255, 0.75);
+  --border-soft: rgba(15, 23, 42, 0.08);
+
+  /* Legacy/Utility mappings */
+  --background: var(--bg-soft);
+  --foreground: var(--charcoal);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-miko-blue: var(--miko-blue);
+  --color-miko-yellow: var(--miko-yellow);
+  --color-miko-pink: var(--miko-pink);
+  --color-charcoal: var(--charcoal);
+  --color-soft: var(--bg-soft);
+  --color-alt: var(--bg-alt);
+
+  --font-heading: var(--font-baloo);
+  --font-body: var(--font-quicksand);
+
+  /* Custom Border Radius */
+  --radius-card: 24px;
+  --radius-btn: 50px;
+
+  /* Animations */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0
+    }
+
+    to {
+      height: var(--radix-accordion-content-height)
+    }
+  }
+
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height)
+    }
+
+    to {
+      height: 0
+    }
+  }
+}
+
+/* Global Base Styles */
+body {
+  background:
+    radial-gradient(900px 500px at 15% 10%, rgba(74, 158, 234, 0.14) 0%, rgba(74, 158, 234, 0.0) 60%),
+    radial-gradient(800px 500px at 85% 0%, rgba(246, 214, 107, 0.16) 0%, rgba(246, 214, 107, 0.0) 55%),
+    linear-gradient(180deg, var(--bg-soft) 0%, #ffffff 45%, var(--bg-soft) 100%);
+  color: var(--charcoal);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+}
+
+/* Subtle pattern overlay (non-distracting) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.05;
+  background-image:
+    radial-gradient(circle at 12px 12px, rgba(31, 41, 55, 0.35) 1.2px, transparent 1.3px);
+  background-size: 36px 36px;
+}
+
+/* Ensure app content sits above the pattern overlay */
+main,
+header,
+footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* Micro-interactions */
+.btn-bounce {
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-bounce:active {
+  transform: scale(0.95);
+}
+
+.btn-bounce:hover {
+  transform: scale(1.05);
+}
+
+/* Soft Shadows */
+.shadow-soft-blue {
+  box-shadow: 0 10px 25px rgba(96, 174, 240, 0.15);
+}
+
+.shadow-soft-yellow {
+  box-shadow: 0 10px 25px rgba(255, 217, 61, 0.25);
+}
+
+/* Premium surface shadow */
+.shadow-soft {
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}

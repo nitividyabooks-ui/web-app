@@ -1,0 +1,327 @@
+[
+  {
+    "id": "miko-meets-animals",
+    "slug": "the-one-where-miko-meets-the-animals",
+    "title": "The One Where Miko Meets The Animals",
+    "shortDescription": "A cheerful board book where Miko meets new animal friends and learns simple social skills.",
+    "longDescription": "<p>Join Miko the baby elephant as he explores the jungle and meets playful animal friends. A gentle story that introduces animal names, sounds, and basic social cues — perfect for ages 0–3.</p>",
+    "price": 24900,
+    "currency": "INR",
+    "ageRange": "0-5 years",
+    "coverPath": "covers/miko-meets-animals-cover.webp",
+    "images": [
+      {
+        "alt": "Miko meets the animals book cover",
+        "path": "covers/miko-meets-animals-cover.webp",
+        "role": "cover",
+        "order": 0
+      }
+    ],
+    "inventoryQuantity": 120,
+    "inventoryStatus": "in_stock",
+    "sku": "NVB-MA-001",
+    "weightGrams": 180,
+    "dimensionsCm": {
+      "depth": 1.5,
+      "width": 21,
+      "height": 29.7
+    },
+    "pages": 24,
+    "format": "Paperback",
+    "author": "NitiVidya",
+    "illustrator": "NitiVidya Studio",
+    "publisher": "NitiVidya Books",
+    "language": "English",
+    "isbn": "NVB-MA-2025-01",
+    "metaTitle": "Miko Meets The Animals — Board book for toddlers | NitiVidya Books",
+    "metaDescription": "Join Miko as he meets new animal friends. Bright, durable board book for ages 0–3. Perfect first-read for curious toddlers.",
+    "ogImagePath": "og/miko-meets-animals-og.webp",
+    "twitterCard": "summary_large_image",
+    "hasHeroSlide": true,
+    "heroPriority": 10,
+    "bannerBgPath": "banners/miko-meets-animals-hero-16x9.webp",
+    "bannerTitle": "The One Where Miko Meets The Animals",
+    "bannerSubtitle": "Playful animal friends and gentle social cues for tiny readers",
+    "bannerCtaText": "Explore the Series",
+    "bannerCtaType": "PDP",
+    "bannerTarget": "the-one-where-miko-meets-the-animals",
+    "bannerAltText": "Forest background with Miko and giraffe — hero banner",
+    "tags": [
+      "animals",
+      "first-words",
+      "0-3"
+    ],
+    "collections": [
+      "miko-series"
+    ],
+    "isFeatured": true,
+    "published": true,
+    "publishedAt": "2025-12-05T10:00:00.000Z",
+    "createdAt": "2025-12-05T10:00:00.000Z",
+    "updatedAt": "2025-12-05T10:00:00.000Z",
+    "status": "published",
+    "meta": {
+      "utm_campaign": "miko_meets_animals_launch"
+    }
+  },
+  {
+    "id": "miko-celebrates-festivals",
+    "slug": "the-one-where-miko-celebrates-festivals",
+    "title": "The One Where Miko Celebrates Festivals",
+    "shortDescription": "A colorful celebration of festivals through Miko’s playful eyes — perfect to introduce cultural moments to little ones.",
+    "longDescription": "<p>Celebrate colors, songs, and joyful traditions with Miko. This vibrant board book introduces festival basics through simple language and bright illustrations — suitable for ages 0–3.</p>",
+    "price": 24900,
+    "currency": "INR",
+    "ageRange": "0-5 years",
+    "coverPath": "covers/miko-celebrates-festivals-cover.webp",
+    "images": [
+      {
+        "alt": "Miko celebrates festivals book cover",
+        "path": "covers/miko-celebrates-festivals-cover.webp",
+        "role": "cover",
+        "order": 0
+      }
+    ],
+    "inventoryQuantity": 80,
+    "inventoryStatus": "in_stock",
+    "sku": "NVB-FS-001",
+    "weightGrams": 190,
+    "dimensionsCm": {
+      "depth": 1.6,
+      "width": 21,
+      "height": 29.7
+    },
+    "pages": 24,
+    "format": "Paperback",
+    "author": "NitiVidya",
+    "illustrator": "NitiVidya Studio",
+    "publisher": "NitiVidya Books",
+    "language": "English",
+    "isbn": "NVB-FS-2025-01",
+    "metaTitle": "Miko Celebrates Festivals — Colourful board book | NitiVidya Books",
+    "metaDescription": "Introduce your child to festivals in a gentle, colorful way with Miko. A vibrant board book for toddlers (0–3 yrs).",
+    "ogImagePath": "og/miko-celebrates-festivals-og.webp",
+    "twitterCard": "summary_large_image",
+    "hasHeroSlide": true,
+    "heroPriority": 20,
+    "bannerBgPath": "banners/miko-festivals-hero-16x9.webp",
+    "bannerTitle": "Miko Celebrates Festivals",
+    "bannerSubtitle": "Bright colours and joyful learning",
+    "bannerCtaText": "Explore the Series",
+    "bannerCtaType": "PDP",
+    "bannerTarget": "the-one-where-miko-celebrates-festivals",
+    "bannerAltText": "Festival-themed background with colourful powders — hero banner",
+    "tags": [
+      "festivals",
+      "culture",
+      "0-3"
+    ],
+    "collections": [
+      "miko-series"
+    ],
+    "isFeatured": false,
+    "published": true,
+    "publishedAt": "2025-12-05T10:00:00.000Z",
+    "createdAt": "2025-12-05T10:00:00.000Z",
+    "updatedAt": "2025-12-05T10:00:00.000Z",
+    "status": "published",
+    "meta": {
+      "utm_campaign": "miko_festivals_launch"
+    }
+  },
+  {
+    "id": "miko-learns-actions",
+    "slug": "the-one-where-miko-learns-the-actions",
+    "title": "The One Where Miko Learns The Actions",
+    "shortDescription": "A bright book that teaches simple actions and verbs — perfect for early language building.",
+    "longDescription": "<p>Help your toddler explore action words — jump, run, clap — through charming illustrations and playful prompts with Miko. Great for read-aloud and vocabulary building (0–3 yrs).</p>",
+    "price": 24900,
+    "currency": "INR",
+    "ageRange": "0-5 years",
+    "coverPath": "covers/miko-learns-actions-cover.webp",
+    "images": [
+      {
+        "alt": "Miko learns the actions book cover",
+        "path": "covers/miko-learns-actions-cover.webp",
+        "role": "cover",
+        "order": 0
+      }
+    ],
+    "inventoryQuantity": 150,
+    "inventoryStatus": "in_stock",
+    "sku": "NVB-ACT-001",
+    "weightGrams": 170,
+    "dimensionsCm": {
+      "depth": 1.4,
+      "width": 21,
+      "height": 29.7
+    },
+    "pages": 24,
+    "format": "Paperback",
+    "author": "NitiVidya",
+    "illustrator": "NitiVidya Studio",
+    "publisher": "NitiVidya Books",
+    "language": "English",
+    "isbn": "NVB-ACT-2025-01",
+    "metaTitle": "Miko Learns Actions — Action words for toddlers | NitiVidya Books",
+    "metaDescription": "Teach your child action words with Miko — a playful board book for toddlers. Great for early language development (0–3 yrs).",
+    "ogImagePath": "og/miko-learns-actions-og.webp",
+    "twitterCard": "summary_large_image",
+    "hasHeroSlide": true,
+    "heroPriority": 30,
+    "bannerBgPath": "banners/miko-actions-hero-16x9.webp",
+    "bannerTitle": "The One Where Miko Learns The Actions",
+    "bannerSubtitle": "Action words made playful and memorable",
+    "bannerCtaText": "Explore the Series",
+    "bannerCtaType": "PDP",
+    "bannerTarget": "the-one-where-miko-learns-the-actions",
+    "bannerAltText": "Park background with Miko jumping — hero banner",
+    "tags": [
+      "actions",
+      "vocabulary",
+      "0-3"
+    ],
+    "collections": [
+      "miko-series"
+    ],
+    "isFeatured": false,
+    "published": true,
+    "publishedAt": "2025-12-05T10:00:00.000Z",
+    "createdAt": "2025-12-05T10:00:00.000Z",
+    "updatedAt": "2025-12-05T10:00:00.000Z",
+    "status": "published",
+    "meta": {
+      "utm_campaign": "miko_actions_launch"
+    }
+  },
+  {
+    "id": "gods-and-goddesses",
+    "slug": "the-one-with-the-gods-and-goddesses",
+    "title": "The One With The Gods & Goddesses",
+    "shortDescription": "A calm, gentle introduction to selected gods and goddesses through friendly illustrations for toddlers.",
+    "longDescription": "<p>A soft, age-appropriate introduction to a few gods and goddesses, told through playful visuals and simple sentences. Designed to be respectful, gentle, and suitable for very young readers (0–3 yrs).</p>",
+    "price": 24900,
+    "currency": "INR",
+    "ageRange": "0-5 years",
+    "coverPath": "covers/gods-and-goddesses-cover.webp",
+    "images": [
+      {
+        "alt": "Gods and Goddesses book cover",
+        "path": "covers/gods-and-goddesses-cover.webp",
+        "role": "cover",
+        "order": 0
+      }
+    ],
+    "inventoryQuantity": 60,
+    "inventoryStatus": "in_stock",
+    "sku": "NVB-GG-001",
+    "weightGrams": 200,
+    "dimensionsCm": {
+      "depth": 1.8,
+      "width": 21,
+      "height": 29.7
+    },
+    "pages": 24,
+    "format": "Paperback",
+    "author": "NitiVidya",
+    "illustrator": "NitiVidya Studio",
+    "publisher": "NitiVidya Books",
+    "language": "English",
+    "isbn": "NVB-GG-2025-01",
+    "metaTitle": "Gods & Goddesses — Gentle introduction for toddlers | NitiVidya Books",
+    "metaDescription": "A respectful, toddler-friendly introduction to a few gods and goddesses through colorful illustrations and simple language.",
+    "ogImagePath": "og/gods-and-goddesses-og.webp",
+    "twitterCard": "summary_large_image",
+    "hasHeroSlide": true,
+    "heroPriority": 40,
+    "bannerBgPath": "banners/gods-and-goddesses-hero-16x9.webp",
+    "bannerTitle": "The One With The Gods & Goddesses",
+    "bannerSubtitle": "A gentle, respectful introduction for tiny readers",
+    "bannerCtaText": "Explore the Series",
+    "bannerCtaType": "PDP",
+    "bannerTarget": "the-one-with-the-gods-and-goddesses",
+    "bannerAltText": "Soft sky and trees — hero banner for gods & goddesses book",
+    "tags": [
+      "culture",
+      "mythology",
+      "0-3"
+    ],
+    "collections": [
+      "miko-series"
+    ],
+    "isFeatured": false,
+    "published": true,
+    "publishedAt": "2025-12-05T10:00:00.000Z",
+    "createdAt": "2025-12-05T10:00:00.000Z",
+    "updatedAt": "2025-12-05T10:00:00.000Z",
+    "status": "published",
+    "meta": {
+      "utm_campaign": "miko_gods_launch"
+    }
+  },
+  {
+    "id": "miko-learns-manners",
+    "slug": "the-one-where-miko-learns-manners",
+    "title": "The One Where Miko Learns Manners",
+    "shortDescription": "A sweet, practical book to teach toddlers simple manners through Miko’s examples.",
+    "longDescription": "<p>Teach kindness, greetings, and simple manners with Miko. This board book uses short scenes and gentle repetition to build good habits in tiny readers.</p>",
+    "price": 24900,
+    "currency": "INR",
+    "ageRange": "0-5 years",
+    "coverPath": "covers/miko-learns-manners-cover.webp",
+    "images": [
+      {
+        "alt": "Miko learns manners book cover",
+        "path": "covers/miko-learns-manners-cover.webp",
+        "role": "cover",
+        "order": 0
+      }
+    ],
+    "inventoryQuantity": 140,
+    "inventoryStatus": "in_stock",
+    "sku": "NVB-MN-001",
+    "weightGrams": 175,
+    "dimensionsCm": {
+      "depth": 1.5,
+      "width": 21,
+      "height": 29.7
+    },
+    "pages": 24,
+    "format": "Paperback",
+    "author": "NitiVidya",
+    "illustrator": "NitiVidya Studio",
+    "publisher": "NitiVidya Books",
+    "language": "English",
+    "isbn": "NVB-MN-2025-01",
+    "metaTitle": "Miko Learns Manners — Toddler manners book | NitiVidya Books",
+    "metaDescription": "A delightful board book to help toddlers learn basic manners and polite behaviour through Miko’s fun examples. Ages 0–3.",
+    "ogImagePath": "og/miko-learns-manners-og.webp",
+    "twitterCard": "summary_large_image",
+    "hasHeroSlide": true,
+    "heroPriority": 50,
+    "bannerBgPath": "banners/miko-manners-hero-16x9.webp",
+    "bannerTitle": "Miko Learns Manners",
+    "bannerSubtitle": "Gentle, playful lessons for tiny hearts",
+    "bannerCtaText": "Explore the Series",
+    "bannerCtaType": "PDP",
+    "bannerTarget": "the-one-where-miko-learns-manners",
+    "bannerAltText": "Warm red and yellow background with Miko family — hero banner",
+    "tags": [
+      "manners",
+      "social-skills",
+      "0-3"
+    ],
+    "collections": [
+      "miko-series"
+    ],
+    "isFeatured": true,
+    "published": true,
+    "publishedAt": "2025-12-05T10:00:00.000Z",
+    "createdAt": "2025-12-05T10:00:00.000Z",
+    "updatedAt": "2025-12-05T10:00:00.000Z",
+    "status": "published",
+    "meta": {
+      "utm_campaign": "miko_manners_launch"
+    }
+  }
+]
