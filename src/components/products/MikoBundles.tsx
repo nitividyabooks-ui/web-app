@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Product } from "@/lib/products";
 import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/Button";
@@ -13,6 +13,7 @@ import {
   getSalePaiseFromMrpPaise,
 } from "@/lib/pricing";
 import { X } from "lucide-react";
+import { trackEvent } from "@/lib/gtm";
 
 interface MikoBundlesProps {
   products: Product[];
@@ -46,7 +47,24 @@ export function MikoBundles({ products }: MikoBundlesProps) {
     [products]
   );
 
+  useEffect(() => {
+    // Track view_bundle_offer on mount
+    trackEvent("view_bundle_offer", {
+      bundle_id: "bundle_3",
+      bundle_price: bundle3Sale / 100,
+      bundle_mrp: bundle3Mrp / 100,
+      discount_percent: BUNDLE_3_DISCOUNT_PERCENT,
+    });
+    trackEvent("view_bundle_offer", {
+      bundle_id: "bundle_5",
+      bundle_price: totalSale5 / 100,
+      bundle_mrp: totalMrp5 / 100,
+      discount_percent: BUNDLE_5_DISCOUNT_PERCENT,
+    });
+  }, [bundle3Sale, bundle3Mrp, totalSale5, totalMrp5]);
+
   const openPicker = () => {
+    trackEvent("bundle_picker_open", { bundle_id: "bundle_3" });
     // Preselect items already in cart; fill remaining slots up to 3.
     const preselected = products.filter((p) => inCartIds.has(p.id)).map((p) => p.id).slice(0, 3);
     const filled = [...preselected];
@@ -61,9 +79,22 @@ export function MikoBundles({ products }: MikoBundlesProps) {
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => {
       const exists = prev.includes(id);
-      if (exists) return prev.filter((x) => x !== id);
-      if (prev.length >= 3) return prev; // enforce max 3
-      return [...prev, id];
+      let newSelection;
+      if (exists) {
+        newSelection = prev.filter((x) => x !== id);
+      } else {
+        if (prev.length >= 3) return prev; // enforce max 3
+        newSelection = [...prev, id];
+      }
+
+      trackEvent("bundle_picker_select_item", {
+        bundle_id: "bundle_3",
+        product_id: id,
+        selected_count: newSelection.length,
+        action: exists ? "deselect" : "select"
+      });
+
+      return newSelection;
     });
   };
 
@@ -79,6 +110,21 @@ export function MikoBundles({ products }: MikoBundlesProps) {
   );
 
   const addSelectedBundle = () => {
+    trackEvent("add_bundle_to_cart", {
+      bundle_id: "bundle_3",
+      currency: "INR",
+      value: selectedSale / 100,
+      discount_percent: BUNDLE_3_DISCOUNT_PERCENT,
+      items: selectedProducts.map(p => ({
+        item_id: p.id,
+        item_name: p.title,
+        price: getSalePaiseFromMrpPaise(p.price, BUNDLE_3_DISCOUNT_PERCENT) / 100,
+        currency: "INR",
+        item_category: "Books",
+        quantity: 1
+      }))
+    });
+
     // Add missing only, but keep selection checked.
     for (const p of selectedProducts) {
       if (inCartIds.has(p.id)) continue;
@@ -98,6 +144,21 @@ export function MikoBundles({ products }: MikoBundlesProps) {
   };
 
   const addFullSet = () => {
+    trackEvent("add_bundle_to_cart", {
+      bundle_id: "bundle_5",
+      currency: "INR",
+      value: totalSale5 / 100,
+      discount_percent: BUNDLE_5_DISCOUNT_PERCENT,
+      items: products.map(p => ({
+        item_id: p.id,
+        item_name: p.title,
+        price: getSalePaiseFromMrpPaise(p.price, BUNDLE_5_DISCOUNT_PERCENT) / 100,
+        currency: "INR",
+        item_category: "Books",
+        quantity: 1
+      }))
+    });
+
     for (const p of products) {
       if (inCartIds.has(p.id)) continue;
       addItem(
@@ -278,9 +339,8 @@ export function MikoBundles({ products }: MikoBundlesProps) {
                       key={p.id}
                       onClick={() => toggleSelect(p.id)}
                       disabled={disabled}
-                      className={`flex items-center gap-3 p-3 rounded-2xl border text-left transition-colors ${
-                        checked ? "border-slate-900 bg-slate-50" : "border-slate-200 hover:bg-slate-50"
-                      } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                      className={`flex items-center gap-3 p-3 rounded-2xl border text-left transition-colors ${checked ? "border-slate-900 bg-slate-50" : "border-slate-200 hover:bg-slate-50"
+                        } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
                     >
                       <div className="relative h-14 w-14 rounded-xl overflow-hidden border border-slate-200 bg-white">
                         <Image
@@ -303,9 +363,8 @@ export function MikoBundles({ products }: MikoBundlesProps) {
                           <span className="text-slate-400 line-through font-semibold">{formatRupeesFromPaise(p.price)}</span>
                         </div>
                       </div>
-                      <div className={`h-5 w-5 rounded border flex items-center justify-center ${
-                        checked ? "bg-slate-900 border-slate-900" : "bg-white border-slate-300"
-                      }`}>
+                      <div className={`h-5 w-5 rounded border flex items-center justify-center ${checked ? "bg-slate-900 border-slate-900" : "bg-white border-slate-300"
+                        }`}>
                         {checked && <div className="h-2.5 w-2.5 bg-white rounded-sm" />}
                       </div>
                     </button>

@@ -1,9 +1,12 @@
+"use client";
+
 import {
     Accordion,
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/Accordion";
+import { trackEvent } from "@/lib/gtm";
 
 const FAQS = [
     {
@@ -110,7 +113,15 @@ export function ProductFAQ() {
                 <Accordion type="single" collapsible className="w-full space-y-4">
                     {FAQS.map((faq, index) => (
                         <AccordionItem key={index} value={`item-${index}`} className="border border-slate-200 rounded-2xl px-4 bg-soft/30 data-[state=open]:bg-blue-50/50 data-[state=open]:border-miko-blue/30 transition-colors">
-                            <AccordionTrigger className="font-heading font-bold text-charcoal text-left hover:text-miko-blue hover:no-underline py-4 text-lg">
+                            <AccordionTrigger
+                                className="font-heading font-bold text-charcoal text-left hover:text-miko-blue hover:no-underline py-4 text-lg"
+                                onClick={() => {
+                                    trackEvent("faq_open", {
+                                        question: faq.question,
+                                        category: "product_faq"
+                                    });
+                                }}
+                            >
                                 {faq.question}
                             </AccordionTrigger>
                             <AccordionContent className="text-slate-600 pb-4 leading-relaxed">

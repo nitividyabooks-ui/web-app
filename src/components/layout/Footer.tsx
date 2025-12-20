@@ -17,17 +17,18 @@ export function Footer() {
                         <h4 className="mb-4 text-sm font-semibold text-slate-900">Shop</h4>
                         <ul className="space-y-2 text-sm text-slate-600">
                             <li><Link href="/books" className="hover:text-miko-blue">All Books</Link></li>
-                            <li><Link href="#" className="hover:text-miko-blue">New Arrivals</Link></li>
-                            <li><Link href="#" className="hover:text-miko-blue">Bestsellers</Link></li>
+                            <li><Link href="/books" className="hover:text-miko-blue">New Arrivals</Link></li>
+                            <li><Link href="/books" className="hover:text-miko-blue">Bestsellers</Link></li>
                         </ul>
                     </div>
 
                     <div>
                         <h4 className="mb-4 text-sm font-semibold text-slate-900">Support</h4>
                         <ul className="space-y-2 text-sm text-slate-600">
-                            <li><Link href="#" className="hover:text-miko-blue">Shipping & Returns</Link></li>
-                            <li><Link href="#" className="hover:text-miko-blue">Contact Us</Link></li>
-                            <li><Link href="#" className="hover:text-miko-blue">Privacy Policy</Link></li>
+                            <li><Link href="/refund-policy" className="hover:text-miko-blue">Shipping & Returns</Link></li>
+                            <li><Link href="/contact" className="hover:text-miko-blue">Contact Us</Link></li>
+                            <li><Link href="/privacy" className="hover:text-miko-blue">Privacy Policy</Link></li>
+                            <li><Link href="/terms" className="hover:text-miko-blue">Terms</Link></li>
                         </ul>
                     </div>
 

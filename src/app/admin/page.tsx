@@ -1,13 +1,15 @@
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/Badge";
 import Link from "next/link";
-import { Card } from "@/components/ui/Card";
+import type { Order, OrderItem } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
+type OrderWithItems = Order & { items: OrderItem[] };
+
 export default async function AdminDashboard() {
     // Mock data if DB fails (since we don't have a real DB running in this env)
-    let orders: any[] = [];
+    let orders: OrderWithItems[] = [];
     try {
         orders = await prisma.order.findMany({
             orderBy: { createdAt: "desc" },

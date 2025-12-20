@@ -8,6 +8,8 @@ import { Product } from "@/lib/products";
 import { getStorageUrl } from "@/lib/storage";
 import { useCart } from "@/context/CartContext";
 import { formatRupeesFromPaise, getSalePaiseFromMrpPaise } from "@/lib/pricing";
+import { trackEvent } from "@/lib/gtm";
+import { bilingualLabelHindiEnglish, isBilingualHindiEnglish } from "@/lib/productFlags";
 
 interface ProductCardProps {
   product: Product;
@@ -22,6 +24,24 @@ export function ProductCard({ product }: ProductCardProps) {
   const mrpPaise = product.price;
   const salePaise = getSalePaiseFromMrpPaise(mrpPaise, discountPercent);
   const savingsPaise = Math.max(0, mrpPaise - salePaise);
+  const isBilingual = isBilingualHindiEnglish(product);
+
+  const handleProductClick = () => {
+    trackEvent("select_item", {
+      item_list_id: "all_products",
+      item_list_name: "All Products",
+      items: [
+        {
+          item_id: product.id,
+          item_name: product.title,
+          price: salePaise / 100,
+          currency: "INR",
+          item_category: "Books",
+          quantity: 1,
+        },
+      ],
+    });
+  };
 
   const handleAdd = (e: MouseEvent) => {
     e.preventDefault();
@@ -36,22 +56,64 @@ export function ProductCard({ product }: ProductCardProps) {
       },
       { openCart: false }
     );
+    trackEvent("add_to_cart", {
+      currency: "INR",
+      value: salePaise / 100,
+      items: [
+        {
+          item_id: product.id,
+          item_name: product.title,
+          price: salePaise / 100,
+          currency: "INR",
+          item_category: "Books",
+          quantity: 1,
+        },
+      ],
+    });
   };
 
   const handleMinus = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     updateQuantity(product.id, qty - 1);
+    trackEvent("remove_from_cart", {
+      currency: "INR",
+      value: salePaise / 100,
+      items: [
+        {
+          item_id: product.id,
+          item_name: product.title,
+          price: salePaise / 100,
+          currency: "INR",
+          item_category: "Books",
+          quantity: 1,
+        },
+      ],
+    });
   };
 
   const handlePlus = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     updateQuantity(product.id, qty + 1);
+    trackEvent("add_to_cart", {
+      currency: "INR",
+      value: salePaise / 100,
+      items: [
+        {
+          item_id: product.id,
+          item_name: product.title,
+          price: salePaise / 100,
+          currency: "INR",
+          item_category: "Books",
+          quantity: 1,
+        },
+      ],
+    });
   };
 
   return (
-    <Link href={`/books/${product.slug}`} className="group">
+    <Link href={`/books/${product.slug}`} className="group" onClick={handleProductClick}>
       <div className="bg-white rounded-[18px] border border-slate-200/70 shadow-sm hover:shadow-soft-blue transition-all duration-200 overflow-hidden h-full flex flex-col">
         {/* Image */}
         <div className="relative aspect-[4/3] bg-slate-50">
@@ -69,6 +131,12 @@ export function ProductCard({ product }: ProductCardProps) {
               Bestseller
             </div>
           )}
+
+          {isBilingual && (
+            <div className="absolute top-2 right-2 bg-white/90 backdrop-blur border border-slate-200 text-slate-800 text-[11px] font-extrabold px-2.5 py-1 rounded-full shadow-sm">
+              {bilingualLabelHindiEnglish()}
+            </div>
+          )}
         </div>
 
         {/* Content */}
@@ -82,11 +150,19 @@ export function ProductCard({ product }: ProductCardProps) {
             </span>
           </div>
 
+          {isBilingual && (
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-yellow-50 text-yellow-800 border border-yellow-100">
+                Bilingual • {bilingualLabelHindiEnglish()}
+              </span>
+            </div>
+          )}
+
           <h3 className="font-heading font-extrabold text-[15px] md:text-[16px] leading-snug text-charcoal line-clamp-2 group-hover:text-miko-blue transition-colors">
             {product.title}
           </h3>
 
-          <div className="flex items-end justify-between gap-2 mt-auto pt-2">
+          <div className="mt-auto pt-2 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div className="flex flex-col">
               <div className="flex items-baseline gap-2">
                 <span className="text-lg font-extrabold text-charcoal">{formatRupeesFromPaise(salePaise)}</span>
@@ -109,13 +185,13 @@ export function ProductCard({ product }: ProductCardProps) {
             {qty === 0 ? (
               <button
                 onClick={handleAdd}
-                className="h-9 px-3 rounded-xl border-2 border-miko-blue text-miko-blue font-extrabold text-sm bg-white hover:bg-blue-50 transition-colors"
+                className="h-9 w-full sm:w-auto px-3 rounded-xl border-2 border-miko-blue text-miko-blue font-extrabold text-sm bg-white hover:bg-blue-50 transition-colors"
                 aria-label={`Add ${product.title} to cart`}
               >
                 ADD
               </button>
             ) : (
-              <div className="h-9 rounded-xl bg-miko-blue text-white flex items-center overflow-hidden shadow-soft-blue">
+              <div className="h-9 w-full sm:w-auto rounded-xl bg-miko-blue text-white flex items-center justify-center overflow-hidden shadow-soft-blue">
                 <button
                   onClick={handleMinus}
                   className="h-9 w-9 flex items-center justify-center hover:bg-blue-500 transition-colors"

@@ -97,3 +97,20 @@ model Product {
   status            String
   meta              Json?
 }
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  name    String
+  email   String
+  phone   String?
+  subject String?
+  message String
+
+  source String?
+  meta   Json?
+
+  @@index([createdAt])
+  @@index([email])
+}

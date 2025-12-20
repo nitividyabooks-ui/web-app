@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Repo scripts (Node/Prisma utilities use CommonJS; keep lint focused on app code)
+    "scripts/**",
+    "prisma/seed.js",
+    "check_data.js",
   ]),
 ]);
 

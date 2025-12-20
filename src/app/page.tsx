@@ -47,6 +47,9 @@ export default async function Home() {
             <p className="mt-4 text-lg text-slate-500 font-medium">
               Explore the complete collection — add a few and checkout on WhatsApp.
             </p>
+            <p className="mt-2 text-sm text-slate-500 font-semibold">
+              Our series books are <span className="text-slate-900">bilingual (Hindi + English)</span> — you’ll see it on each book card.
+            </p>
           </div>
 
           <div className="grid gap-3 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -112,9 +115,9 @@ export default async function Home() {
       {/* Newsletter / Email Capture */}
       <section className="py-24 bg-miko-blue/5">
         <div className="container mx-auto px-4 md:px-6 text-center max-w-2xl">
-          <h2 className="font-heading text-3xl sm:text-4xl font-bold text-charcoal">Join Miko's Club!</h2>
+          <h2 className="font-heading text-3xl sm:text-4xl font-bold text-charcoal">Join Miko&apos;s Club!</h2>
           <p className="mt-4 text-slate-600 text-lg">
-            Sign up to get a free "Miko's Coloring Page" PDF and updates on new books.
+            Sign up to get a free Miko&apos;s Coloring Page PDF and updates on new books.
           </p>
           <form className="mt-10 flex flex-col gap-4 sm:flex-row max-w-md mx-auto">
             <input

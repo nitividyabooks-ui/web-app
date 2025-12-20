@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getAllProducts } from "@/lib/products";
 import { getDiscountPercentForQuantity, getSalePaiseFromMrpPaise } from "@/lib/pricing";
+import { Prisma } from "@prisma/client";
 
 const orderSchema = z.object({
     customer: z.object({
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
                 customerEmail: customer.email || null,
                 address: customer.address || null,
                 totalAmount,
-                meta: (meta || {}) as any,
+                meta: (meta || {}) satisfies Prisma.InputJsonValue,
                 items: {
                     create: orderItems,
                 },

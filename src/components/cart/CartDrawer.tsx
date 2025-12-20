@@ -1,16 +1,108 @@
 "use client";
 
 import { useCart } from "@/context/CartContext";
+import type { CartItem } from "@/context/CartContext";
 import { Button } from "@/components/ui/Button";
 import { X, Plus, Minus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { WhatsAppCheckoutModal } from "@/components/checkout/WhatsAppCheckoutModal";
 import { formatRupeesFromPaise, getSalePaiseFromMrpPaise } from "@/lib/pricing";
 import Image from "next/image";
+import { trackEvent } from "@/lib/gtm";
 
 export function CartDrawer() {
     const { items, removeItem, updateQuantity, totalAmount, totalMrpAmount, discountPercent, isCartOpen, setIsCartOpen } = useCart();
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+
+    useEffect(() => {
+        if (isCartOpen) {
+            trackEvent("view_cart", {
+                currency: "INR",
+                value: totalAmount / 100,
+                discount_percent: discountPercent,
+                items: items.map((item) => ({
+                    item_id: item.productId,
+                    item_name: item.title,
+                    price: getSalePaiseFromMrpPaise(item.price, discountPercent) / 100,
+                    currency: "INR",
+                    item_category: "Books",
+                    quantity: item.quantity,
+                })),
+            });
+        }
+    }, [isCartOpen, items, totalAmount, discountPercent]);
+
+    const handleRemove = (item: CartItem) => {
+        removeItem(item.productId);
+        trackEvent("remove_from_cart", {
+            currency: "INR",
+            value: getSalePaiseFromMrpPaise(item.price, discountPercent) / 100,
+            items: [
+                {
+                    item_id: item.productId,
+                    item_name: item.title,
+                    price: getSalePaiseFromMrpPaise(item.price, discountPercent) / 100,
+                    currency: "INR",
+                    item_category: "Books",
+                    quantity: item.quantity,
+                },
+            ],
+        });
+    };
+
+    const handleUpdateQuantity = (item: CartItem, newQty: number) => {
+        const diff = newQty - item.quantity;
+        updateQuantity(item.productId, newQty);
+
+        if (diff > 0) {
+            trackEvent("add_to_cart", {
+                currency: "INR",
+                value: getSalePaiseFromMrpPaise(item.price, discountPercent) / 100,
+                items: [
+                    {
+                        item_id: item.productId,
+                        item_name: item.title,
+                        price: getSalePaiseFromMrpPaise(item.price, discountPercent) / 100,
+                        currency: "INR",
+                        item_category: "Books",
+                        quantity: 1, // Adding 1
+                    },
+                ],
+            });
+        } else if (diff < 0) {
+            trackEvent("remove_from_cart", {
+                currency: "INR",
+                value: getSalePaiseFromMrpPaise(item.price, discountPercent) / 100,
+                items: [
+                    {
+                        item_id: item.productId,
+                        item_name: item.title,
+                        price: getSalePaiseFromMrpPaise(item.price, discountPercent) / 100,
+                        currency: "INR",
+                        item_category: "Books",
+                        quantity: 1, // Removing 1
+                    },
+                ],
+            });
+        }
+    };
+
+    const handleCheckout = () => {
+        setIsCheckoutOpen(true);
+        trackEvent("begin_checkout", {
+            currency: "INR",
+            value: totalAmount / 100,
+            discount_percent: discountPercent,
+            items: items.map((item) => ({
+                item_id: item.productId,
+                item_name: item.title,
+                price: getSalePaiseFromMrpPaise(item.price, discountPercent) / 100,
+                currency: "INR",
+                item_category: "Books",
+                quantity: item.quantity,
+            })),
+        });
+    };
 
     if (!isCartOpen) return null;
 
@@ -71,21 +163,21 @@ export function CartDrawer() {
                                         <div className="flex items-center gap-3 mt-2">
                                             <div className="flex items-center gap-1 bg-white rounded-full border border-slate-200 px-2 py-1">
                                                 <button
-                                                    onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                                                    onClick={() => handleUpdateQuantity(item, item.quantity - 1)}
                                                     className="p-1 hover:text-miko-blue"
                                                 >
                                                     <Minus className="h-3 w-3" />
                                                 </button>
                                                 <span className="text-sm w-4 text-center">{item.quantity}</span>
                                                 <button
-                                                    onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                                                    onClick={() => handleUpdateQuantity(item, item.quantity + 1)}
                                                     className="p-1 hover:text-miko-blue"
                                                 >
                                                     <Plus className="h-3 w-3" />
                                                 </button>
                                             </div>
                                             <button
-                                                onClick={() => removeItem(item.productId)}
+                                                onClick={() => handleRemove(item)}
                                                 className="p-2 text-slate-400 hover:text-red-500"
                                             >
                                                 <Trash2 className="h-4 w-4" />
@@ -116,7 +208,7 @@ export function CartDrawer() {
                             <Button
                                 className="w-full"
                                 size="lg"
-                                onClick={() => setIsCheckoutOpen(true)}
+                                onClick={handleCheckout}
                             >
                                 Proceed to Checkout
                             </Button>

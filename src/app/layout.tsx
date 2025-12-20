@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CartProvider } from "@/context/CartContext";
 import { CartDrawer } from "@/components/cart/CartDrawer";
+import GoogleTagManager from "@/components/analytics/GoogleTagManager";
 
 const baloo = Baloo_2({
   variable: "--font-baloo",
@@ -33,6 +34,7 @@ export default function RootLayout({
       <body
         className={`${baloo.variable} ${quicksand.variable} antialiased font-body bg-soft text-charcoal flex flex-col min-h-screen`}
       >
+        <GoogleTagManager />
         <CartProvider>
           <Header />
           <main className="flex-1">

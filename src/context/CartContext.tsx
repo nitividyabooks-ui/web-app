@@ -24,80 +24,107 @@ interface CartContextType {
     totalAmount: number;
     isCartOpen: boolean;
     setIsCartOpen: (isOpen: boolean) => void;
+    isHydrated: boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+function asRecord(value: unknown): Record<string, unknown> | null {
+    return value && typeof value === "object" ? (value as Record<string, unknown>) : null;
+}
+
+function loadCartFromLocalStorage(): CartItem[] {
+    try {
+        const savedCart = localStorage.getItem("nitividya-cart");
+        if (!savedCart) return [];
+        const parsed: unknown = JSON.parse(savedCart);
+        const asArray = Array.isArray(parsed) ? parsed : [];
+
+        return asArray
+            .map((raw): CartItem | null => {
+                const r = asRecord(raw);
+                if (!r) return null;
+                const productId = String(r.productId ?? "");
+                const title = String(r.title ?? "");
+                const price = Number(r.price);
+                const quantity = Number(r.quantity);
+                const image = typeof r.image === "string" ? r.image : undefined;
+                if (!productId) return null;
+                if (!Number.isFinite(price) || !Number.isFinite(quantity) || quantity <= 0) return null;
+                return { productId, title, price, quantity, image };
+            })
+            .filter((i): i is CartItem => Boolean(i));
+    } catch {
+        return [];
+    }
+}
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
     const [items, setItems] = useState<CartItem[]>([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
+    const [isHydrated, setIsHydrated] = useState(false);
 
-    // Load from localStorage + normalize/migrate old cart shapes
+    // Load cart from localStorage after hydration (client-side only)
     useEffect(() => {
-        const savedCart = localStorage.getItem("nitividya-cart");
-        if (savedCart) {
-            try {
-                const parsed = JSON.parse(savedCart);
-                const asArray = Array.isArray(parsed) ? parsed : [];
-
-                // Basic sanitation (coerce types, drop invalid)
-                const sanitized: CartItem[] = asArray
-                    .map((i: any) => ({
-                        productId: String(i?.productId ?? ""),
-                        title: String(i?.title ?? ""),
-                        price: Number(i?.price),
-                        quantity: Number(i?.quantity),
-                        image: typeof i?.image === "string" ? i.image : undefined,
-                    }))
-                    .filter(
-                        (i) =>
-                            Boolean(i.productId) &&
-                            Number.isFinite(i.price) &&
-                            Number.isFinite(i.quantity) &&
-                            i.quantity > 0
-                    );
-
-                setItems(sanitized);
-
-                // Migrate: ensure cart items store MRP (price from current product table), not old discounted values.
-                // This fixes NaN totals and keeps pricing consistent with tier rules.
-                (async () => {
-                    try {
-                        const res = await fetch("/api/products");
-                        if (!res.ok) return;
-                        const products = await res.json();
-                        const byId = new Map<string, any>(products.map((p: any) => [p.id, p]));
-
-                        setItems((prev) =>
-                            prev.map((it) => {
-                                const p = byId.get(it.productId);
-                                if (!p) return it;
-
-                                const mrp = Number(p.price);
-                                const cover = p.coverPath || p.images?.[0]?.path;
-
-                                return {
-                                    ...it,
-                                    title: typeof p.title === "string" ? p.title : it.title,
-                                    price: Number.isFinite(mrp) ? mrp : it.price,
-                                    image: cover ? getStorageUrl(cover) : it.image,
-                                };
-                            })
-                        );
-                    } catch {
-                        // Ignore migration errors; sanitation above still prevents NaN explosions.
-                    }
-                })();
-            } catch (e) {
-                console.error("Failed to parse cart", e);
-            }
-        }
+        const savedItems = loadCartFromLocalStorage();
+        setItems(savedItems);
+        setIsHydrated(true);
     }, []);
 
-    // Save to localStorage
+    // Migrate: ensure cart items store MRP (price from current product table), not old discounted values.
     useEffect(() => {
+        if (!isHydrated || items.length === 0) return;
+        (async () => {
+            try {
+                const res = await fetch("/api/products");
+                if (!res.ok) return;
+                const products: unknown = await res.json();
+                if (!Array.isArray(products)) return;
+
+                const byId = new Map<string, Record<string, unknown>>();
+                for (const raw of products) {
+                    const r = asRecord(raw);
+                    const id = r ? String(r.id ?? "") : "";
+                    if (r && id) byId.set(id, r);
+                }
+
+                setItems((prev) =>
+                    prev.map((it) => {
+                        const p = byId.get(it.productId);
+                        if (!p) return it;
+
+                        const mrp = Number(p.price);
+                        const title = typeof p.title === "string" ? p.title : it.title;
+                        const coverPath =
+                            typeof p.coverPath === "string"
+                                ? p.coverPath
+                                : (() => {
+                                      const images = p.images;
+                                      if (!Array.isArray(images)) return undefined;
+                                      const first = asRecord(images[0]);
+                                      return first && typeof first.path === "string" ? first.path : undefined;
+                                  })();
+
+                        return {
+                            ...it,
+                            title,
+                            price: Number.isFinite(mrp) ? mrp : it.price,
+                            image: coverPath ? getStorageUrl(coverPath) : it.image,
+                        };
+                    })
+                );
+            } catch {
+                // Ignore migration errors; sanitation above still prevents NaN explosions.
+            }
+        })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Save to localStorage (only after hydration to prevent overwriting with empty array)
+    useEffect(() => {
+        if (!isHydrated) return;
         localStorage.setItem("nitividya-cart", JSON.stringify(items));
-    }, [items]);
+    }, [items, isHydrated]);
 
     const addItem = (newItem: CartItem, options?: { openCart?: boolean }) => {
         setItems((prev) => {
@@ -156,6 +183,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 totalAmount,
                 isCartOpen,
                 setIsCartOpen,
+                isHydrated,
             }}
         >
             {children}

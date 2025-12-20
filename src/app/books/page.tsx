@@ -20,6 +20,9 @@ export default async function BooksPage() {
                 <p className="mt-2 text-slate-600 font-medium max-w-2xl">
                     Calm, joyful board books designed for tiny hands — and parent peace of mind.
                 </p>
+                <p className="mt-2 text-sm text-slate-500 font-semibold">
+                    Look for the <span className="text-slate-900">Hindi + English</span> badge — our Miko Series is bilingual.
+                </p>
             </div>
 
             {mikoSeriesProducts.length > 0 && (

@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/Button";
-import { X } from "lucide-react";
-import { Spinner } from "@/components/ui/Spinner";
+import { X, Loader2 } from "lucide-react";
+import { trackEvent } from "@/lib/gtm";
+import { getSalePaiseFromMrpPaise } from "@/lib/pricing";
 
 interface WhatsAppCheckoutModalProps {
     isOpen: boolean;
@@ -12,7 +13,7 @@ interface WhatsAppCheckoutModalProps {
 }
 
 export function WhatsAppCheckoutModal({ isOpen, onClose }: WhatsAppCheckoutModalProps) {
-    const { items, totalAmount, clearCart } = useCart();
+    const { items, totalAmount, clearCart, discountPercent } = useCart();
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
         name: "",
@@ -27,6 +28,21 @@ export function WhatsAppCheckoutModal({ isOpen, onClose }: WhatsAppCheckoutModal
         e.preventDefault();
         setIsLoading(true);
 
+        // Track shipping info
+        trackEvent("add_shipping_info", {
+            currency: "INR",
+            value: totalAmount / 100,
+            shipping_tier: "standard",
+            items: items.map((item) => ({
+                item_id: item.productId,
+                item_name: item.title,
+                price: getSalePaiseFromMrpPaise(item.price, discountPercent) / 100,
+                currency: "INR",
+                item_category: "Books",
+                quantity: item.quantity,
+            })),
+        });
+
         try {
             const response = await fetch("/api/orders/create", {
                 method: "POST",
@@ -37,12 +53,30 @@ export function WhatsAppCheckoutModal({ isOpen, onClose }: WhatsAppCheckoutModal
                         productId: item.productId,
                         quantity: item.quantity,
                     })),
+                    totalAmount,
+                    discountPercent
                 }),
             });
 
             const data = await response.json();
 
             if (response.ok) {
+                // Track purchase intent
+                trackEvent("purchase_intent_whatsapp", {
+                    order_id: data.orderId,
+                    currency: "INR",
+                    value: totalAmount / 100,
+                    discount_percent: discountPercent,
+                    items: items.map((item) => ({
+                        item_id: item.productId,
+                        item_name: item.title,
+                        price: getSalePaiseFromMrpPaise(item.price, discountPercent) / 100,
+                        currency: "INR",
+                        item_category: "Books",
+                        quantity: item.quantity,
+                    })),
+                });
+
                 clearCart();
                 window.open(data.whatsappUrl, "_blank");
                 onClose();
@@ -122,7 +156,7 @@ export function WhatsAppCheckoutModal({ isOpen, onClose }: WhatsAppCheckoutModal
                         <Button type="submit" className="w-full" disabled={isLoading}>
                             {isLoading ? (
                                 <>
-                                    <Spinner size="sm" className="mr-2 border-white/40 border-t-white" label="Processing" />
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     Processing...
                                 </>
                             ) : (

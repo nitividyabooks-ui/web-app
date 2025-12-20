@@ -14,7 +14,7 @@ export interface Product extends Omit<PrismaProduct, "images" | "dimensionsCm" |
         height: number;
         depth: number;
     };
-    meta: any;
+    meta: unknown;
 }
 
 export async function getAllProducts(): Promise<Product[]> {
