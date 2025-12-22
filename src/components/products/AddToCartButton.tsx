@@ -7,6 +7,7 @@ import { ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import { trackEvent } from "@/lib/gtm";
 import { getSalePaiseFromMrpPaise, SINGLE_BOOK_DISCOUNT_PERCENT } from "@/lib/pricing";
+import { getStorageUrl } from "@/lib/storage";
 
 interface AddToCartButtonProps {
     product: Product;
@@ -27,7 +28,7 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
             title: product.title,
             price: product.price,
             quantity: 1,
-            image: product.coverPath || product.images?.[0]?.path,
+            image: getStorageUrl(product.coverPath || product.images?.[0]?.path),
         });
 
         trackEvent("add_to_cart", {

@@ -25,7 +25,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
     return (
         <div className="space-y-8">
             <div className="flex items-center gap-4">
-                <Link href="/admin" className="text-slate-500 hover:text-slate-900">
+                <Link href="/admin/orders" className="text-slate-500 hover:text-slate-900">
                     <ArrowLeft className="h-5 w-5" />
                 </Link>
                 <h1 className="text-2xl font-bold text-slate-900">Order #{order.id.slice(-6).toUpperCase()}</h1>

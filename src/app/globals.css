@@ -127,3 +127,13 @@ footer {
 .shadow-soft {
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
 }
+
+/* Hide scrollbar utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

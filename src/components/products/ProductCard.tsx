@@ -162,7 +162,7 @@ export function ProductCard({ product }: ProductCardProps) {
             {product.title}
           </h3>
 
-          <div className="mt-auto pt-2 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex items-end justify-between gap-2 mt-auto pt-2">
             <div className="flex flex-col">
               <div className="flex items-baseline gap-2">
                 <span className="text-lg font-extrabold text-charcoal">{formatRupeesFromPaise(salePaise)}</span>
@@ -185,13 +185,13 @@ export function ProductCard({ product }: ProductCardProps) {
             {qty === 0 ? (
               <button
                 onClick={handleAdd}
-                className="h-9 w-full sm:w-auto px-3 rounded-xl border-2 border-miko-blue text-miko-blue font-extrabold text-sm bg-white hover:bg-blue-50 transition-colors"
+                className="h-9 px-3 rounded-xl border-2 border-miko-blue text-miko-blue font-extrabold text-sm bg-white hover:bg-blue-50 transition-colors"
                 aria-label={`Add ${product.title} to cart`}
               >
                 ADD
               </button>
             ) : (
-              <div className="h-9 w-full sm:w-auto rounded-xl bg-miko-blue text-white flex items-center justify-center overflow-hidden shadow-soft-blue">
+              <div className="h-9 rounded-xl bg-miko-blue text-white flex items-center overflow-hidden shadow-soft-blue">
                 <button
                   onClick={handleMinus}
                   className="h-9 w-9 flex items-center justify-center hover:bg-blue-500 transition-colors"

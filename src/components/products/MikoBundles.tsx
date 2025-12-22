@@ -80,11 +80,25 @@ export function MikoBundles({ products }: MikoBundlesProps) {
     setSelectedIds((prev) => {
       const exists = prev.includes(id);
       let newSelection;
+      
       if (exists) {
+        // Deselect: simply remove the item
         newSelection = prev.filter((x) => x !== id);
       } else {
-        if (prev.length >= 3) return prev; // enforce max 3
-        newSelection = [...prev, id];
+        // Select: if at max (3), replace the oldest non-cart item
+        if (prev.length >= 3) {
+          // Find the first selected item that's NOT already in cart to replace
+          const replaceIndex = prev.findIndex((selectedId) => !inCartIds.has(selectedId));
+          if (replaceIndex === -1) {
+            // All 3 selected are in cart - replace the first one anyway
+            newSelection = [...prev.slice(1), id];
+          } else {
+            // Replace the first non-cart item
+            newSelection = [...prev.slice(0, replaceIndex), ...prev.slice(replaceIndex + 1), id];
+          }
+        } else {
+          newSelection = [...prev, id];
+        }
       }
 
       trackEvent("bundle_picker_select_item", {
@@ -332,17 +346,18 @@ export function MikoBundles({ products }: MikoBundlesProps) {
               <div className="grid gap-3 md:grid-cols-2">
                 {products.map((p) => {
                   const checked = selectedIds.includes(p.id);
-                  const disabled = !checked && selectedIds.length >= 3;
                   const alreadyInCart = inCartIds.has(p.id);
                   return (
                     <button
                       key={p.id}
                       onClick={() => toggleSelect(p.id)}
-                      disabled={disabled}
-                      className={`flex items-center gap-3 p-3 rounded-2xl border text-left transition-colors ${checked ? "border-slate-900 bg-slate-50" : "border-slate-200 hover:bg-slate-50"
-                        } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                      className={`flex items-center gap-3 p-3 rounded-2xl border text-left transition-all duration-200 ${
+                        checked 
+                          ? "border-slate-900 bg-slate-50 ring-2 ring-slate-900/10" 
+                          : "border-slate-200 hover:bg-slate-50 hover:border-slate-300"
+                      }`}
                     >
-                      <div className="relative h-14 w-14 rounded-xl overflow-hidden border border-slate-200 bg-white">
+                      <div className="relative h-14 w-14 rounded-xl overflow-hidden border border-slate-200 bg-white flex-shrink-0">
                         <Image
                           src={getStorageUrl(p.coverPath || p.images?.[0]?.path || "")}
                           alt={p.title}
@@ -351,9 +366,9 @@ export function MikoBundles({ products }: MikoBundlesProps) {
                           className="object-cover"
                         />
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         <div className="font-semibold text-slate-900 line-clamp-2">{p.title}</div>
-                        <div className="text-xs text-slate-600 font-medium mt-1 flex gap-2 items-center">
+                        <div className="text-xs text-slate-600 font-medium mt-1 flex gap-2 items-center flex-wrap">
                           {alreadyInCart && (
                             <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 font-bold">
                               In cart
@@ -363,9 +378,17 @@ export function MikoBundles({ products }: MikoBundlesProps) {
                           <span className="text-slate-400 line-through font-semibold">{formatRupeesFromPaise(p.price)}</span>
                         </div>
                       </div>
-                      <div className={`h-5 w-5 rounded border flex items-center justify-center ${checked ? "bg-slate-900 border-slate-900" : "bg-white border-slate-300"
-                        }`}>
-                        {checked && <div className="h-2.5 w-2.5 bg-white rounded-sm" />}
+                      {/* Checkbox indicator */}
+                      <div className={`h-6 w-6 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                        checked 
+                          ? "bg-slate-900 border-slate-900" 
+                          : "bg-white border-slate-300"
+                      }`}>
+                        {checked && (
+                          <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
                       </div>
                     </button>
                   );
@@ -390,7 +413,7 @@ export function MikoBundles({ products }: MikoBundlesProps) {
                 </Button>
               </div>
               <p className="mt-2 text-xs text-slate-500">
-                Items already in your cart stay selected automatically.
+                Tap any book to select or swap. Cart items stay selected.
               </p>
             </div>
           </div>
