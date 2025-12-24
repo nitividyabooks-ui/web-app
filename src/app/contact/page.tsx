@@ -33,6 +33,9 @@ export default function ContactPage() {
               <div>
                 Phone: <span className="text-slate-900">+919315383801</span>
               </div>
+              <div>
+                Address: <span className="text-slate-900">208 Basera Apartment, Block E, Sector 56, Gurugram, Haryana 122011</span>
+              </div>
             </div>
             <p className="mt-4 text-sm text-slate-600 font-medium">
               For order help, you can also reach out on WhatsApp from the header.

@@ -1,12 +1,14 @@
+import Link from "next/link";
+
 export const metadata = {
-    title: "Terms of Service — NitiVidya Books",
+    title: "Terms and Conditions — NitiVidya Books",
     description: "Terms and conditions for using NitiVidya Books website and services.",
 };
 
 export default function TermsPage() {
     return (
         <div className="container mx-auto px-4 py-12 prose prose-slate max-w-3xl min-h-screen">
-            <h1>Terms of Service</h1>
+            <h1>Terms and Conditions</h1>
             <p>Last updated: {new Date().toLocaleDateString()}</p>
 
             <p>
@@ -44,7 +46,7 @@ export default function TermsPage() {
 
             <h2>6. Returns & Refunds</h2>
             <p>
-                Please refer to our <a href="/refund-policy">Refund Policy</a> for detailed information on returns, cancellations, and refunds.
+                For details on returns and refunds, please refer to our <Link href="/return-policy" className="text-primary hover:underline">Return Policy</Link>.
             </p>
 
             <h2>7. Intellectual Property</h2>
@@ -59,7 +61,7 @@ export default function TermsPage() {
 
             <h2>9. Privacy</h2>
             <p>
-                Your use of our website is also governed by our <a href="/privacy">Privacy Policy</a>. By using our services, you consent to the collection and use of your information as described therein.
+                Your use of our website is also governed by our <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>. By using our services, you consent to the collection and use of your information as described therein.
             </p>
 
             <h2>10. Changes to Terms</h2>

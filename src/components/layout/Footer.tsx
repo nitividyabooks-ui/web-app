@@ -25,7 +25,16 @@ export function Footer() {
                     <div>
                         <h4 className="mb-4 text-sm font-semibold text-slate-900">Support</h4>
                         <ul className="space-y-2 text-sm text-slate-600">
-                            <li><Link href="/refund-policy" className="hover:text-miko-blue">Shipping & Returns</Link></li>
+                            <li>
+                                <Link href="/return-policy" className="text-muted-foreground hover:text-foreground">
+                                    Return & Refund Policy
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/shipping-policy" className="text-muted-foreground hover:text-foreground">
+                                    Shipping Policy
+                                </Link>
+                            </li>
                             <li><Link href="/contact" className="hover:text-miko-blue">Contact Us</Link></li>
                             <li><Link href="/privacy" className="hover:text-miko-blue">Privacy Policy</Link></li>
                             <li><Link href="/terms" className="hover:text-miko-blue">Terms</Link></li>
