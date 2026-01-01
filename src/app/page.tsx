@@ -17,13 +17,16 @@ export default async function Home() {
     <div className="flex flex-col min-h-screen font-body">
       {/* Launch Offer Banner */}
       <div className="bg-slate-900 text-white">
-        <div className="container mx-auto px-4 md:px-6 py-2 text-sm font-semibold flex items-center justify-center gap-2">
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/10 border border-white/15">
-            Launch offer
-          </span>
-          <span className="text-white/90">
-            {SINGLE_BOOK_DISCOUNT_PERCENT}% off single • {BUNDLE_3_DISCOUNT_PERCENT}% off 3+ • {BUNDLE_5_DISCOUNT_PERCENT}% off 5+
-          </span>
+        <div className="container mx-auto px-4 md:px-6 py-2 text-center">
+          <div className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm font-semibold">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/10 border border-white/15 text-xs sm:text-sm whitespace-nowrap">
+              🎉 Launch offer
+            </span>
+            <span className="text-white/90 text-xs sm:text-sm">
+              <span className="hidden sm:inline">{SINGLE_BOOK_DISCOUNT_PERCENT}% off single • {BUNDLE_3_DISCOUNT_PERCENT}% off 3+ • {BUNDLE_5_DISCOUNT_PERCENT}% off 5+</span>
+              <span className="sm:hidden">Up to {BUNDLE_5_DISCOUNT_PERCENT}% off bundles</span>
+            </span>
+          </div>
         </div>
       </div>
 

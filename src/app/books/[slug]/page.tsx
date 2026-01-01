@@ -5,8 +5,13 @@ import { AddToCartButton } from "@/components/products/AddToCartButton";
 import { ProductImageGallery } from "@/components/products/ProductImageGallery";
 import { ProductFAQ } from "@/components/products/ProductFAQ";
 import { SeriesBundleCTA } from "@/components/products/SeriesBundleCTA";
-import { ArrowLeft, Brain, MessageCircle, Heart, ShieldCheck, Truck, Star, BookOpen, Sparkles } from "lucide-react";
+import { BookQualitySection } from "@/components/products/BookQualitySection";
+import { InsideBookPreview } from "@/components/products/InsideBookPreview";
+import { ArrowLeft, Star, BookOpen, Truck } from "lucide-react";
+import { SiWhatsapp, SiAmazon } from "react-icons/si";
+import { AmazonButton } from "@/components/products/AmazonButton";
 import Link from "next/link";
+import { getWhatsAppNumber } from "@/lib/whatsapp";
 import { SINGLE_BOOK_DISCOUNT_PERCENT, formatRupeesFromPaise, getSalePaiseFromMrpPaise } from "@/lib/pricing";
 import { ProductViewTracker } from "@/components/products/ProductViewTracker";
 import { bilingualLabelHindiEnglish, isBilingualHindiEnglish } from "@/lib/productFlags";
@@ -29,40 +34,58 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     };
 }
 
-// Dynamic tips based on book content
-function getMikoTip(productId: string): { highlight: string; tip: string; stat: string } {
-    const tips: Record<string, { highlight: string; tip: string; stat: string }> = {
-        "miko-meets-animals": {
-            highlight: "Build Social Skills",
-            tip: "Children who learn animal names early show 40% better vocabulary development by age 3!",
-            stat: "15+ Animals to Discover"
-        },
-        "miko-celebrates-festivals": {
-            highlight: "Cultural Connection",
-            tip: "Early exposure to festivals helps children develop cultural identity and family bonding.",
-            stat: "10+ Festival Traditions"
-        },
-        "miko-learns-actions": {
-            highlight: "Active Learning",
-            tip: "Action words are among the first 50 words toddlers learn — this book makes it fun!",
-            stat: "20+ Action Words"
-        },
-        "gods-and-goddesses": {
-            highlight: "Spiritual Foundation",
-            tip: "Gentle storytelling builds a child's understanding of values and traditions.",
-            stat: "Beautiful Illustrations"
-        },
-        "miko-learns-manners": {
-            highlight: "Life Skills",
-            tip: "Children who learn manners early develop better social relationships and confidence.",
-            stat: "12+ Polite Phrases"
-        }
+// Parent-facing value propositions by product
+function getValueProposition(productId: string): string {
+    const propositions: Record<string, string> = {
+        "miko-meets-animals": "A gentle story that helps toddlers learn animal names through a friendly elephant they'll love.",
+        "miko-celebrates-festivals": "Introduce your child to beautiful Indian festivals through simple, joyful stories.",
+        "miko-learns-actions": "Help your toddler build vocabulary with fun action words they can see and do.",
+        "gods-and-goddesses": "Share the stories of our culture with age-appropriate, beautifully illustrated tales.",
+        "miko-learns-manners": "Teach essential social skills through relatable situations your child will understand."
     };
-    return tips[productId] || {
-        highlight: "Early Learning",
-        tip: "Reading together for just 15 minutes a day can boost your child's development!",
-        stat: "24 Colorful Pages"
+    return propositions[productId] || "A thoughtfully designed book to help your little one learn and grow.";
+}
+
+// Parent-focused benefits by product (replacing generic learning outcomes)
+function getParentBenefits(productId: string): { icon: string; benefit: string }[] {
+    const benefits: Record<string, { icon: string; benefit: string }[]> = {
+        "miko-meets-animals": [
+            { icon: "🐘", benefit: "Helps children name and recognize animals confidently" },
+            { icon: "💕", benefit: "Encourages empathy through gentle animal friendships" },
+            { icon: "📖", benefit: "Builds early Hindi + English vocabulary naturally" },
+            { icon: "⏱️", benefit: "Short pages perfect for toddler attention spans" }
+        ],
+        "miko-celebrates-festivals": [
+            { icon: "🪔", benefit: "Introduces cultural traditions in age-appropriate ways" },
+            { icon: "👨‍👩‍👧", benefit: "Creates bonding moments during festival seasons" },
+            { icon: "📖", benefit: "Builds vocabulary around celebrations and family" },
+            { icon: "🎨", benefit: "Vibrant illustrations capture festive joy" }
+        ],
+        "miko-learns-actions": [
+            { icon: "🏃", benefit: "Encourages movement and physical play" },
+            { icon: "🗣️", benefit: "Helps toddlers express what they want to do" },
+            { icon: "📖", benefit: "Action words are among the first 50 words toddlers learn" },
+            { icon: "🤹", benefit: "Interactive reading—kids love mimicking the actions" }
+        ],
+        "gods-and-goddesses": [
+            { icon: "🙏", benefit: "Gentle introduction to spiritual stories" },
+            { icon: "👨‍👩‍👧", benefit: "Perfect for grandparent-child storytime" },
+            { icon: "🎨", benefit: "Beautiful, child-friendly deity illustrations" },
+            { icon: "💫", benefit: "Builds cultural identity from early years" }
+        ],
+        "miko-learns-manners": [
+            { icon: "🙋", benefit: "Teaches 'please', 'thank you', and 'sorry' naturally" },
+            { icon: "🤝", benefit: "Helps children navigate social situations" },
+            { icon: "😊", benefit: "Builds confidence in interactions with others" },
+            { icon: "👨‍👩‍👧", benefit: "Reinforces manners parents are teaching at home" }
+        ]
     };
+    return benefits[productId] || [
+        { icon: "📚", benefit: "Designed specifically for early childhood development" },
+        { icon: "💡", benefit: "Simple concepts that stick with daily reading" },
+        { icon: "❤️", benefit: "Creates lasting bonding moments with your child" },
+        { icon: "✨", benefit: "Quality content that parents can feel good about" }
+    ];
 }
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -82,11 +105,19 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     const mrpPaise = product.price;
     const salePaise = getSalePaiseFromMrpPaise(mrpPaise, SINGLE_BOOK_DISCOUNT_PERCENT);
     const isBilingual = isBilingualHindiEnglish(product);
-    const mikoTip = getMikoTip(product.id);
+    const valueProposition = getValueProposition(product.id);
+    const parentBenefits = getParentBenefits(product.id);
+
+    // Get preview images for "Inside the Book" section (skip cover image)
+    const previewImages = product.images
+        .filter((img, idx) => idx > 0) // Skip first image (cover)
+        .slice(0, 3)
+        .map(img => getStorageUrl(img.path));
 
     return (
         <div className="min-h-screen pb-24 md:pb-12">
             <ProductViewTracker product={product} />
+
             {/* Breadcrumbs */}
             <div className="container mx-auto px-4 md:px-6 py-4">
                 <Link href="/books" className="inline-flex items-center text-slate-500 hover:text-miko-blue transition-colors font-medium text-sm">
@@ -95,165 +126,211 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             </div>
 
             <div className="container mx-auto px-4 md:px-6">
-                <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
+                {/* ═══════════════════════════════════════════════════════════════
+                    SECTION 1: ABOVE THE FOLD
+                    Purpose: Immediate understanding + emotional hook
+                ═══════════════════════════════════════════════════════════════ */}
+                <div className="grid lg:grid-cols-2 gap-8 lg:gap-16">
 
-                    {/* Left Column: Visuals */}
-                    <div className="lg:sticky lg:top-24 h-fit group">
-                        <ProductImageGallery images={product.images.map(img => getStorageUrl(img.path))} title={product.title} />
+                    {/* Left Column: Product Images */}
+                    <div className="lg:sticky lg:top-24 h-fit">
+                        <ProductImageGallery
+                            images={product.images.map(img => getStorageUrl(img.path))}
+                            title={product.title}
+                        />
                     </div>
 
-                    {/* Right Column: Decision Layer */}
-                    <div className="space-y-6">
+                    {/* Right Column: Purchase Decision Layer */}
+                    <div className="space-y-5">
+
+                        {/* Title & Value Proposition */}
                         <div>
-                            <h1 className="font-heading text-4xl md:text-5xl font-bold text-charcoal leading-tight mb-2">
+                            <h1 className="font-heading text-3xl md:text-4xl font-bold text-charcoal leading-tight">
                                 {product.title}
                             </h1>
-                            <p className="text-xl text-slate-600 font-medium">{product.shortDescription}</p>
+                            <p className="text-lg text-slate-600 mt-2 leading-relaxed">
+                                {valueProposition}
+                            </p>
                         </div>
 
-                        {/* Combined Tags & Specs Row */}
+                        {/* Compact Badges (Max 3) */}
                         <div className="flex flex-wrap gap-2">
-                            {/* Age Range - Primary badge */}
+                            {/* Age Range - Always shown */}
                             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 border border-green-200/70">
                                 <Star className="w-3.5 h-3.5 fill-green-500 text-green-500" />
                                 {product.ageRange}
                             </span>
-                            
-                            {/* Bilingual badge */}
+
+                            {/* Bilingual badge - if applicable */}
                             {isBilingual && (
                                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-700 border border-amber-200/70">
                                     <BookOpen className="w-3.5 h-3.5" />
                                     {bilingualLabelHindiEnglish()}
                                 </span>
                             )}
-                            
-                            {/* Bestseller badge */}
-                            {product.tags.includes("bestseller") && (
-                                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold bg-gradient-to-r from-pink-50 to-rose-50 text-pink-700 border border-pink-200/70">
-                                    <Sparkles className="w-3.5 h-3.5" />
-                                    Best Seller
-                                </span>
-                            )}
-                            
-                            {/* Specs - Secondary style */}
-                            <span className="px-3 py-1.5 rounded-full text-sm font-semibold bg-slate-50 text-slate-600 border border-slate-200/70">
-                                A4 Size
-                            </span>
-                            <span className="px-3 py-1.5 rounded-full text-sm font-semibold bg-slate-50 text-slate-600 border border-slate-200/70">
-                                {product.pages} pages
-                            </span>
+
+                            {/* Format badge */}
                             <span className="px-3 py-1.5 rounded-full text-sm font-semibold bg-slate-50 text-slate-600 border border-slate-200/70">
                                 {product.format}
                             </span>
                         </div>
 
-                        {/* Trust cues */}
-                        <div className="grid grid-cols-2 gap-3">
-                            <div className="flex items-center gap-2 rounded-2xl border border-slate-200/70 bg-white/70 backdrop-blur px-4 py-3 text-sm font-semibold text-slate-700">
-                                <ShieldCheck className="h-5 w-5 text-miko-blue" />
-                                Safe materials
-                            </div>
-                            <div className="flex items-center gap-2 rounded-2xl border border-slate-200/70 bg-white/70 backdrop-blur px-4 py-3 text-sm font-semibold text-slate-700">
-                                <Truck className="h-5 w-5 text-miko-blue" />
-                                Fast shipping
-                            </div>
-                        </div>
-
                         {/* Price Block */}
-                        <div className="flex items-baseline gap-4">
-                            <span className="font-heading text-4xl font-bold text-miko-blue">
-                                {formatRupeesFromPaise(salePaise)}
-                            </span>
-                            <span className="text-xl text-slate-400 line-through font-medium">
-                                {formatRupeesFromPaise(mrpPaise)}
-                            </span>
-                            <span className="bg-emerald-50 text-emerald-700 px-2 py-1 rounded-md text-sm font-extrabold border border-emerald-100">
-                                {SINGLE_BOOK_DISCOUNT_PERCENT}% OFF
-                            </span>
-                        </div>
-
-                        {/* Enhanced Miko Tip - Conversion Focused */}
-                        <div className="bg-gradient-to-br from-[#FFF9C4] via-[#FFFDE7] to-[#FFF8E1] p-5 rounded-[20px] relative border border-amber-200/50 shadow-sm">
-                            {/* Decorative elements */}
-                            <div className="absolute -top-3 -right-2 text-3xl transform rotate-12 opacity-80">✨</div>
-                            
-                            <div className="flex items-start gap-4">
-                                {/* Miko avatar */}
-                                <div className="shrink-0 w-14 h-14 rounded-full bg-white shadow-md flex items-center justify-center text-3xl border-2 border-amber-200">
-                                    🐘
-                                </div>
-                                
-                                <div className="flex-1 min-w-0">
-                                    {/* Highlight tag */}
-                                    <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-800 text-xs font-bold mb-1.5">
-                                        <Sparkles className="w-3 h-3" />
-                                        {mikoTip.highlight}
-                                    </div>
-                                    
-                                    {/* Tip content */}
-                                    <p className="text-slate-700 font-medium text-sm leading-relaxed mb-2">
-                                        {mikoTip.tip}
-                                    </p>
-                                    
-                                    {/* Stat callout */}
-                                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/80 border border-amber-200/50 text-xs font-bold text-amber-800">
-                                        <BookOpen className="w-3 h-3" />
-                                        {mikoTip.stat}
-                                    </div>
-                                </div>
+                        <div className="bg-white rounded-2xl border border-slate-200/70 p-5 space-y-3">
+                            <div className="flex items-baseline gap-3 flex-wrap">
+                                <span className="font-heading text-3xl font-bold text-miko-blue">
+                                    {formatRupeesFromPaise(salePaise)}
+                                </span>
+                                <span className="text-lg text-slate-400 line-through font-medium">
+                                    {formatRupeesFromPaise(mrpPaise)}
+                                </span>
+                                <span className="bg-emerald-50 text-emerald-700 px-2 py-1 rounded-md text-sm font-bold border border-emerald-100">
+                                    {SINGLE_BOOK_DISCOUNT_PERCENT}% OFF
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-slate-600">
+                                <Truck className="w-4 h-4 text-miko-blue" />
+                                Free shipping above ₹499
                             </div>
                         </div>
 
-                        {/* CTA Group (Desktop) */}
-                        <div className="hidden md:block pt-2">
-                            <AddToCartButton product={product} />
+                        {/* Primary CTA - Desktop */}
+                        <div className="hidden md:flex flex-col gap-4">
+                            {/* Amazon Primary CTA */}
+                            {product.amazonUrl && (
+                                <AmazonButton
+                                    amazonUrl={product.amazonUrl}
+                                    productId={product.id}
+                                    productName={product.title}
+                                    productPrice={product.price}
+                                    variant="primary"
+                                    location="desktop"
+                                    className="flex items-center justify-center gap-3 py-4 px-6 rounded-2xl bg-[#FF9900] text-white font-bold text-lg shadow-lg shadow-[#FF9900]/30 hover:bg-[#E88B00] transition-all hover:scale-[1.02] active:scale-[0.98]"
+                                />
+                            )}
+
+                            {/* Secondary Actions Row */}
+                            <div className="flex gap-3">
+                                {/* Add to Cart - Icon Button */}
+                                <div className="flex-1">
+                                    <AddToCartButton product={product} />
+                                </div>
+
+                                {/* WhatsApp Icon Button */}
+                                <a
+                                    href={`https://wa.me/${getWhatsAppNumber()}?text=Hi! I'm interested in ${product.title}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center justify-center w-14 h-14 rounded-xl bg-green-50 border-2 border-green-200 text-green-600 hover:bg-green-100 hover:border-green-300 transition-colors flex-shrink-0"
+                                    aria-label="Order on WhatsApp"
+                                >
+                                    <SiWhatsapp className="w-6 h-6" />
+                                </a>
+                            </div>
+
+                            {/* Trust Badge */}
+                            {product.amazonUrl && (
+                                <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
+                                    <SiAmazon className="w-4 h-4 text-[#FF9900]" />
+                                    <span>Also available on Amazon.in</span>
+                                </div>
+                            )}
                         </div>
 
-                        {/* Complete Series CTA (PDP) */}
+                        {/* Complete Series CTA (for Miko series products) */}
                         {isMikoSeries && mikoSeriesProducts.length > 0 && (
-                            <SeriesBundleCTA products={mikoSeriesProducts} seriesName="Miko Series" addMode="missing_only" />
+                            <SeriesBundleCTA
+                                products={mikoSeriesProducts}
+                                seriesName="Miko Series"
+                                addMode="missing_only"
+                            />
                         )}
-
                     </div>
                 </div>
 
-                {/* Section 3: Learning Outcomes */}
-                <div className="mt-24 mb-16">
-                    <h2 className="font-heading text-3xl font-bold text-charcoal text-center mb-12">What Your Little One Learns</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div className="flex flex-col items-center text-center space-y-4 p-6 bg-white rounded-[24px] shadow-sm border border-slate-100">
-                            <div className="w-16 h-16 bg-blue-100 text-miko-blue rounded-full flex items-center justify-center">
-                                <Brain className="w-8 h-8" />
+                {/* ═══════════════════════════════════════════════════════════════
+                    SECTION 2: WHY PARENTS CHOOSE THIS BOOK
+                    Purpose: Parent-relevant benefits in plain language
+                ═══════════════════════════════════════════════════════════════ */}
+                <section className="mt-16 md:mt-24">
+                    <h2 className="font-heading text-2xl md:text-3xl font-bold text-charcoal text-center mb-8 md:mb-10">
+                        Why Parents Choose This Book
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 max-w-3xl mx-auto">
+                        {parentBenefits.map((item, index) => (
+                            <div
+                                key={index}
+                                className="flex items-start gap-4 p-5 bg-white rounded-2xl border border-slate-100 shadow-sm"
+                            >
+                                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-xl">
+                                    {item.icon}
+                                </div>
+                                <p className="text-charcoal font-medium text-base leading-relaxed">
+                                    {item.benefit}
+                                </p>
                             </div>
-                            <h3 className="font-bold text-lg">Cognitive Skills</h3>
-                            <p className="text-slate-500 text-sm">Boosts memory and problem-solving through fun stories.</p>
-                        </div>
-                        <div className="flex flex-col items-center text-center space-y-4 p-6 bg-white rounded-[24px] shadow-sm border border-slate-100">
-                            <div className="w-16 h-16 bg-pink-100 text-miko-pink rounded-full flex items-center justify-center">
-                                <Heart className="w-8 h-8" />
-                            </div>
-                            <h3 className="font-bold text-lg">Emotional Growth</h3>
-                            <p className="text-slate-500 text-sm">Helps understand feelings and empathy.</p>
-                        </div>
-                        <div className="flex flex-col items-center text-center space-y-4 p-6 bg-white rounded-[24px] shadow-sm border border-slate-100">
-                            <div className="w-16 h-16 bg-yellow-100 text-miko-yellow rounded-full flex items-center justify-center">
-                                <MessageCircle className="w-8 h-8" />
-                            </div>
-                            <h3 className="font-bold text-lg">Vocabulary</h3>
-                            <p className="text-slate-500 text-sm">Introduces new words in a playful context.</p>
-                        </div>
+                        ))}
                     </div>
-                </div>
+                </section>
 
-                {/* Section 4: FAQ */}
-                <div className="mt-16 mb-24">
-                    <ProductFAQ />
-                </div>
+                {/* ═══════════════════════════════════════════════════════════════
+                    SECTION 3: MADE FOR LITTLE HANDS (Book Quality & Safety)
+                    Purpose: Build trust through quality/safety messaging
+                ═══════════════════════════════════════════════════════════════ */}
+                <BookQualitySection />
+
+                {/* ═══════════════════════════════════════════════════════════════
+                    SECTION 4: A PEEK INSIDE (Interior Preview)
+                    Purpose: Reduce purchase anxiety
+                ═══════════════════════════════════════════════════════════════ */}
+                {previewImages.length > 0 && (
+                    <InsideBookPreview
+                        images={previewImages}
+                        title={product.title}
+                    />
+                )}
+
+                {/* ═══════════════════════════════════════════════════════════════
+                    SECTION 5: FAQ (SIMPLIFIED)
+                    Purpose: Answer buyer-stopping questions only
+                ═══════════════════════════════════════════════════════════════ */}
+                <ProductFAQ />
+
             </div>
 
             {/* Mobile Sticky Action Bar */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 md:hidden z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
-                <AddToCartButton product={product} />
+            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-3 md:hidden z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+                <div className="flex flex-col gap-2">
+                    {/* Amazon Primary - Full Width */}
+                    {product.amazonUrl && (
+                        <AmazonButton
+                            amazonUrl={product.amazonUrl}
+                            productId={product.id}
+                            productName={product.title}
+                            productPrice={product.price}
+                            variant="primary"
+                            location="mobile"
+                            className="flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-[#FF9900] text-white font-bold shadow-md shadow-[#FF9900]/25 hover:bg-[#E88B00] transition-all active:scale-[0.98]"
+                        />
+                    )}
+
+                    {/* Secondary Row: Cart + WhatsApp - Equal Width */}
+                    <div className="flex gap-2">
+                        <div className="flex-1">
+                            <AddToCartButton product={product} />
+                        </div>
+                        <a
+                            href={`https://wa.me/${getWhatsAppNumber()}?text=Hi! I'm interested in ${product.title}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 flex items-center justify-center gap-2 h-12 rounded-xl bg-green-50 border-2 border-green-200 text-green-700 font-semibold hover:bg-green-100 transition-colors"
+                            aria-label="Order on WhatsApp"
+                        >
+                            <SiWhatsapp className="w-5 h-5" />
+                            <span className="text-sm">WhatsApp</span>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     );

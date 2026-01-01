@@ -104,9 +104,8 @@ export function ProductImageGallery({ images, title }: ProductImageGalleryProps)
                                     alt={`${title} thumbnail ${idx + 1}`}
                                     fill
                                     sizes="76px"
-                                    className={`object-contain p-1.5 rounded-xl transition-all duration-200 ${
-                                        activeIndex === idx ? "brightness-100" : "brightness-[0.97] group-hover:brightness-100"
-                                    }`}
+                                    className={`object-contain p-1.5 rounded-xl transition-all duration-200 ${activeIndex === idx ? "brightness-100" : "brightness-[0.97] group-hover:brightness-100"
+                                        }`}
                                 />
                             </button>
                         ))}
@@ -176,11 +175,10 @@ export function ProductImageGallery({ images, title }: ProductImageGalleryProps)
                                     <button
                                         key={idx}
                                         onClick={() => setActiveIndex(idx)}
-                                        className={`h-1.5 rounded-full transition-all duration-300 ${
-                                            activeIndex === idx
+                                        className={`h-1.5 rounded-full transition-all duration-300 ${activeIndex === idx
                                                 ? "bg-slate-900 w-6"
                                                 : "bg-slate-300 w-1.5 hover:bg-slate-400"
-                                        }`}
+                                            }`}
                                         aria-label={`Go to image ${idx + 1}`}
                                     />
                                 ))}
@@ -258,9 +256,8 @@ export function ProductImageGallery({ images, title }: ProductImageGalleryProps)
                         onTouchEnd={handleTouchEnd}
                     >
                         <div
-                            className={`relative w-full h-full transition-all duration-300 ${
-                                isZoomed ? "cursor-zoom-out" : "cursor-zoom-in"
-                            }`}
+                            className={`relative w-full h-full transition-all duration-300 ${isZoomed ? "cursor-zoom-out" : "cursor-zoom-in"
+                                }`}
                             onClick={() => setIsZoomed(!isZoomed)}
                         >
                             <Image
@@ -268,11 +265,10 @@ export function ProductImageGallery({ images, title }: ProductImageGalleryProps)
                                 alt={title}
                                 fill
                                 sizes="100vw"
-                                className={`transition-all duration-300 ${
-                                    isZoomed
+                                className={`transition-all duration-300 ${isZoomed
                                         ? "object-contain scale-150 md:scale-[2]"
                                         : "object-contain"
-                                }`}
+                                    }`}
                                 priority
                                 draggable={false}
                             />

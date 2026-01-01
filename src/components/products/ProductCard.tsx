@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus } from "lucide-react";
+import { SiAmazon } from "react-icons/si";
 import type { MouseEvent } from "react";
 import { Product } from "@/lib/products";
 import { getStorageUrl } from "@/lib/storage";
@@ -135,6 +136,14 @@ export function ProductCard({ product }: ProductCardProps) {
           {isBilingual && (
             <div className="absolute top-2 right-2 bg-white/90 backdrop-blur border border-slate-200 text-slate-800 text-[11px] font-extrabold px-2.5 py-1 rounded-full shadow-sm">
               {bilingualLabelHindiEnglish()}
+            </div>
+          )}
+
+          {/* Amazon Badge */}
+          {product.amazonUrl && (
+            <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-[#232F3E] text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-sm">
+              <SiAmazon className="w-3 h-3 text-[#FF9900]" />
+              <span>On Amazon</span>
             </div>
           )}
         </div>

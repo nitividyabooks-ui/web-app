@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { CartProvider } from "@/context/CartContext";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import GoogleTagManager from "@/components/analytics/GoogleTagManager";
+import { LeadCaptureModal } from "@/components/marketing/LeadCaptureModal";
 
 const baloo = Baloo_2({
   variable: "--font-baloo",
@@ -33,6 +34,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${baloo.variable} ${quicksand.variable} antialiased font-body bg-soft text-charcoal flex flex-col min-h-screen`}
+        suppressHydrationWarning
       >
         <GoogleTagManager />
         <CartProvider>
@@ -42,8 +44,10 @@ export default function RootLayout({
           </main>
           <Footer />
           <CartDrawer />
+          <LeadCaptureModal />
         </CartProvider>
       </body>
     </html>
   );
 }
+

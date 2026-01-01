@@ -24,12 +24,21 @@ model Order {
   customerPhone String
   customerEmail String?
   address       String?
+  pincode       String?
+  city          String?
+  state         String?
   totalAmount   Int
   currency      String       @default("INR")
   notes         String?
   whatsappSent  Boolean      @default(false)
+  paymentId     String?      // PhonePe merchant transaction ID
+  paymentMethod String?      // PHONEPE, WHATSAPP, COD
   items         OrderItem[]
   meta          Json?
+
+  @@index([paymentId])
+  @@index([customerPhone])
+  @@index([status])
 }
 
 model OrderItem {
@@ -45,6 +54,8 @@ model OrderItem {
 
 enum OrderStatus {
   PENDING_WHATSAPP
+  PENDING_PAYMENT
+  PAYMENT_FAILED
   CONFIRMED
   CANCELLED
   SHIPPED
@@ -96,6 +107,7 @@ model Product {
   updatedAt         DateTime @updatedAt
   status            String
   meta              Json?
+  amazonUrl         String?  // Amazon product purchase link
 }
 
 model ContactMessage {
@@ -113,4 +125,18 @@ model ContactMessage {
 
   @@index([createdAt])
   @@index([email])
+}
+
+model Lead {
+  id         String   @id @default(cuid())
+  visitorId  String   @unique  // Links to nv_visitor_id cookie
+  phone      String
+  name       String?
+  source     String?  // "welcome_modal", "checkout", etc.
+  meta       Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([phone])
+  @@index([createdAt])
 }
