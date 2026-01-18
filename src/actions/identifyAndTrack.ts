@@ -36,7 +36,7 @@ export interface IdentifyAndTrackResult {
   success: boolean;
   userId: string;
   user: {
-    id: string;
+    userId: string;
     mobile: string;
     name?: string;
     email?: string;
@@ -70,9 +70,9 @@ export async function identifyAndTrack(input: IdentifyAndTrackInput): Promise<Id
       },
       create: {
         mobile: cleanMobile,
-        name: name || null,
-        email: email && email.trim() ? email.trim() : null,
-        addresses: addresses || null,
+        ...(name && { name }),
+        ...(email && email.trim() && { email: email.trim() }),
+        ...(addresses && addresses.length > 0 && { addresses }),
       },
       select: {
         id: true,
@@ -114,7 +114,7 @@ export async function identifyAndTrack(input: IdentifyAndTrackInput): Promise<Id
       success: true,
       userId: user.id,
       user: {
-        id: user.id,
+        userId: user.id,
         mobile: user.mobile,
         name: user.name || undefined,
         email: user.email || undefined,
@@ -127,7 +127,7 @@ export async function identifyAndTrack(input: IdentifyAndTrackInput): Promise<Id
     console.error("[identifyAndTrack] Error:", error);
 
     if (error instanceof z.ZodError) {
-      throw new Error(`Validation error: ${error.errors[0]?.message}`);
+      throw new Error(`Validation error: ${error.issues[0]?.message}`);
     }
 
     throw new Error("Failed to identify and track user");
