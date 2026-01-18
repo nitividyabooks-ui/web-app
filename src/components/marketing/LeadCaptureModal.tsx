@@ -5,11 +5,13 @@ import { X, Gift, Phone, Sparkles, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { getVisitorId } from "@/lib/visitor-id";
 import { trackEvent } from "@/lib/gtm";
+import { useIdentifyUser } from "@/context/UserContext";
 
 const MODAL_DELAY_MS = 10000; // Show after 10 seconds
 const DISMISSED_KEY = "nv_lead_modal_dismissed";
 
 export function LeadCaptureModal() {
+    const { identifyUser } = useIdentifyUser();
     const [isOpen, setIsOpen] = useState(false);
     const [phone, setPhone] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -81,34 +83,16 @@ export function LeadCaptureModal() {
         setError(null);
         setIsLoading(true);
 
-        const visitorId = getVisitorId();
-        if (!visitorId) {
-            setError("Something went wrong. Please refresh and try again.");
-            setIsLoading(false);
-            return;
-        }
-
         try {
-            const response = await fetch("/api/leads", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    visitorId,
-                    phone,
-                    source: "welcome_modal",
-                }),
+            await identifyUser({
+                mobile: phone,
+                source: "modal",
             });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || "Failed to save");
-            }
 
             setIsSuccess(true);
             trackEvent("lead_captured", {
-                visitor_id: visitorId,
                 source: "welcome_modal",
+                user_phone: phone,
             });
 
             // Auto-close after success

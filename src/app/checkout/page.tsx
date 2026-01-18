@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
+import { useUser } from "@/context/UserContext";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
 import { DeliveryForm, DeliveryFormData } from "@/components/checkout/DeliveryForm";
 import { PaymentOptions } from "@/components/checkout/PaymentOptions";
@@ -21,6 +22,7 @@ type CheckoutStep = "delivery" | "payment";
 export default function CheckoutPage() {
     const router = useRouter();
     const { items, totalAmount, totalMrpAmount, discountPercent, clearCart, isHydrated } = useCart();
+    const { user, identifyUser } = useUser();
     const [step, setStep] = useState<CheckoutStep>("delivery");
     const [deliveryData, setDeliveryData] = useState<DeliveryFormData | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -29,6 +31,7 @@ export default function CheckoutPage() {
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const hasTrackedCheckout = useRef(false);
     const currentOrderId = useRef<string | null>(null);
+    const currentUserId = useRef<string | null>(null);
 
     // Redirect to home if cart is empty (after hydration)
     useEffect(() => {
@@ -57,26 +60,54 @@ export default function CheckoutPage() {
         }
     }, [isHydrated, items, totalAmount, discountPercent]);
 
-    const handleDeliverySubmit = useCallback((data: DeliveryFormData) => {
-        setDeliveryData(data);
-        setStep("payment");
+    const handleDeliverySubmit = useCallback(async (data: DeliveryFormData) => {
+        setIsLoading(true);
         setError(null);
 
-        // Track address completed
-        trackEvent("add_shipping_info", {
-            currency: "INR",
-            value: totalAmount / 100,
-            shipping_tier: "standard",
-            items: items.map((item) => ({
-                item_id: item.productId,
-                item_name: item.title,
-                price: getSalePaiseFromMrpPaise(item.price, discountPercent) / 100,
+        try {
+            // Identify or create user
+            const userResult = await identifyUser({
+                mobile: data.phone,
+                name: data.name,
+                source: "checkout",
+                addresses: [{
+                    name: data.name,
+                    phone: data.phone,
+                    address: data.address,
+                    pincode: data.pincode,
+                    city: data.city,
+                    state: data.state,
+                }],
+            });
+
+            currentUserId.current = userResult.userId;
+
+            setDeliveryData(data);
+            setStep("payment");
+
+            // Track address completed
+            trackEvent("add_shipping_info", {
                 currency: "INR",
-                item_category: "Books",
-                quantity: item.quantity,
-            })),
-        });
-    }, [totalAmount, discountPercent, items]);
+                value: totalAmount / 100,
+                shipping_tier: "standard",
+                user_id: userResult.userId,
+                items: items.map((item) => ({
+                    item_id: item.productId,
+                    item_name: item.title,
+                    price: getSalePaiseFromMrpPaise(item.price, discountPercent) / 100,
+                    currency: "INR",
+                    item_category: "Books",
+                    quantity: item.quantity,
+                })),
+            });
+
+        } catch (error) {
+            console.error("Error identifying user:", error);
+            setError("Failed to process your information. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
+    }, [totalAmount, discountPercent, items, identifyUser]);
 
     const handleRazorpayPayment = useCallback(async () => {
         if (!deliveryData) return;
@@ -113,6 +144,7 @@ export default function CheckoutPage() {
                         quantity: item.quantity,
                     })),
                     paymentMethod: "RAZORPAY",
+                    userId: currentUserId.current, // Link order to user
                 }),
             });
 

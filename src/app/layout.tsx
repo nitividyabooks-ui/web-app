@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CartProvider } from "@/context/CartContext";
+import { UserProvider } from "@/context/UserContext";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import GoogleTagManager from "@/components/analytics/GoogleTagManager";
 import { LeadCaptureModal } from "@/components/marketing/LeadCaptureModal";
@@ -37,15 +38,17 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <GoogleTagManager />
-        <CartProvider>
-          <Header />
-          <main className="flex-1">
-            {children}
-          </main>
-          <Footer />
-          <CartDrawer />
-          <LeadCaptureModal />
-        </CartProvider>
+        <UserProvider>
+          <CartProvider>
+            <Header />
+            <main className="flex-1">
+              {children}
+            </main>
+            <Footer />
+            <CartDrawer />
+            <LeadCaptureModal />
+          </CartProvider>
+        </UserProvider>
       </body>
     </html>
   );

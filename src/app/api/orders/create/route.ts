@@ -25,6 +25,7 @@ const orderSchema = z.object({
         })
     ).min(1, "Cart cannot be empty"),
     paymentMethod: z.enum(["RAZORPAY", "WHATSAPP", "COD"]).optional().default("WHATSAPP"),
+    userId: z.string().optional(), // Optional user ID for linking orders to users
     meta: z.record(z.string(), z.any()).optional(),
 });
 
@@ -40,7 +41,7 @@ export async function POST(request: Request) {
             );
         }
 
-        const { customer, cart, paymentMethod, meta } = parsed.data;
+        const { customer, cart, paymentMethod, userId, meta } = parsed.data;
 
         // Fetch all products to validate and get prices
         const allProducts = await getAllProducts();
@@ -134,6 +135,7 @@ export async function POST(request: Request) {
                 totalAmount,
                 status: initialStatus,
                 paymentMethod,
+                userId: userId || null, // Link to user if provided
                 meta: (meta || {}) satisfies Prisma.InputJsonValue,
                 items: {
                     create: orderItems,

@@ -20,6 +20,8 @@ model Order {
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   status        OrderStatus  @default(PENDING_WHATSAPP)
+
+  // Customer details (keeping for backward compatibility)
   customerName  String
   customerPhone String
   customerEmail String?
@@ -27,6 +29,11 @@ model Order {
   pincode       String?
   city          String?
   state         String?
+
+  // New user relationship (optional for backward compatibility)
+  userId        String?
+  user          User?         @relation(fields: [userId], references: [id])
+
   totalAmount   Int
   currency      String       @default("INR")
   notes         String?
@@ -40,6 +47,7 @@ model Order {
   @@index([paymentId])
   @@index([razorpayOrderId])
   @@index([customerPhone])
+  @@index([userId])
   @@index([status])
 }
 
@@ -127,6 +135,40 @@ model ContactMessage {
 
   @@index([createdAt])
   @@index([email])
+}
+
+model User {
+  id        String   @id @default(cuid())
+  mobile    String   @unique
+  name      String?
+  email     String?
+  addresses Json?    // Array of shipping addresses
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  orders      Order[]
+  campaignHits CampaignHit[]
+
+  @@index([mobile])
+  @@index([createdAt])
+}
+
+model CampaignHit {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmTerm     String?
+  utmContent  String?
+
+  clickedAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([clickedAt])
 }
 
 model Lead {
