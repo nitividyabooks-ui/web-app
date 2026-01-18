@@ -1,138 +1,187 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import Razorpay from "razorpay";
 
 /**
- * Check PhonePe payment status using Standard Checkout V2 API
+ * Check Razorpay payment status
  * 
  * Flow:
- * 1. Get OAuth access token  
- * 2. Call Order Status API
- * 3. Update order in DB based on status
+ * 1. Look up order by Razorpay order ID or internal order ID
+ * 2. Fetch payment status from Razorpay API
+ * 3. Update order in DB if needed
+ * 4. Return status to client
  */
 export async function GET(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id: merchantOrderId } = await params;
+        const { id } = await params;
         const orderId = req.nextUrl.searchParams.get("order");
 
         // Validate environment variables
-        const clientId = process.env.PHONEPE_CLIENT_ID;
-        const clientSecret = process.env.PHONEPE_CLIENT_SECRET;
-        const clientVersion = process.env.PHONEPE_CLIENT_VERSION || "1";
-        const hostUrl = process.env.PHONEPE_HOST_URL;
+        const keyId = process.env.RAZORPAY_KEY_ID;
+        const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
-        if (!clientId || !clientSecret || !hostUrl) {
-            console.error("PhonePe credentials not configured");
+        if (!keyId || !keySecret) {
+            console.error("Razorpay credentials not configured");
             return NextResponse.json(
                 { success: false, error: "Payment service not configured" },
                 { status: 500 }
             );
         }
 
-        // Step 1: Get OAuth Access Token
-        const tokenParams = new URLSearchParams();
-        tokenParams.append("client_id", clientId);
-        tokenParams.append("client_version", clientVersion);
-        tokenParams.append("client_secret", clientSecret);
-        tokenParams.append("grant_type", "client_credentials");
+        // Find order
+        let order = null;
+        if (orderId) {
+            order = await prisma.order.findUnique({
+                where: { id: orderId },
+            });
+        }
+        
+        if (!order) {
+            // Try finding by Razorpay order ID
+            order = await prisma.order.findFirst({
+                where: { razorpayOrderId: id },
+            });
+        }
 
-        const tokenResponse = await fetch(`${hostUrl}/v1/oauth/token`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body: tokenParams,
-        });
-
-        const tokenData = await tokenResponse.json();
-
-        if (!tokenData.access_token) {
-            console.error("PhonePe Auth Token Error:", tokenData);
+        if (!order) {
             return NextResponse.json(
-                { success: false, error: "Payment service authentication failed" },
-                { status: 500 }
+                { success: false, error: "Order not found" },
+                { status: 404 }
             );
         }
 
-        // Step 2: Check Order Status
-        const statusResponse = await fetch(
-            `${hostUrl}/checkout/v2/order/${merchantOrderId}/status`,
-            {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `O-Bearer ${tokenData.access_token}`,
-                },
-            }
-        );
-
-        const statusData = await statusResponse.json();
-        console.log("PhonePe Status Response:", JSON.stringify(statusData, null, 2));
-
-        // Map PhonePe status to our status
-        const paymentState = statusData.state || statusData.payload?.state;
-        let orderStatus: "CONFIRMED" | "PAYMENT_FAILED" | "PENDING_PAYMENT" = "PENDING_PAYMENT";
-        let isSuccess = false;
-
-        switch (paymentState) {
-            case "COMPLETED":
-                orderStatus = "CONFIRMED";
-                isSuccess = true;
-                break;
-            case "FAILED":
-            case "CANCELLED":
-                orderStatus = "PAYMENT_FAILED";
-                break;
-            case "PENDING":
-            default:
-                orderStatus = "PENDING_PAYMENT";
-                break;
+        // If order is already confirmed or failed, return current status
+        if (order.status === "CONFIRMED") {
+            return NextResponse.json({
+                success: true,
+                state: "COMPLETED",
+                orderStatus: "CONFIRMED",
+                orderId: order.id,
+                message: "Payment successful! Your order has been confirmed.",
+                paymentId: order.paymentId,
+            });
         }
 
-        // Update order status in DB
-        if (orderId) {
-            try {
-                const order = await prisma.order.findUnique({
-                    where: { id: orderId },
-                });
+        if (order.status === "PAYMENT_FAILED") {
+            return NextResponse.json({
+                success: false,
+                state: "FAILED",
+                orderStatus: "PAYMENT_FAILED",
+                orderId: order.id,
+                message: "Payment was not completed.",
+            });
+        }
 
-                // Only update if status has changed and order is still pending
-                if (order && order.status === "PENDING_PAYMENT" && orderStatus !== "PENDING_PAYMENT") {
+        // For pending payments, check with Razorpay
+        if (order.razorpayOrderId) {
+            const razorpay = new Razorpay({
+                key_id: keyId,
+                key_secret: keySecret,
+            });
+
+            try {
+                // Fetch order from Razorpay
+                const razorpayOrder = await razorpay.orders.fetch(order.razorpayOrderId);
+                console.log("Razorpay Order Status:", JSON.stringify(razorpayOrder, null, 2));
+
+                // Check order status
+                if (razorpayOrder.status === "paid") {
+                    // Order is paid - update our DB
+                    // Try to get payment details
+                    const payments = await razorpay.orders.fetchPayments(order.razorpayOrderId);
+                    const successfulPayment = payments.items?.find(
+                        (p: { status: string }) => p.status === "captured" || p.status === "authorized"
+                    );
+
                     await prisma.order.update({
-                        where: { id: orderId },
+                        where: { id: order.id },
                         data: {
-                            status: orderStatus,
+                            status: "CONFIRMED",
+                            paymentId: successfulPayment?.id || null,
                             meta: {
                                 ...(typeof order.meta === 'object' && order.meta !== null ? order.meta : {}),
-                                phonePeStatus: paymentState,
-                                phonePeTransactionId: statusData.transactionId || statusData.payload?.transactionId,
-                                paymentCompletedAt: isSuccess ? new Date().toISOString() : undefined,
-                                paymentFailedAt: orderStatus === "PAYMENT_FAILED" ? new Date().toISOString() : undefined,
+                                razorpayStatus: razorpayOrder.status,
+                                razorpayPaymentId: successfulPayment?.id,
+                                paymentCompletedAt: new Date().toISOString(),
                             },
                         },
                     });
+
+                    return NextResponse.json({
+                        success: true,
+                        state: "COMPLETED",
+                        orderStatus: "CONFIRMED",
+                        orderId: order.id,
+                        message: "Payment successful! Your order has been confirmed.",
+                        paymentId: successfulPayment?.id,
+                    });
                 }
-            } catch (dbError) {
-                console.error("Failed to update order status:", dbError);
-                // Don't fail the response, just log the error
+
+                if (razorpayOrder.status === "attempted") {
+                    // Payment was attempted but not successful yet
+                    // Check if there's a failed payment
+                    const payments = await razorpay.orders.fetchPayments(order.razorpayOrderId);
+                    const failedPayment = payments.items?.find(
+                        (p: { status: string }) => p.status === "failed"
+                    );
+
+                    if (failedPayment && payments.items?.length === payments.count) {
+                        // All attempts failed
+                        return NextResponse.json({
+                            success: false,
+                            state: "FAILED",
+                            orderStatus: "PAYMENT_FAILED",
+                            orderId: order.id,
+                            message: "Payment failed. Please try again.",
+                        });
+                    }
+
+                    return NextResponse.json({
+                        success: false,
+                        state: "PENDING",
+                        orderStatus: "PENDING_PAYMENT",
+                        orderId: order.id,
+                        message: "Payment is being processed. Please wait...",
+                    });
+                }
+
+                // Order is still in created state
+                return NextResponse.json({
+                    success: false,
+                    state: "PENDING",
+                    orderStatus: "PENDING_PAYMENT",
+                    orderId: order.id,
+                    message: "Waiting for payment...",
+                });
+
+            } catch (razorpayError) {
+                console.error("Razorpay API error:", razorpayError);
+                // Fall through to return current DB status
             }
         }
 
+        // Fallback to DB status - refetch to get latest status
+        const latestOrder = await prisma.order.findUnique({
+            where: { id: order.id },
+        });
+
+        const currentStatus = latestOrder?.status || order.status;
+        
         return NextResponse.json({
-            success: isSuccess,
-            state: paymentState,
-            orderStatus,
-            orderId,
-            merchantOrderId,
-            message: isSuccess 
+            success: currentStatus === "CONFIRMED",
+            state: currentStatus === "CONFIRMED" ? "COMPLETED" : 
+                   currentStatus === "PAYMENT_FAILED" ? "FAILED" : "PENDING",
+            orderStatus: currentStatus,
+            orderId: order.id,
+            message: currentStatus === "CONFIRMED" 
                 ? "Payment successful! Your order has been confirmed."
-                : paymentState === "PENDING"
-                ? "Payment is being processed. Please wait..."
-                : "Payment was not completed.",
-            transactionId: statusData.transactionId || statusData.payload?.transactionId,
-            amount: statusData.amount || statusData.payload?.amount,
+                : currentStatus === "PAYMENT_FAILED"
+                ? "Payment was not completed."
+                : "Checking payment status...",
+            paymentId: latestOrder?.paymentId || order.paymentId,
         });
 
     } catch (error) {

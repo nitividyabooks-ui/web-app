@@ -22,7 +22,7 @@ const quicksand = Quicksand({
 
 export const metadata: Metadata = {
   title: "NitiVidya Books - Big Wisdom for Little Minds",
-  description: "Vibrant, durable board books designed to spark joy in children aged 0–5.",
+  description: "Vibrant, durable paperback books designed to spark joy in children aged 0–5.",
 };
 
 export default function RootLayout({

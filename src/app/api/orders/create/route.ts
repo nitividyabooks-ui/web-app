@@ -5,6 +5,7 @@ import { getAllProducts } from "@/lib/products";
 import { getDiscountPercentForQuantity, getSalePaiseFromMrpPaise } from "@/lib/pricing";
 import { Prisma, OrderStatus } from "@prisma/client";
 import { buildWhatsAppMessage, buildWhatsAppUrl, getWhatsAppNumber } from "@/lib/whatsapp";
+import { notifyOrderPlaced } from "@/lib/whatsapp-notifications";
 
 const orderSchema = z.object({
     customer: z.object({
@@ -22,7 +23,7 @@ const orderSchema = z.object({
             quantity: z.number().min(1),
         })
     ).min(1, "Cart cannot be empty"),
-    paymentMethod: z.enum(["PHONEPE", "WHATSAPP", "COD"]).optional().default("WHATSAPP"),
+    paymentMethod: z.enum(["RAZORPAY", "WHATSAPP", "COD"]).optional().default("WHATSAPP"),
     meta: z.record(z.string(), z.any()).optional(),
 });
 
@@ -76,7 +77,7 @@ export async function POST(request: Request) {
 
         // Determine order status based on payment method
         const initialStatus: OrderStatus = 
-            paymentMethod === "PHONEPE" ? "PENDING_PAYMENT" : "PENDING_WHATSAPP";
+            paymentMethod === "RAZORPAY" ? "PENDING_PAYMENT" : "PENDING_WHATSAPP";
 
         // Create Order in DB with idempotency (check for duplicate within last 5 minutes)
         const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
@@ -157,6 +158,17 @@ export async function POST(request: Request) {
             totalAmount,
             discountPercent,
         });
+
+        // Send WhatsApp notification for new order (fire and forget)
+        notifyOrderPlaced({
+            orderId: order.id,
+            customerName: customer.name,
+            customerPhone: customer.phone,
+            itemCount: orderItems.length,
+            totalAmount: totalAmount / 100, // Convert paise to rupees
+            paymentMethod,
+            city: customer.city,
+        }).catch(console.error);
 
         return NextResponse.json({
             orderId: order.id,

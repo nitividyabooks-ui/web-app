@@ -1,12 +1,15 @@
 import { notFound } from "next/navigation";
 import { getAllProducts, getProductBySlug } from "@/lib/products";
 import { getStorageUrl } from "@/lib/storage";
+import { getReviewsByProductId } from "@/lib/reviews";
 import { AddToCartButton } from "@/components/products/AddToCartButton";
 import { ProductImageGallery } from "@/components/products/ProductImageGallery";
 import { ProductFAQ } from "@/components/products/ProductFAQ";
 import { SeriesBundleCTA } from "@/components/products/SeriesBundleCTA";
 import { BookQualitySection } from "@/components/products/BookQualitySection";
 import { InsideBookPreview } from "@/components/products/InsideBookPreview";
+import { ReviewSection } from "@/components/products/ReviewSection";
+import { StarRatingInline } from "@/components/products/StarRating";
 import { ArrowLeft, Star, BookOpen, Truck } from "lucide-react";
 import { SiWhatsapp, SiAmazon } from "react-icons/si";
 import { AmazonButton } from "@/components/products/AmazonButton";
@@ -108,6 +111,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     const valueProposition = getValueProposition(product.id);
     const parentBenefits = getParentBenefits(product.id);
 
+    // Fetch reviews for this product
+    const reviews = await getReviewsByProductId(product.id);
+    const averageRating = reviews.length > 0
+        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+        : 0;
+
     // Get preview images for "Inside the Book" section (skip cover image)
     const previewImages = product.images
         .filter((img, idx) => idx > 0) // Skip first image (cover)
@@ -148,6 +157,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                             <h1 className="font-heading text-3xl md:text-4xl font-bold text-charcoal leading-tight">
                                 {product.title}
                             </h1>
+                            {reviews.length > 0 && (
+                                <div className="mt-2">
+                                    <StarRatingInline rating={averageRating} reviewCount={reviews.length} />
+                                </div>
+                            )}
                             <p className="text-lg text-slate-600 mt-2 leading-relaxed">
                                 {valueProposition}
                             </p>
@@ -295,6 +309,18 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     Purpose: Answer buyer-stopping questions only
                 ═══════════════════════════════════════════════════════════════ */}
                 <ProductFAQ />
+
+                {/* ═══════════════════════════════════════════════════════════════
+                    SECTION 6: CUSTOMER REVIEWS
+                    Purpose: Social proof from real parents
+                ═══════════════════════════════════════════════════════════════ */}
+                {reviews.length > 0 && (
+                    <ReviewSection
+                        productId={product.id}
+                        productName={product.title}
+                        reviews={reviews}
+                    />
+                )}
 
             </div>
 

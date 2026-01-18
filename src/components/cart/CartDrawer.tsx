@@ -353,15 +353,9 @@ export function CartDrawer() {
                                     className="w-full shadow-lg shadow-blue-600/25"
                                     size="lg"
                                     onClick={handleCheckout}
-                                    disabled={true}
                                 >
-                                    🚀 Payment Coming Soon
+                                    Proceed to Checkout
                                 </Button>
-                                {/* Tooltip on hover */}
-                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-800 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-                                    Order via WhatsApp for now! 💬
-                                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
-                                </div>
                             </div>
                             <button
                                 onClick={handleQuickWhatsApp}
@@ -374,7 +368,7 @@ export function CartDrawer() {
 
                         {/* Trust Text */}
                         <p className="text-center text-xs text-slate-500">
-                            Free shipping on orders above ₹499 • Order via WhatsApp
+                            Free shipping on orders above ₹499 • Secure Online Payment
                         </p>
                     </div>
                 )}

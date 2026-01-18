@@ -25,6 +25,16 @@ export function Header() {
 
     return (
         <>
+            {/* 🇮🇳 Republic Day Offer Banner */}
+            <div className="bg-gradient-to-r from-orange-500 via-white to-green-600 text-center py-2 px-4 relative overflow-hidden">
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSIyIiBmaWxsPSJyZ2JhKDAsMCwwLDAuMDUpIi8+PC9zdmc+')] opacity-30" />
+                <p className="text-sm md:text-base font-bold text-slate-900 relative">
+                    🇮🇳 <span className="text-orange-600">Republic Day</span> <span className="text-blue-900">Special</span> <span className="text-green-700">Sale!</span>{" "}
+                    <span className="hidden sm:inline">—</span>{" "}
+                    <span className="text-orange-700">Up to 60% OFF</span> on Miko Series Bundles 🎉
+                </p>
+            </div>
+
             <header className="sticky top-0 z-50 w-full border-b border-slate-200/60 bg-white/70 backdrop-blur-md">
                 {/* Trust strip */}
                 <div className="hidden sm:block border-b border-slate-200/50">
@@ -34,10 +44,10 @@ export function Header() {
                             <span className="text-slate-300">•</span>
                             <span>WhatsApp order support</span>
                             <span className="text-slate-300">•</span>
-                            <span>Free shipping above ₹999</span>
+                            <span>Free shipping above ₹499</span>
                         </div>
                         <div className="hidden md:block text-slate-500">
-                            Big Wisdom for Little Minds
+                            <span className="animate-pulse">🔥</span> Limited Time Republic Day Offer!
                         </div>
                     </div>
                 </div>
@@ -64,6 +74,7 @@ export function Header() {
                             { name: "Home", href: "/" },
                             { name: "Books", href: "/books" },
                             { name: "About", href: "/about" },
+                            { name: "FAQ", href: "/faq" },
                             { name: "Contact", href: "/contact" },
                         ].map((link) => (
                             <Link
@@ -135,6 +146,7 @@ export function Header() {
                                     { name: "Home", href: "/" },
                                     { name: "Books", href: "/books" },
                                     { name: "About", href: "/about" },
+                                    { name: "FAQ", href: "/faq" },
                                     { name: "Contact", href: "/contact" },
                                 ].map((link) => (
                                     <Link

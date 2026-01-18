@@ -9,31 +9,36 @@ import {
     ArrowLeft,
     ChevronRight,
     CheckCircle2,
-    Clock
 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 
 interface PaymentOptionsProps {
     deliveryData: DeliveryFormData;
-    onPhonePe: () => void;
+    onRazorpay: () => void;
     onWhatsApp: () => void;
     onBack: () => void;
     isLoading: boolean;
     totalAmount: number;
+    razorpayReady?: boolean;
 }
 
 export function PaymentOptions({
     deliveryData,
+    onRazorpay,
     onWhatsApp,
     onBack,
     isLoading,
     totalAmount,
+    razorpayReady = true,
 }: PaymentOptionsProps) {
-    // WhatsApp is now the only available option
-    const [selectedMethod] = useState<"whatsapp">("whatsapp");
+    const [selectedMethod, setSelectedMethod] = useState<"razorpay" | "whatsapp">("razorpay");
 
     const handleProceed = () => {
-        onWhatsApp();
+        if (selectedMethod === "razorpay") {
+            onRazorpay();
+        } else {
+            onWhatsApp();
+        }
     };
 
     return (
@@ -70,17 +75,70 @@ export function PaymentOptions({
                     Payment Method
                 </h2>
 
-                {/* WhatsApp Option - Primary & Only Available */}
+                {/* Razorpay Option - Primary */}
                 <button
                     type="button"
+                    onClick={() => setSelectedMethod("razorpay")}
                     disabled={isLoading}
-                    className="w-full text-left p-4 rounded-xl border-2 transition-all border-green-500 bg-green-50 ring-2 ring-green-200 relative"
+                    className={`w-full text-left p-4 rounded-xl border-2 transition-all relative ${
+                        selectedMethod === "razorpay"
+                            ? "border-blue-500 bg-blue-50 ring-2 ring-blue-200"
+                            : "border-slate-200 hover:border-slate-300"
+                    }`}
                 >
                     {/* Recommended Badge */}
-                    <div className="absolute -top-2.5 left-4 px-2 py-0.5 bg-green-600 text-white text-xs font-bold rounded-full">
+                    <div className="absolute -top-2.5 left-4 px-2 py-0.5 bg-blue-600 text-white text-xs font-bold rounded-full">
                         Recommended
                     </div>
 
+                    <div className="flex items-start gap-4">
+                        {/* Secure Pay Shield Logo */}
+                        <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-600/20">
+                            <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="white" stroke="white"/>
+                                <rect x="9" y="11" width="6" height="5" rx="1" stroke="#2563eb" fill="#2563eb"/>
+                                <path d="M10 11V9a2 2 0 1 1 4 0v2" stroke="#2563eb"/>
+                            </svg>
+                        </div>
+
+                        <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                                <span className="font-bold text-slate-900">Pay Online</span>
+                                {selectedMethod === "razorpay" && (
+                                    <CheckCircle2 className="w-5 h-5 text-blue-600" />
+                                )}
+                            </div>
+                            <p className="text-sm text-slate-600 mt-0.5">
+                                UPI, Cards, Net Banking, Wallets
+                            </p>
+                            <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                <span className="inline-flex items-center gap-1 text-xs text-green-700 font-medium bg-green-100 px-2 py-0.5 rounded-full">
+                                    <ShieldCheck className="w-3 h-3" />
+                                    Secure Payment
+                                </span>
+                                <span className="inline-flex items-center text-xs text-slate-600 font-medium bg-slate-100 px-2 py-0.5 rounded-full">
+                                    Instant Confirmation
+                                </span>
+                            </div>
+                        </div>
+
+                        <ChevronRight className={`w-5 h-5 flex-shrink-0 ${
+                            selectedMethod === "razorpay" ? "text-blue-600" : "text-slate-400"
+                        }`} />
+                    </div>
+                </button>
+
+                {/* WhatsApp Option */}
+                <button
+                    type="button"
+                    onClick={() => setSelectedMethod("whatsapp")}
+                    disabled={isLoading}
+                    className={`w-full text-left p-4 rounded-xl border-2 transition-all relative ${
+                        selectedMethod === "whatsapp"
+                            ? "border-green-500 bg-green-50 ring-2 ring-green-200"
+                            : "border-slate-200 hover:border-slate-300"
+                    }`}
+                >
                     <div className="flex items-start gap-4">
                         {/* WhatsApp Logo */}
                         <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
@@ -90,7 +148,9 @@ export function PaymentOptions({
                         <div className="flex-1">
                             <div className="flex items-center gap-2">
                                 <span className="font-bold text-slate-900">Order on WhatsApp</span>
-                                <CheckCircle2 className="w-5 h-5 text-green-600" />
+                                {selectedMethod === "whatsapp" && (
+                                    <CheckCircle2 className="w-5 h-5 text-green-600" />
+                                )}
                             </div>
                             <p className="text-sm text-slate-600 mt-0.5">
                                 Place order via chat • Pay on delivery or via UPI
@@ -102,69 +162,41 @@ export function PaymentOptions({
                             </div>
                         </div>
 
-                        <ChevronRight className="w-5 h-5 flex-shrink-0 text-green-600" />
+                        <ChevronRight className={`w-5 h-5 flex-shrink-0 ${
+                            selectedMethod === "whatsapp" ? "text-green-600" : "text-slate-400"
+                        }`} />
                     </div>
                 </button>
-
-                {/* PhonePe Option - Disabled / Coming Soon */}
-                <div
-                    className="w-full text-left p-4 rounded-xl border-2 transition-all border-slate-200 bg-slate-50 opacity-60 cursor-not-allowed relative"
-                >
-                    {/* Coming Soon Badge */}
-                    <div className="absolute -top-2.5 left-4 px-2 py-0.5 bg-amber-500 text-white text-xs font-bold rounded-full flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        Coming Soon
-                    </div>
-
-                    <div className="flex items-start gap-4">
-                        {/* PhonePe Logo */}
-                        <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center flex-shrink-0">
-                            <svg viewBox="0 0 24 24" className="w-8 h-8" fill="none">
-                                <path
-                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"
-                                    fill="#5F259F"
-                                />
-                                <path
-                                    d="M15.5 8.5L11 13l-2.5-2.5"
-                                    stroke="white"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                />
-                            </svg>
-                        </div>
-
-                        <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                                <span className="font-bold text-slate-500">Pay via PhonePe</span>
-                            </div>
-                            <p className="text-sm text-slate-500 mt-0.5">
-                                UPI, Cards, Net Banking & more
-                            </p>
-                            <div className="flex items-center gap-3 mt-2">
-                                <span className="inline-flex items-center gap-1 text-xs text-slate-500 font-medium bg-slate-200 px-2 py-0.5 rounded-full">
-                                    Online payments launching soon!
-                                </span>
-                            </div>
-                        </div>
-
-                        <ChevronRight className="w-5 h-5 flex-shrink-0 text-slate-400" />
-                    </div>
-                </div>
             </div>
 
             {/* Action Buttons */}
             <div className="space-y-3">
                 <button
                     onClick={handleProceed}
-                    disabled={isLoading}
-                    className="w-full font-bold py-4 px-6 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-lg active:scale-[0.98] flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white focus:ring-green-500 shadow-green-600/25"
+                    disabled={isLoading || (selectedMethod === "razorpay" && !razorpayReady)}
+                    className={`w-full font-bold py-4 px-6 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-lg active:scale-[0.98] flex items-center justify-center gap-2 ${
+                        selectedMethod === "razorpay"
+                            ? "bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white focus:ring-blue-500 shadow-blue-600/25"
+                            : "bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white focus:ring-green-500 shadow-green-600/25"
+                    }`}
                 >
                     {isLoading ? (
                         <>
                             <Loader2 className="w-5 h-5 animate-spin" />
                             Processing...
                         </>
+                    ) : selectedMethod === "razorpay" ? (
+                        !razorpayReady ? (
+                            <>
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                                Initializing Payment...
+                            </>
+                        ) : (
+                            <>
+                                <CreditCard className="w-5 h-5" />
+                                Pay ₹{(totalAmount / 100).toFixed(0)} Securely
+                            </>
+                        )
                     ) : (
                         <>
                             <SiWhatsapp className="w-5 h-5" />
@@ -184,11 +216,14 @@ export function PaymentOptions({
             </div>
 
             {/* Security Note */}
-            <p className="text-center text-xs text-slate-500">
-                You'll be redirected to WhatsApp to confirm your order with our team.
-            </p>
+            <div className="flex items-center justify-center gap-2 text-xs text-slate-500">
+                <ShieldCheck className="w-4 h-4 text-green-600" />
+                <span>
+                    {selectedMethod === "razorpay"
+                        ? "Secured by Razorpay • PCI DSS Compliant"
+                        : "You'll be redirected to WhatsApp to confirm your order"}
+                </span>
+            </div>
         </div>
     );
 }
-
-

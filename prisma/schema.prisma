@@ -31,12 +31,14 @@ model Order {
   currency      String       @default("INR")
   notes         String?
   whatsappSent  Boolean      @default(false)
-  paymentId     String?      // PhonePe merchant transaction ID
-  paymentMethod String?      // PHONEPE, WHATSAPP, COD
+  paymentId     String?      // Razorpay payment ID (pay_xxxxx)
+  razorpayOrderId String?    // Razorpay order ID (order_xxxxx)
+  paymentMethod String?      // RAZORPAY, WHATSAPP, COD
   items         OrderItem[]
   meta          Json?
 
   @@index([paymentId])
+  @@index([razorpayOrderId])
   @@index([customerPhone])
   @@index([status])
 }
@@ -139,4 +141,33 @@ model Lead {
 
   @@index([phone])
   @@index([createdAt])
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  productId   String
+  rating      Int      // 1-5 stars
+  title       String?
+  content     String
+  authorName  String
+  authorCity  String?
+  isVerified  Boolean  @default(false)  // Verified purchase
+  isApproved  Boolean  @default(true)   // Admin approval
+  createdAt   DateTime @default(now())
+
+  @@index([productId])
+  @@index([isApproved])
+}
+
+model Testimonial {
+  id          String   @id @default(cuid())
+  content     String
+  authorName  String
+  authorTitle String?  // e.g., "Mother of 2", "Preschool Teacher"
+  rating      Int      @default(5)
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([isActive])
 }

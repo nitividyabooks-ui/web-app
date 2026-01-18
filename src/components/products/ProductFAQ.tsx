@@ -16,11 +16,11 @@ const FAQS = [
     },
     {
         question: "Are these books safe for babies?",
-        answer: "Absolutely! All NitiVidya board books are printed with non-toxic, lead-free inks on child-safe materials. They have rounded corners and sturdy pages—safe even for teething toddlers."
+        answer: "Absolutely! All NitiVidya paperback books are printed with non-toxic, lead-free inks on child-safe materials. They have rounded corners and sturdy pages—safe even for teething toddlers."
     },
     {
-        question: "What's the difference between board book and paperback?",
-        answer: "Board books have thick, durable cardboard pages that are perfect for babies learning to turn pages. Paperback books have thinner pages better suited for older children who handle books more carefully."
+        question: "What format are your books?",
+        answer: "Our books are high-quality paperbacks with durable pages designed for young readers. They feature child-safe materials and are perfect for babies and toddlers aged 0-5 years."
     },
     {
         question: "Is this book bilingual (Hindi + English)?",

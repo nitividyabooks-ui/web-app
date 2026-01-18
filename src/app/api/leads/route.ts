@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { notifyNewLead } from "@/lib/whatsapp-notifications";
 
 /**
  * GET /api/leads/check?visitorId=xxx
@@ -74,6 +75,14 @@ export async function POST(request: NextRequest) {
                 source: source || "welcome_modal",
             },
         });
+
+        // Send WhatsApp notification for new lead (fire and forget)
+        notifyNewLead({
+            phone: cleanPhone,
+            name: name || undefined,
+            source: source || "welcome_modal",
+            visitorId,
+        }).catch(console.error);
 
         return NextResponse.json({
             success: true,

@@ -1,8 +1,18 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { getDiscountPercentForQuantity, getSalePaiseFromMrpPaise } from "@/lib/pricing";
 import { getStorageUrl } from "@/lib/storage";
+import { getVisitorId } from "@/lib/visitor-id";
+
+// Track event helper
+function trackEvent(event: string, data: Record<string, unknown>) {
+    fetch("/api/track", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ event, data }),
+    }).catch(console.error);
+}
 
 export interface CartItem {
     productId: string;
@@ -126,7 +136,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem("nitividya-cart", JSON.stringify(items));
     }, [items, isHydrated]);
 
-    const addItem = (newItem: CartItem, options?: { openCart?: boolean }) => {
+    const addItem = useCallback((newItem: CartItem, options?: { openCart?: boolean }) => {
         setItems((prev) => {
             const existing = prev.find((i) => i.productId === newItem.productId);
             if (existing) {
@@ -141,7 +151,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         if (options?.openCart !== false) {
             setIsCartOpen(true);
         }
-    };
+        
+        // Track add to cart event
+        const visitorId = getVisitorId();
+        trackEvent("add_to_cart", {
+            productName: newItem.title,
+            price: newItem.price / 100, // Convert paise to rupees
+            quantity: newItem.quantity,
+            visitorId,
+        });
+    }, []);
 
     const removeItem = (productId: string) => {
         setItems((prev) => prev.filter((i) => i.productId !== productId));

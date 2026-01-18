@@ -1,7 +1,12 @@
 // Central pricing knobs (change anytime)
 export const SINGLE_BOOK_DISCOUNT_PERCENT = 30;
-export const BUNDLE_3_DISCOUNT_PERCENT = 35;
-export const BUNDLE_5_DISCOUNT_PERCENT = 40;
+
+// 🇮🇳 REPUBLIC DAY SPECIAL OFFER (Jan 20-27, 2026)
+export const BUNDLE_3_DISCOUNT_PERCENT = 50;  // Was 35%
+export const BUNDLE_5_DISCOUNT_PERCENT = 60;  // Was 40%
+
+// Offer validity
+export const REPUBLIC_DAY_OFFER_END = new Date("2026-01-27T23:59:59+05:30");
 
 export const BUNDLE_3_MIN_QTY = 3;
 export const BUNDLE_5_MIN_QTY = 5;

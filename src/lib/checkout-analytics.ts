@@ -4,7 +4,7 @@
  * Standardized tracking events for the checkout flow:
  * - checkout_started
  * - address_completed
- * - phonepe_selected
+ * - razorpay_selected
  * - payment_success
  * - payment_failure
  * - whatsapp_order_initiated
@@ -85,20 +85,20 @@ export function trackAddressCompleted(
 }
 
 /**
- * Track when user selects PhonePe as payment method
+ * Track when user selects Razorpay as payment method
  */
-export function trackPhonePeSelected(totalAmount: number) {
-    trackEvent("phonepe_selected", {
+export function trackRazorpaySelected(totalAmount: number) {
+    trackEvent("razorpay_selected", {
         currency: "INR",
         value: totalAmount / 100,
-        payment_type: "PhonePe",
+        payment_type: "Razorpay",
     });
 
     // Also fire GA4 standard event
     trackEvent("add_payment_info", {
         currency: "INR",
         value: totalAmount / 100,
-        payment_type: "PhonePe",
+        payment_type: "Razorpay",
     });
 }
 
@@ -111,7 +111,7 @@ export function trackPaymentSuccess(
     discountPercent: number,
     orderId: string,
     transactionId?: string,
-    paymentMethod: "PhonePe" | "WhatsApp" = "PhonePe"
+    paymentMethod: "Razorpay" | "WhatsApp" = "Razorpay"
 ) {
     trackEvent("payment_success", {
         transaction_id: transactionId || orderId,
@@ -140,7 +140,7 @@ export function trackPaymentFailure(
     totalAmount: number,
     orderId: string,
     errorMessage?: string,
-    paymentMethod: "PhonePe" | "WhatsApp" = "PhonePe"
+    paymentMethod: "Razorpay" | "WhatsApp" = "Razorpay"
 ) {
     trackEvent("payment_failure", {
         currency: "INR",
@@ -200,10 +200,10 @@ export function trackCheckoutAbandonment(
 /**
  * Track WhatsApp fallback after payment failure
  */
-export function trackWhatsAppFallback(orderId: string, merchantOrderId?: string) {
+export function trackWhatsAppFallback(orderId: string, razorpayOrderId?: string) {
     trackEvent("whatsapp_fallback_after_payment_failure", {
         order_id: orderId,
-        merchant_order_id: merchantOrderId,
+        razorpay_order_id: razorpayOrderId,
     });
 }
 
@@ -222,5 +222,3 @@ export function trackQuickWhatsAppFromCart(
         items_count: items.length,
     });
 }
-
-

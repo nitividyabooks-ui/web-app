@@ -1,23 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import Razorpay from "razorpay";
 
 const initiateSchema = z.object({
     orderId: z.string().min(1, "Order ID is required"),
     amount: z.number().positive("Amount must be positive"),
     customerPhone: z.string().min(10, "Valid phone number required"),
     customerName: z.string().min(1, "Customer name required"),
+    customerEmail: z.string().email().optional(),
 });
 
 /**
- * PhonePe Standard Checkout V2 Payment Initiation
+ * Razorpay Payment Initiation
  * 
  * Flow:
- * 1. Get OAuth access token
- * 2. Create payment order with PhonePe
- * 3. Return redirect URL for PayPage
+ * 1. Validate request and order
+ * 2. Create Razorpay order
+ * 3. Return order details for client-side checkout
  * 
- * Docs: https://developer.phonepe.com/payment-gateway/website-integration/standard-checkout/api-integration
+ * Docs: https://razorpay.com/docs/payments/server-integration/nodejs/
  */
 export async function POST(req: NextRequest) {
     try {
@@ -31,17 +33,14 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const { orderId, amount, customerPhone, customerName } = parsed.data;
+        const { orderId, amount, customerPhone, customerName, customerEmail } = parsed.data;
 
         // Validate environment variables
-        const clientId = process.env.PHONEPE_CLIENT_ID;
-        const clientSecret = process.env.PHONEPE_CLIENT_SECRET;
-        const clientVersion = process.env.PHONEPE_CLIENT_VERSION || "1";
-        const hostUrl = process.env.PHONEPE_HOST_URL;
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+        const keyId = process.env.RAZORPAY_KEY_ID;
+        const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
-        if (!clientId || !clientSecret || !hostUrl) {
-            console.error("PhonePe credentials not configured");
+        if (!keyId || !keySecret) {
+            console.error("Razorpay credentials not configured");
             return NextResponse.json(
                 { success: false, error: "Payment service not configured" },
                 { status: 500 }
@@ -67,85 +66,33 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Generate unique merchant transaction ID
-        const merchantOrderId = `NV${Date.now()}${orderId.slice(-6).toUpperCase()}`;
-
-        // Step 1: Get OAuth Access Token
-        const tokenParams = new URLSearchParams();
-        tokenParams.append("client_id", clientId);
-        tokenParams.append("client_version", clientVersion);
-        tokenParams.append("client_secret", clientSecret);
-        tokenParams.append("grant_type", "client_credentials");
-
-        const tokenResponse = await fetch(`${hostUrl}/v1/oauth/token`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body: tokenParams,
+        // Initialize Razorpay
+        const razorpay = new Razorpay({
+            key_id: keyId,
+            key_secret: keySecret,
         });
 
-        const tokenData = await tokenResponse.json();
-
-        if (!tokenData.access_token) {
-            console.error("PhonePe Auth Token Error:", tokenData);
-            return NextResponse.json(
-                { success: false, error: "Payment service authentication failed" },
-                { status: 500 }
-            );
-        }
-
-        // Step 2: Create Payment Order
-        const paymentPayload = {
-            merchantOrderId,
-            amount, // Already in paise
-            expireAfter: 1200, // 20 minutes
-            metaInfo: {
-                udf1: orderId, // Store our order ID
-                udf2: customerName,
-                udf3: customerPhone,
+        // Create Razorpay order
+        // Amount should be in paise (smallest currency unit)
+        const razorpayOrder = await razorpay.orders.create({
+            amount: amount, // Already in paise
+            currency: "INR",
+            receipt: orderId,
+            notes: {
+                orderId: orderId,
+                customerName: customerName,
+                customerPhone: customerPhone,
             },
-            paymentFlow: {
-                type: "PG_CHECKOUT",
-                message: `NitiVidya Books Order #${orderId.slice(-6).toUpperCase()}`,
-                merchantUrls: {
-                    redirectUrl: `${baseUrl}/payment/status?id=${merchantOrderId}&order=${orderId}`,
-                },
-            },
-        };
-
-        const createPaymentResponse = await fetch(`${hostUrl}/checkout/v2/pay`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `O-Bearer ${tokenData.access_token}`,
-            },
-            body: JSON.stringify(paymentPayload),
         });
 
-        const paymentData = await createPaymentResponse.json();
-        console.log("PhonePe Payment Response:", JSON.stringify(paymentData, null, 2));
-
-        if (!paymentData.orderId || !paymentData.redirectUrl) {
-            console.error("PhonePe Payment Creation Failed:", paymentData);
-            return NextResponse.json(
-                { 
-                    success: false, 
-                    error: paymentData.message || "Payment creation failed",
-                    code: paymentData.code,
-                },
-                { status: 400 }
-            );
-        }
-
-        // Update order with payment ID
+        // Update order with Razorpay order ID
         await prisma.order.update({
             where: { id: orderId },
             data: {
-                paymentId: merchantOrderId,
+                razorpayOrderId: razorpayOrder.id,
                 meta: {
                     ...(typeof order.meta === 'object' && order.meta !== null ? order.meta : {}),
-                    phonePeOrderId: paymentData.orderId,
+                    razorpayOrderId: razorpayOrder.id,
                     paymentInitiatedAt: new Date().toISOString(),
                 },
             },
@@ -153,9 +100,16 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            redirectUrl: paymentData.redirectUrl,
-            merchantOrderId,
-            phonePeOrderId: paymentData.orderId,
+            razorpayOrderId: razorpayOrder.id,
+            razorpayKeyId: keyId,
+            amount: razorpayOrder.amount,
+            currency: razorpayOrder.currency,
+            orderId: orderId,
+            prefill: {
+                name: customerName,
+                contact: customerPhone,
+                email: customerEmail || "",
+            },
         });
 
     } catch (error) {

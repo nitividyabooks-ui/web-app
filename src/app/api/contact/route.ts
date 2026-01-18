@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import { notifyContactForm } from "@/lib/whatsapp-notifications";
 
 const contactSchema = z.object({
   name: z.string().min(1).max(120),
@@ -35,6 +36,15 @@ export async function POST(request: Request) {
       },
       select: { id: true, createdAt: true },
     });
+
+    // Send WhatsApp notification for contact form (fire and forget)
+    notifyContactForm({
+      name: parsed.name,
+      email: parsed.email,
+      phone: parsed.phone || undefined,
+      subject: parsed.subject || undefined,
+      message: parsed.message,
+    }).catch(console.error);
 
     return NextResponse.json({ ok: true, ...created });
   } catch (error) {

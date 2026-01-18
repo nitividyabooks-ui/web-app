@@ -25,7 +25,7 @@ interface StatusData {
     orderStatus: string;
     orderId?: string;
     message: string;
-    transactionId?: string;
+    paymentId?: string;
 }
 
 function PaymentStatusContent() {
@@ -38,11 +38,11 @@ function PaymentStatusContent() {
     const [retryCount, setRetryCount] = useState(0);
     const hasTrackedRef = useRef(false);
 
-    const merchantOrderId = searchParams.get("id");
+    const razorpayOrderId = searchParams.get("id");
     const orderId = searchParams.get("order");
 
     const checkStatus = useCallback(async () => {
-        if (!merchantOrderId) {
+        if (!razorpayOrderId && !orderId) {
             setStatus("failed");
             setStatusData({
                 success: false,
@@ -55,7 +55,7 @@ function PaymentStatusContent() {
 
         try {
             const response = await fetch(
-                `/api/payment/status/${merchantOrderId}${orderId ? `?order=${orderId}` : ""}`
+                `/api/payment/status/${razorpayOrderId || orderId}${orderId ? `?order=${orderId}` : ""}`
             );
             const data: StatusData = await response.json();
             setStatusData(data);
@@ -67,10 +67,10 @@ function PaymentStatusContent() {
                 if (!hasTrackedRef.current) {
                     hasTrackedRef.current = true;
                     trackEvent("purchase", {
-                        transaction_id: data.transactionId || merchantOrderId,
+                        transaction_id: data.paymentId || razorpayOrderId,
                         currency: "INR",
                         value: totalAmount / 100,
-                        payment_type: "PhonePe",
+                        payment_type: "Razorpay",
                         order_id: orderId,
                     });
                     clearCart();
@@ -85,7 +85,7 @@ function PaymentStatusContent() {
                     trackEvent("payment_failed", {
                         currency: "INR",
                         value: totalAmount / 100,
-                        payment_type: "PhonePe",
+                        payment_type: "Razorpay",
                         error: data.state,
                         order_id: orderId,
                     });
@@ -101,13 +101,13 @@ function PaymentStatusContent() {
                 message: "Could not verify payment. Please check your bank statement or contact support.",
             });
         }
-    }, [merchantOrderId, orderId, totalAmount, clearCart]);
+    }, [razorpayOrderId, orderId, totalAmount, clearCart]);
 
     // Initial check with delay
     useEffect(() => {
         const timer = setTimeout(() => {
             checkStatus();
-        }, 1500); // Give PhonePe time to process
+        }, 1500); // Give Razorpay time to process
 
         return () => clearTimeout(timer);
     }, [checkStatus]);
@@ -134,7 +134,7 @@ function PaymentStatusContent() {
     const handleWhatsAppFallback = () => {
         trackEvent("whatsapp_fallback_after_payment_failure", {
             order_id: orderId,
-            merchant_order_id: merchantOrderId,
+            razorpay_order_id: razorpayOrderId,
         });
 
         const message = items.length > 0
@@ -142,7 +142,7 @@ function PaymentStatusContent() {
                 items.map((i) => ({ title: i.title, quantity: i.quantity, price: i.price })),
                 totalAmount
             )
-            : `Hi, I had an issue with my payment (Order: ${orderId || merchantOrderId}). Please help me complete my order.`;
+            : `Hi, I had an issue with my payment (Order: ${orderId || razorpayOrderId}). Please help me complete my order.`;
 
         window.open(buildWhatsAppUrl(getWhatsAppNumber(), message), "_blank");
     };
@@ -283,13 +283,13 @@ function PaymentStatusContent() {
                 </div>
 
                 {/* Transaction Details */}
-                {statusData?.transactionId && status === "success" && (
+                {statusData?.paymentId && status === "success" && (
                     <div className="px-6 pb-6">
                         <div className="bg-slate-50 rounded-xl p-4 text-sm">
                             <div className="flex justify-between text-slate-600">
-                                <span>Transaction ID</span>
+                                <span>Payment ID</span>
                                 <span className="font-mono text-slate-900">
-                                    {statusData.transactionId}
+                                    {statusData.paymentId}
                                 </span>
                             </div>
                         </div>
