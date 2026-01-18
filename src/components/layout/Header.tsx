@@ -26,7 +26,7 @@ export function Header() {
     return (
         <>
             {/* 🇮🇳 Republic Day Offer Banner */}
-            <div className="bg-gradient-to-r from-orange-500 via-white to-green-600 text-center py-2 px-4 relative overflow-hidden">
+            <div className="bg-gradient-to-r from-orange-500 via-white to-green-600 text-center py-2 px-4 relative overflow-hidden z-[60]">
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSIyIiBmaWxsPSJyZ2JhKDAsMCwwLDAuMDUpIi8+PC9zdmc+')] opacity-30" />
                 <p className="text-sm md:text-base font-bold text-slate-900 relative">
                     🇮🇳 <span className="text-orange-600">Republic Day</span> <span className="text-blue-900">Special</span> <span className="text-green-700">Sale!</span>{" "}
@@ -53,7 +53,7 @@ export function Header() {
                 </div>
 
                 <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
-                    <Link href="/" className="flex flex-col">
+                    <Link href="/" className="flex items-center">
                         <div className="relative h-10 w-40 sm:h-11 sm:w-44">
                             <Image
                                 src="https://zpetbavsoftzxaoqixna.supabase.co/storage/v1/object/public/nitividyabooks/logo.png"
@@ -64,9 +64,6 @@ export function Header() {
                                 priority
                             />
                         </div>
-                        <span className="text-[10px] text-slate-500 font-medium tracking-wide sm:hidden -mt-0.5">
-                            Big Wisdom for Little Minds
-                        </span>
                     </Link>
 
                     <nav className="hidden md:flex items-center gap-1">
@@ -132,14 +129,25 @@ export function Header() {
             {/* Mobile menu drawer - rendered outside header */}
             {isMenuOpen && (
                 <>
-                    {/* Backdrop - starts below header, separate from content */}
+                    {/* Backdrop */}
                     <div
-                        className="md:hidden fixed top-16 bottom-0 left-0 right-0 z-[90] bg-black/40 backdrop-blur-sm"
+                        className="md:hidden fixed inset-0 z-[200] bg-black/40 backdrop-blur-sm"
                         onClick={() => setIsMenuOpen(false)}
                         aria-hidden="true"
                     />
-                    {/* Menu content */}
-                    <div className="md:hidden fixed top-16 bottom-0 left-0 right-0 z-[100] bg-white shadow-soft overflow-auto">
+                    {/* Menu content - full screen with close button */}
+                    <div className="md:hidden fixed inset-0 z-[210] bg-white overflow-auto">
+                        {/* Close button at top */}
+                        <div className="flex items-center justify-between p-4 border-b border-slate-100">
+                            <span className="font-heading font-bold text-lg text-slate-900">Menu</span>
+                            <button
+                                className="h-10 w-10 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors flex items-center justify-center"
+                                aria-label="Close menu"
+                                onClick={() => setIsMenuOpen(false)}
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                        </div>
                         <div className="container mx-auto px-4 py-5">
                             <div className="grid gap-2">
                                 {[
@@ -152,7 +160,7 @@ export function Header() {
                                     <Link
                                         key={link.name}
                                         href={link.href}
-                                        className="w-full rounded-2xl px-4 py-3 text-base font-bold text-slate-800 hover:bg-slate-50 transition-colors"
+                                        className="w-full rounded-2xl px-4 py-4 text-lg font-bold text-slate-800 hover:bg-slate-50 transition-colors"
                                         onClick={() => setIsMenuOpen(false)}
                                     >
                                         {link.name}
@@ -162,7 +170,7 @@ export function Header() {
                                 <Link
                                     href={whatsappLink}
                                     target="_blank"
-                                    className="w-full rounded-2xl px-4 py-3 text-base font-bold text-white bg-slate-900 hover:bg-slate-800 inline-flex items-center gap-2 transition-colors"
+                                    className="w-full rounded-2xl px-4 py-4 text-lg font-bold text-white bg-slate-900 hover:bg-slate-800 inline-flex items-center gap-2 transition-colors mt-4"
                                     onClick={() => {
                                         setIsMenuOpen(false);
                                         trackEvent("whatsapp_help_click", { location: "mobile_menu" });

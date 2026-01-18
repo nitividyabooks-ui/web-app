@@ -247,6 +247,9 @@ export function MikoBundles({ products }: MikoBundlesProps) {
             <div className="mt-auto pt-6">
               {cartSeriesCount >= 3 ? (
                 <>
+                  <p className="mb-2 text-xs text-emerald-700 text-center font-semibold">
+                    🎉 Republic Day deal locked in!
+                  </p>
                   <Button
                     size="lg"
                     className="w-full rounded-full bg-emerald-600 hover:bg-emerald-700 text-white"
@@ -254,22 +257,19 @@ export function MikoBundles({ products }: MikoBundlesProps) {
                   >
                     ✓ View Cart
                   </Button>
-                  <p className="mt-2 text-xs text-emerald-700 text-center font-semibold">
-                    🎉 Republic Day deal locked in!
-                  </p>
                 </>
               ) : (
                 <>
+                  <p className="mb-2 text-xs text-orange-700 text-center font-semibold">
+                    🔥 Half price! Save {formatRupeesFromPaise(bundle3Mrp - bundle3Sale)} — ends Jan 27
+                  </p>
                   <Button
                     size="lg"
                     className="w-full rounded-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-md"
                     onClick={openPicker}
                   >
-                    🛒 Grab This Deal
+                    Add to Cart
                   </Button>
-                  <p className="mt-2 text-xs text-orange-700 text-center font-semibold">
-                    ⏰ Limited time — {BUNDLE_3_DISCOUNT_PERCENT}% off ends Jan 27!
-                  </p>
                 </>
               )}
             </div>
@@ -335,6 +335,9 @@ export function MikoBundles({ products }: MikoBundlesProps) {
             <div className="mt-auto pt-6">
               {cartSeriesCount === 5 ? (
                 <>
+                  <p className="mb-2 text-xs text-emerald-700 text-center font-semibold">
+                    🎉 Maximum savings unlocked!
+                  </p>
                   <Button
                     size="lg"
                     className="w-full rounded-full bg-emerald-600 hover:bg-emerald-700 text-white"
@@ -342,22 +345,19 @@ export function MikoBundles({ products }: MikoBundlesProps) {
                   >
                     ✓ View Cart
                   </Button>
-                  <p className="mt-2 text-xs text-emerald-700 text-center font-semibold">
-                    🎉 Maximum savings unlocked!
-                  </p>
                 </>
               ) : (
                 <>
+                  <p className="mb-2 text-xs text-green-700 text-center font-semibold">
+                    🏆 Best deal! Save {formatRupeesFromPaise(totalMrp5 - totalSale5)} — ends Jan 27
+                  </p>
                   <Button
                     size="lg"
-                    className="w-full rounded-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-md text-lg"
+                    className="w-full rounded-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-md"
                     onClick={addFullSet}
                   >
-                    {cartSeriesCount > 0 ? `🛒 Complete Your Set` : "🎁 Get Maximum Savings"}
+                    Add to Cart
                   </Button>
-                  <p className="mt-2 text-xs text-green-700 text-center font-semibold">
-                    ⏰ {BUNDLE_5_DISCOUNT_PERCENT}% off — Best deal of the year! Ends Jan 27
-                  </p>
                 </>
               )}
             </div>
@@ -367,18 +367,19 @@ export function MikoBundles({ products }: MikoBundlesProps) {
 
       {/* Picker modal (bundle of 3) */}
       {isPickerOpen && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[220] flex items-end md:items-center justify-center">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsPickerOpen(false)} />
-          <div className="relative z-10 w-full max-w-2xl bg-white rounded-3xl shadow-soft border border-slate-200/70 overflow-hidden">
-            <div className="p-5 md:p-6 border-b border-slate-100 flex items-center justify-between">
+          <div className="relative z-10 w-full max-w-2xl bg-white rounded-t-3xl md:rounded-3xl shadow-soft border border-slate-200/70 max-h-[90vh] flex flex-col">
+            {/* Header - fixed */}
+            <div className="p-4 md:p-6 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
               <div>
-                <h4 className="font-heading text-xl font-extrabold text-slate-900">Pick any 3 books</h4>
+                <h4 className="font-heading text-lg md:text-xl font-extrabold text-slate-900">Pick any 3 books</h4>
                 <p className="text-sm text-slate-600 font-medium">
                   {BUNDLE_3_DISCOUNT_PERCENT}% OFF applies when you add 3 books
                 </p>
               </div>
               <button
-                className="h-10 w-10 rounded-full hover:bg-slate-100 flex items-center justify-center"
+                className="h-10 w-10 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center flex-shrink-0"
                 onClick={() => setIsPickerOpen(false)}
                 aria-label="Close"
               >
@@ -386,8 +387,9 @@ export function MikoBundles({ products }: MikoBundlesProps) {
               </button>
             </div>
 
-            <div className="p-5 md:p-6">
-              <div className="grid gap-3 md:grid-cols-2">
+            {/* Scrollable content */}
+            <div className="p-4 md:p-6 overflow-y-auto flex-1">
+              <div className="grid gap-3">
                 {products.map((p) => {
                   const checked = selectedIds.includes(p.id);
                   const alreadyInCart = inCartIds.has(p.id);
@@ -411,7 +413,7 @@ export function MikoBundles({ products }: MikoBundlesProps) {
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-slate-900 line-clamp-2">{p.title}</div>
+                        <div className="font-semibold text-slate-900 line-clamp-2 text-sm">{p.title}</div>
                         <div className="text-xs text-slate-600 font-medium mt-1 flex gap-2 items-center flex-wrap">
                           {alreadyInCart && (
                             <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 font-bold">
@@ -440,7 +442,8 @@ export function MikoBundles({ products }: MikoBundlesProps) {
               </div>
             </div>
 
-            <div className="p-5 md:p-6 border-t border-slate-100 bg-white">
+            {/* Footer - fixed */}
+            <div className="p-4 md:p-6 border-t border-slate-100 bg-white flex-shrink-0">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 <div className="text-sm text-slate-700 font-semibold">
                   Selected: {selectedIds.length}/3 •{" "}
@@ -453,12 +456,9 @@ export function MikoBundles({ products }: MikoBundlesProps) {
                   disabled={selectedIds.length !== 3}
                   onClick={addSelectedBundle}
                 >
-                  Add selected bundle
+                  Add to Cart
                 </Button>
               </div>
-              <p className="mt-2 text-xs text-slate-500">
-                Tap any book to select or swap. Cart items stay selected.
-              </p>
             </div>
           </div>
         </div>

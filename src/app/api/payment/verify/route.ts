@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import crypto from "crypto";
 import { notifyPaymentSuccess, notifyPaymentFailed } from "@/lib/whatsapp-notifications";
+import { emailPaymentSuccess, emailPaymentFailed } from "@/lib/email-notifications";
 
 const verifySchema = z.object({
     razorpay_order_id: z.string().min(1, "Razorpay order ID is required"),
@@ -78,8 +79,15 @@ export async function POST(req: NextRequest) {
                 },
             });
 
-            // Send WhatsApp notification for payment failure
+            // Send notifications for payment failure
             notifyPaymentFailed({
+                orderId,
+                customerName: failedOrder.customerName,
+                amount: failedOrder.totalAmount / 100,
+                error: "Signature verification failed",
+            }).catch(console.error);
+
+            emailPaymentFailed({
                 orderId,
                 customerName: failedOrder.customerName,
                 amount: failedOrder.totalAmount / 100,
@@ -122,8 +130,16 @@ export async function POST(req: NextRequest) {
                 },
             });
 
-            // Send WhatsApp notification for payment success
+            // Send notifications for payment success
             notifyPaymentSuccess({
+                orderId,
+                customerName: order.customerName,
+                amount: order.totalAmount / 100,
+                paymentMethod: "Razorpay",
+                paymentId: razorpay_payment_id,
+            }).catch(console.error);
+
+            emailPaymentSuccess({
                 orderId,
                 customerName: order.customerName,
                 amount: order.totalAmount / 100,

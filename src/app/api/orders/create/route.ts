@@ -6,6 +6,7 @@ import { getDiscountPercentForQuantity, getSalePaiseFromMrpPaise } from "@/lib/p
 import { Prisma, OrderStatus } from "@prisma/client";
 import { buildWhatsAppMessage, buildWhatsAppUrl, getWhatsAppNumber } from "@/lib/whatsapp";
 import { notifyOrderPlaced } from "@/lib/whatsapp-notifications";
+import { emailOrderPlaced } from "@/lib/email-notifications";
 
 const orderSchema = z.object({
     customer: z.object({
@@ -160,12 +161,23 @@ export async function POST(request: Request) {
         });
 
         // Send WhatsApp notification for new order (fire and forget)
+        // Send notifications (fire and forget)
         notifyOrderPlaced({
             orderId: order.id,
             customerName: customer.name,
             customerPhone: customer.phone,
             itemCount: orderItems.length,
             totalAmount: totalAmount / 100, // Convert paise to rupees
+            paymentMethod,
+            city: customer.city,
+        }).catch(console.error);
+
+        emailOrderPlaced({
+            orderId: order.id,
+            customerName: customer.name,
+            customerPhone: customer.phone,
+            itemCount: orderItems.length,
+            totalAmount: totalAmount / 100,
             paymentMethod,
             city: customer.city,
         }).catch(console.error);

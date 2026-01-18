@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { notifyContactForm } from "@/lib/whatsapp-notifications";
+import { emailContactForm } from "@/lib/email-notifications";
 
 const contactSchema = z.object({
   name: z.string().min(1).max(120),
@@ -38,7 +39,16 @@ export async function POST(request: Request) {
     });
 
     // Send WhatsApp notification for contact form (fire and forget)
+    // Send notifications (fire and forget)
     notifyContactForm({
+      name: parsed.name,
+      email: parsed.email,
+      phone: parsed.phone || undefined,
+      subject: parsed.subject || undefined,
+      message: parsed.message,
+    }).catch(console.error);
+
+    emailContactForm({
       name: parsed.name,
       email: parsed.email,
       phone: parsed.phone || undefined,
