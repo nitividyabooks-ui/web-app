@@ -5,7 +5,7 @@
 
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, Suspense } from "react";
 import { identifyAndTrack, type IdentifyAndTrackInput, type IdentifyAndTrackResult } from "@/actions/identifyAndTrack";
 import { useCampaignTracker, type UserIdentity, clearStoredUserIdentity } from "@/hooks/useCampaignTracker";
 
@@ -25,12 +25,25 @@ export interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 /**
+ * Internal component that uses useCampaignTracker (requires Suspense)
+ */
+function CampaignTrackerSync({ onUserIdentified }: { onUserIdentified: (user: UserIdentity | null, isNewUser: boolean) => void }) {
+  const campaignTracker = useCampaignTracker();
+
+  useEffect(() => {
+    if (campaignTracker.user) {
+      onUserIdentified(campaignTracker.user, campaignTracker.isNewUser);
+    }
+  }, [campaignTracker.user, campaignTracker.isNewUser, onUserIdentified]);
+
+  return null;
+}
+
+/**
  * UserProvider component
  * Manages user state and provides user actions
  */
 export function UserProvider({ children }: { children: React.ReactNode }) {
-  const campaignTracker = useCampaignTracker();
-
   const [userState, setUserState] = useState<Omit<UserContextType, "identifyUser" | "clearUser" | "updateUserInfo">>({
     user: null,
     isLoading: false,
@@ -38,16 +51,16 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     isNewUser: false,
   });
 
-  // Sync with campaign tracker
-  useEffect(() => {
-    if (campaignTracker.user && !userState.user) {
+  // Handle campaign tracker user identification
+  const handleUserIdentified = useCallback((user: UserIdentity | null, isNewUser: boolean) => {
+    if (user && !userState.user) {
       setUserState(prev => ({
         ...prev,
-        user: campaignTracker.user,
-        isNewUser: campaignTracker.isNewUser,
+        user,
+        isNewUser,
       }));
     }
-  }, [campaignTracker.user, campaignTracker.isNewUser, userState.user]);
+  }, [userState.user]);
 
   const identifyUser = useCallback(async (
     input: Omit<IdentifyAndTrackInput, "source"> & { source?: IdentifyAndTrackInput["source"] }
@@ -109,6 +122,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <UserContext.Provider value={contextValue}>
+      <Suspense fallback={null}>
+        <CampaignTrackerSync onUserIdentified={handleUserIdentified} />
+      </Suspense>
       {children}
     </UserContext.Provider>
   );

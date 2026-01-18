@@ -17,6 +17,9 @@ import Script from "next/script";
 import type { RazorpayOptions, RazorpayResponse, RazorpayErrorResponse } from "@/types/razorpay";
 import "@/types/razorpay"; // Import for Window extension
 
+// Force dynamic rendering since checkout is user-specific and uses useSearchParams
+export const dynamic = 'force-dynamic';
+
 type CheckoutStep = "delivery" | "payment";
 
 export default function CheckoutPage() {
