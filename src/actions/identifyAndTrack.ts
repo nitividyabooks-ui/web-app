@@ -7,6 +7,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { emailNewLead } from "@/lib/email-notifications";
 
 const identifyAndTrackSchema = z.object({
   mobile: z.string().min(10, "Valid mobile number required").max(15),
@@ -109,6 +110,15 @@ export async function identifyAndTrack(input: IdentifyAndTrackInput): Promise<Id
     }
 
     console.log(`[identifyAndTrack] ${isNewUserCheck ? 'New' : 'Existing'} user identified: ${user.mobile} (source: ${source})`);
+
+    // Send email notification for new users (fire and forget)
+    if (isNewUserCheck) {
+      emailNewLead({
+        phone: user.mobile,
+        name: user.name || undefined,
+        source: source,
+      }).catch((err) => console.error("[identifyAndTrack] Email notification failed:", err));
+    }
 
     return {
       success: true,
