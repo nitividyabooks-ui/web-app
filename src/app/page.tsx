@@ -6,7 +6,7 @@ import { HeroCarousel } from "@/components/home/HeroCarousel";
 import { ProductCard } from "@/components/products/ProductCard";
 import { MikoBundles } from "@/components/products/MikoBundles";
 import { TestimonialSection } from "@/components/home/TestimonialSection";
-import { BUNDLE_3_DISCOUNT_PERCENT, BUNDLE_5_DISCOUNT_PERCENT, SINGLE_BOOK_DISCOUNT_PERCENT } from "@/lib/pricing";
+import { BUNDLE_5_DISCOUNT_PERCENT, SINGLE_BOOK_DISCOUNT_PERCENT } from "@/lib/pricing";
 
 export default async function Home() {
   const allProducts = await getAllProducts();
@@ -17,16 +17,27 @@ export default async function Home() {
     .sort((a, b) => a.heroPriority - b.heroPriority);
 
   return (
+    <HomeContent heroProducts={heroProducts} mikoSeriesProducts={mikoSeriesProducts} testimonials={testimonials} allProducts={allProducts} />
+  );
+}
+
+function HomeContent({ heroProducts, mikoSeriesProducts, testimonials, allProducts }: { 
+  heroProducts: any[]; 
+  mikoSeriesProducts: any[]; 
+  testimonials: any[]; 
+  allProducts: any[]; 
+}) {
+  return (
     <div className="flex flex-col min-h-screen font-body">
       {/* Launch Offer Banner */}
       <div className="bg-slate-900 text-white">
         <div className="container mx-auto px-4 md:px-6 py-2 text-center">
           <div className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm font-semibold">
             <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/10 border border-white/15 text-xs sm:text-sm whitespace-nowrap">
-              🎉 Launch offer
+              🎁 Baby Gift Special
             </span>
             <span className="text-white/90 text-xs sm:text-sm">
-              <span className="hidden sm:inline">{SINGLE_BOOK_DISCOUNT_PERCENT}% off single • {BUNDLE_3_DISCOUNT_PERCENT}% off 3+ • {BUNDLE_5_DISCOUNT_PERCENT}% off 5+</span>
+              <span className="hidden sm:inline">{SINGLE_BOOK_DISCOUNT_PERCENT}% off single • {BUNDLE_5_DISCOUNT_PERCENT}% off complete set</span>
               <span className="sm:hidden">Up to {BUNDLE_5_DISCOUNT_PERCENT}% off bundles</span>
             </span>
           </div>
@@ -173,4 +184,11 @@ export default async function Home() {
       </section>
     </div>
   );
+}
+
+export async function generateMetadata() {
+  return {
+    title: "NitiVidya Books - Big Wisdom for Little Minds",
+    description: "Beautiful bilingual books for babies and toddlers. Safe, durable, and educational.",
+  };
 }

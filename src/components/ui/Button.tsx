@@ -16,11 +16,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         };
 
         const sizes = {
-            sm: "h-9 rounded-md px-3",
-            md: "h-11 px-6 text-base", // Keeping md as it was not explicitly removed by the instruction's provided lines
-            lg: "h-11 rounded-md px-8",
-            xl: "h-14 rounded-btn px-10 text-lg",
-            icon: "h-10 w-10",
+            sm: "h-11 rounded-md px-3 min-w-11",  // Increased from h-9 (36px) to h-11 (44px)
+            md: "h-11 px-6 text-base min-w-11",   // Maintains h-11 (44px) height
+            lg: "h-11 rounded-md px-8 min-w-11",  // Maintains h-11 (44px) height
+            xl: "h-14 rounded-btn px-10 text-lg min-w-14", // Maintains h-14 (56px) height
+            icon: "h-11 w-11",                  // Increased from h-10/w-10 (40px) to h-11/w-11 (44px)
         };
 
         return (

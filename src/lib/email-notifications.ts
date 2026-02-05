@@ -14,6 +14,7 @@ const BUSINESS_EMAIL = process.env.BUSINESS_EMAIL || "nitividyabooks@gmail.com";
 const FROM_EMAIL = process.env.FROM_EMAIL || "NitiVidya Books <onboarding@resend.dev>";
 
 export type EmailNotificationType = 
+    | "new_visitor"
     | "new_lead"
     | "add_to_cart"
     | "checkout_started"
@@ -190,6 +191,26 @@ function formatEmailContent(payload: EmailNotificationPayload): { subject: strin
                 `
             };
 
+        case "new_visitor":
+            return {
+                subject: `🌐 New Visitor: ${data.page || 'Homepage'}`,
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                        <div style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); padding: 20px; text-align: center;">
+                            <h1 style="color: white; margin: 0;">🌐 New Visitor</h1>
+                        </div>
+                        <div style="padding: 20px; background: #f8fafc;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr><td style="padding: 8px 0; color: #64748b;">Time</td><td style="padding: 8px 0; font-weight: bold;">${time}</td></tr>
+                                <tr><td style="padding: 8px 0; color: #64748b;">Page</td><td style="padding: 8px 0; font-weight: bold;">${data.page || 'Homepage'}</td></tr>
+                                <tr><td style="padding: 8px 0; color: #64748b;">Source</td><td style="padding: 8px 0;">${data.source || 'Direct'}</td></tr>
+                                ${data.visitorId ? `<tr><td style="padding: 8px 0; color: #64748b;">ID</td><td style="padding: 8px 0; font-size: 12px;">${(data.visitorId as string).slice(-8)}</td></tr>` : ''}
+                            </table>
+                        </div>
+                    </div>
+                `
+            };
+
         case "checkout_started":
             return {
                 subject: `🚀 Checkout Started - ₹${data.totalAmount}`,
@@ -317,5 +338,13 @@ export async function emailContactForm(data: {
     message: string;
 }) {
     return sendEmailNotification({ type: "contact_form", data });
+}
+
+export async function emailNewVisitor(data: {
+    page?: string;
+    source?: string;
+    visitorId?: string;
+}) {
+    return sendEmailNotification({ type: "new_visitor", data });
 }
 

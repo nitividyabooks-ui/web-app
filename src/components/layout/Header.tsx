@@ -25,13 +25,13 @@ export function Header() {
 
     return (
         <>
-            {/* 🇮🇳 Republic Day Offer Banner */}
-            <div className="bg-gradient-to-r from-orange-500 via-white to-green-600 text-center py-2 px-4 relative overflow-hidden z-[60]">
+            {/* Seasonal Offer Banner */}
+            <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-center py-2 px-4 relative overflow-hidden z-[60]">
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSIyIiBmaWxsPSJyZ2JhKDAsMCwwLDAuMDUpIi8+PC9zdmc+')] opacity-30" />
-                <p className="text-sm md:text-base font-bold text-slate-900 relative">
-                    🇮🇳 <span className="text-orange-600">Republic Day</span> <span className="text-blue-900">Special</span> <span className="text-green-700">Sale!</span>{" "}
+                <p className="text-sm md:text-base font-bold text-white relative">
+                    <span className="text-yellow-300">🎉</span> Great Gift for Your Baby <span className="text-yellow-300">🎉</span>{" "}
                     <span className="hidden sm:inline">—</span>{" "}
-                    <span className="text-orange-700">Up to 60% OFF</span> on Miko Series Bundles 🎉
+                    <span className="text-yellow-200">Complete 5-Book Set</span> with up to 60% OFF!
                 </p>
             </div>
 
@@ -47,7 +47,7 @@ export function Header() {
                             <span>Free shipping above ₹499</span>
                         </div>
                         <div className="hidden md:block text-slate-500">
-                            <span className="animate-pulse">🔥</span> Limited Time Republic Day Offer!
+                            <span className="animate-pulse">🎁</span> Perfect Baby Gift Bundle Available!
                         </div>
                     </div>
                 </div>
@@ -77,7 +77,7 @@ export function Header() {
                             <Link
                                 key={link.name}
                                 href={link.href}
-                                className="px-4 py-2 rounded-full text-sm font-semibold text-slate-700 hover:text-charcoal hover:bg-slate-100/70 transition-colors"
+                                className="px-4 py-3 rounded-full text-sm font-semibold text-slate-700 hover:text-charcoal hover:bg-slate-100/70 transition-colors min-h-11 min-w-11 flex items-center justify-center"
                             >
                                 {link.name}
                             </Link>
@@ -89,7 +89,7 @@ export function Header() {
                         <Link
                             href={whatsappLink}
                             target="_blank"
-                            className="inline-flex items-center justify-center gap-2 h-10 w-10 sm:w-auto sm:px-4 rounded-full bg-emerald-600 text-white text-sm font-bold hover:bg-emerald-700 transition-colors"
+                            className="inline-flex items-center justify-center gap-2 h-11 w-11 sm:w-auto sm:px-4 rounded-full bg-emerald-600 text-white text-sm font-bold hover:bg-emerald-700 transition-colors"
                             aria-label="Get WhatsApp order support"
                             onClick={() => {
                                 trackEvent("whatsapp_help_click", {
@@ -103,19 +103,19 @@ export function Header() {
 
                         {/* Mobile menu button */}
                         <button
-                            className="md:hidden h-10 w-10 rounded-full bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors"
+                            className="md:hidden h-11 w-11 rounded-full bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors flex items-center justify-center"
                             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
                             onClick={() => setIsMenuOpen((v) => !v)}
                         >
-                            {isMenuOpen ? <X className="h-5 w-5 mx-auto" /> : <Menu className="h-5 w-5 mx-auto" />}
+                            {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                         </button>
 
                         <button
-                            className="relative h-10 w-10 rounded-full bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors"
+                            className="relative h-11 w-11 rounded-full bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors flex items-center justify-center"
                             onClick={() => setIsCartOpen(true)}
                             aria-label="Open cart"
                         >
-                            <ShoppingCart className="h-5 w-5 mx-auto" />
+                            <ShoppingCart className="h-5 w-5" />
                             {isHydrated && totalItems > 0 && (
                                 <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-miko-blue text-xs font-extrabold text-white shadow-sm border-2 border-white">
                                     {totalItems}
@@ -141,7 +141,7 @@ export function Header() {
                         <div className="flex items-center justify-between p-4 border-b border-slate-100">
                             <span className="font-heading font-bold text-lg text-slate-900">Menu</span>
                             <button
-                                className="h-10 w-10 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors flex items-center justify-center"
+                                className="h-11 w-11 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors flex items-center justify-center"
                                 aria-label="Close menu"
                                 onClick={() => setIsMenuOpen(false)}
                             >
@@ -160,7 +160,7 @@ export function Header() {
                                     <Link
                                         key={link.name}
                                         href={link.href}
-                                        className="w-full rounded-2xl px-4 py-4 text-lg font-bold text-slate-800 hover:bg-slate-50 transition-colors"
+                                        className="w-full rounded-2xl px-4 py-4 text-lg font-bold text-slate-800 hover:bg-slate-50 transition-colors min-h-11 flex items-center"
                                         onClick={() => setIsMenuOpen(false)}
                                     >
                                         {link.name}
@@ -170,7 +170,7 @@ export function Header() {
                                 <Link
                                     href={whatsappLink}
                                     target="_blank"
-                                    className="w-full rounded-2xl px-4 py-4 text-lg font-bold text-white bg-slate-900 hover:bg-slate-800 inline-flex items-center gap-2 transition-colors mt-4"
+                                    className="w-full rounded-2xl px-4 py-4 text-lg font-bold text-white bg-slate-900 hover:bg-slate-800 inline-flex items-center gap-2 transition-colors mt-4 min-h-11"
                                     onClick={() => {
                                         setIsMenuOpen(false);
                                         trackEvent("whatsapp_help_click", { location: "mobile_menu" });
