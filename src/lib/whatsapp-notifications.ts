@@ -251,3 +251,14 @@ export async function notifyContactForm(data: {
     });
 }
 
+export async function notifyNewVisitor(data: {
+    page?: string;
+    source?: string;
+    visitorId?: string;
+}) {
+    return sendWhatsAppNotification({
+        type: "new_visitor",
+        data,
+    });
+}
+

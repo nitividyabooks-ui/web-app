@@ -5,10 +5,9 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CartProvider } from "@/context/CartContext";
 import { UserProvider } from "@/context/UserContext";
-import { CartDrawer } from "@/components/cart/CartDrawer";
 import GoogleTagManager from "@/components/analytics/GoogleTagManager";
-import { LeadCaptureModal } from "@/components/marketing/LeadCaptureModal";
 import { ConditionalComponents } from "@/components/layout/ConditionalComponents";
+import VisitorTracker from "@/components/analytics/VisitorTracker";
 
 const baloo = Baloo_2({
   variable: "--font-baloo",
@@ -39,6 +38,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <GoogleTagManager />
+        <VisitorTracker />
         <UserProvider>
           <CartProvider>
             <Header />
