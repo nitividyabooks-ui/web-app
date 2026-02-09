@@ -8,6 +8,7 @@ import { UserProvider } from "@/context/UserContext";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import GoogleTagManager from "@/components/analytics/GoogleTagManager";
 import { LeadCaptureModal } from "@/components/marketing/LeadCaptureModal";
+import { ConditionalComponents } from "@/components/layout/ConditionalComponents";
 
 const baloo = Baloo_2({
   variable: "--font-baloo",
@@ -45,8 +46,7 @@ export default function RootLayout({
               {children}
             </main>
             <Footer />
-            <CartDrawer />
-            <LeadCaptureModal />
+            <ConditionalComponents />
           </CartProvider>
         </UserProvider>
       </body>

@@ -39,6 +39,10 @@ export function useCampaignTracker(): CampaignTrackerState {
 
   useEffect(() => {
     async function processUrlParams() {
+      // Skip if on admin routes
+      if (typeof window !== "undefined" && window.location.pathname.startsWith("/admin")) {
+        return;
+      }
       // Check if we already have user identity in session storage
       const storedUser = getStoredUserIdentity();
       if (storedUser) {

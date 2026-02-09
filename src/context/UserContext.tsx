@@ -6,6 +6,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback, Suspense } from "react";
+import { usePathname } from "next/navigation";
 import { identifyAndTrack, type IdentifyAndTrackInput, type IdentifyAndTrackResult } from "@/actions/identifyAndTrack";
 import { useCampaignTracker, type UserIdentity, clearStoredUserIdentity } from "@/hooks/useCampaignTracker";
 
@@ -44,12 +45,16 @@ function CampaignTrackerSync({ onUserIdentified }: { onUserIdentified: (user: Us
  * Manages user state and provides user actions
  */
 export function UserProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const [userState, setUserState] = useState<Omit<UserContextType, "identifyUser" | "clearUser" | "updateUserInfo">>({
     user: null,
     isLoading: false,
     error: null,
     isNewUser: false,
   });
+  
+  // Skip campaign tracking on admin routes - memoize to prevent re-renders
+  const isAdminRoute = React.useMemo(() => pathname.startsWith("/admin"), [pathname]);
 
   // Handle campaign tracker user identification
   const handleUserIdentified = useCallback((user: UserIdentity | null, isNewUser: boolean) => {
@@ -122,9 +127,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <UserContext.Provider value={contextValue}>
-      <Suspense fallback={null}>
-        <CampaignTrackerSync onUserIdentified={handleUserIdentified} />
-      </Suspense>
+      {!isAdminRoute && (
+        <Suspense fallback={null}>
+          <CampaignTrackerSync onUserIdentified={handleUserIdentified} />
+        </Suspense>
+      )}
       {children}
     </UserContext.Provider>
   );

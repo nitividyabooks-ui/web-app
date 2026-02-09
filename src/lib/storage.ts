@@ -19,11 +19,17 @@ if (!SUPABASE_URL) {
 }
 
 export function getStorageUrl(path: string | null | undefined): string {
-    if (!path) return "/images/placeholder-book.jpg"; // Fallback image
-    if (path.startsWith("http")) return path; // Already a full URL
+    // Handle null, undefined, empty string, or invalid values
+    if (!path || typeof path !== "string" || path.trim() === "") {
+        return "/images/placeholder-book.jpg"; // Fallback image
+    }
+    
+    const pathString = path.trim();
+    
+    if (pathString.startsWith("http")) return pathString; // Already a full URL
 
     // Remove leading slash if present
-    const cleanPath = path.startsWith("/") ? path.slice(1) : path;
+    const cleanPath = pathString.startsWith("/") ? pathString.slice(1) : pathString;
 
     const base = sanitizeEnvValue(SUPABASE_URL) || SUPABASE_URL;
     return `${base}/storage/v1/object/public/${BUCKET_NAME}/${cleanPath}`;

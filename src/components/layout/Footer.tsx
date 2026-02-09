@@ -1,9 +1,19 @@
+"use client";
+
 import Link from "next/link";
 import { Instagram } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 const INSTAGRAM_URL = process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://instagram.com/nitividyabooks";
 
 export function Footer() {
+    const pathname = usePathname();
+    
+    // Hide footer on admin routes
+    if (pathname.startsWith("/admin")) {
+        return null;
+    }
+    
     return (
         <footer className="border-t border-slate-100 bg-white py-12">
             <div className="container mx-auto px-4 md:px-6">

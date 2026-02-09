@@ -7,12 +7,17 @@ import { SiWhatsapp } from "react-icons/si";
 import { useCart } from "@/context/CartContext";
 import { trackEvent } from "@/lib/gtm";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 export function Header() {
     const { totalItems, setIsCartOpen, isHydrated } = useCart();
+    const pathname = usePathname();
     const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "919999999999";
     const whatsappLink = `https://wa.me/${whatsappNumber}`;
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    
+    // Hide header on admin routes
+    const isAdminRoute = pathname.startsWith("/admin");
 
     useEffect(() => {
         if (!isMenuOpen) return;
@@ -22,6 +27,11 @@ export function Header() {
             document.body.style.overflow = prev;
         };
     }, [isMenuOpen]);
+
+    // Don't render header on admin routes
+    if (isAdminRoute) {
+        return null;
+    }
 
     return (
         <>

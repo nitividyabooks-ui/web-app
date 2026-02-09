@@ -11,7 +11,7 @@ const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KE
 
 // Business owner's email for notifications
 const BUSINESS_EMAIL = process.env.BUSINESS_EMAIL || "nitividyabooks@gmail.com";
-const FROM_EMAIL = process.env.FROM_EMAIL || "NitiVidya Books <onboarding@resend.dev>";
+const ALERT_EMAIL = process.env.ALERT_EMAIL || "NitiVidya Books <alert@nitividyabooks.com>";
 
 export type EmailNotificationType = 
     | "new_lead"
@@ -247,7 +247,7 @@ export async function sendEmailNotification(payload: EmailNotificationPayload): 
 
     try {
         const { error } = await resend.emails.send({
-            from: FROM_EMAIL,
+            from: ALERT_EMAIL,
             to: BUSINESS_EMAIL,
             subject,
             html,
