@@ -84,46 +84,46 @@ export function TestimonialSection({ testimonials }: TestimonialSectionProps) {
     const currentTestimonial = testimonials[currentIndex];
 
     return (
-        <section ref={sectionRef} className="py-16 lg:py-24 bg-gradient-to-b from-white to-blue-50/50">
+        <section ref={sectionRef} className="py-16 lg:py-24 bg-pale-green">
             <div className="container mx-auto px-4 md:px-6">
                 {/* Section Header */}
                 <div className="text-center mb-10 md:mb-14">
-                    <h2 className="font-heading text-3xl sm:text-4xl font-bold text-charcoal">
+                    <h2 className="font-heading text-3xl sm:text-4xl font-bold text-ink">
                         Loved by Parents
                     </h2>
-                    <p className="mt-3 text-slate-500 text-lg">
+                    <p className="mt-3 text-ink-secondary text-lg">
                         See what families are saying about our books
                     </p>
                 </div>
 
                 {/* Testimonial Carousel */}
                 <div className="max-w-3xl mx-auto">
-                    <div className="relative bg-white rounded-3xl shadow-lg shadow-slate-200/50 border border-slate-100 p-8 md:p-12">
+                    <div className="relative bg-white rounded-3xl shadow-warm border border-amber-100/60 p-8 md:p-12">
                         {/* Quote Icon */}
                         <div className="absolute -top-5 left-8 md:left-12">
-                            <div className="w-10 h-10 bg-miko-blue rounded-full flex items-center justify-center shadow-lg shadow-miko-blue/30">
-                                <Quote className="w-5 h-5 text-white fill-white" />
+                            <div className="w-10 h-10 bg-sunshine rounded-full flex items-center justify-center shadow-golden">
+                                <Quote className="w-5 h-5 text-forest fill-forest" />
                             </div>
                         </div>
 
                         {/* Content */}
                         <div className="text-center">
-                            <StarRating 
-                                rating={currentTestimonial.rating} 
-                                size="lg" 
+                            <StarRating
+                                rating={currentTestimonial.rating}
+                                size="lg"
                                 className="justify-center mb-6"
                             />
-                            
-                            <blockquote className="text-lg md:text-xl text-slate-700 leading-relaxed mb-6">
+
+                            <blockquote className="text-lg md:text-xl text-ink/80 leading-relaxed mb-6">
                                 &ldquo;{currentTestimonial.content}&rdquo;
                             </blockquote>
 
-                            <div className="pt-4 border-t border-slate-100">
-                                <p className="font-heading font-bold text-charcoal text-lg">
+                            <div className="pt-4 border-t border-amber-100/60">
+                                <p className="font-heading font-bold text-forest text-lg">
                                     {currentTestimonial.authorName}
                                 </p>
                                 {currentTestimonial.authorTitle && (
-                                    <p className="text-slate-500 text-sm mt-1">
+                                    <p className="text-ink-secondary text-sm mt-1">
                                         {currentTestimonial.authorTitle}
                                     </p>
                                 )}
@@ -135,14 +135,14 @@ export function TestimonialSection({ testimonials }: TestimonialSectionProps) {
                             <>
                                 <button
                                     onClick={goToPrev}
-                                    className="absolute left-2 md:-left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-md border border-slate-200 flex items-center justify-center text-slate-600 hover:text-miko-blue hover:border-miko-blue transition-colors"
+                                    className="absolute left-2 md:-left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-warm border border-amber-100/60 flex items-center justify-center text-ink-secondary hover:text-forest hover:border-forest/30 transition-colors"
                                     aria-label="Previous testimonial"
                                 >
                                     <ChevronLeft className="w-5 h-5" />
                                 </button>
                                 <button
                                     onClick={goToNext}
-                                    className="absolute right-2 md:-right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-md border border-slate-200 flex items-center justify-center text-slate-600 hover:text-miko-blue hover:border-miko-blue transition-colors"
+                                    className="absolute right-2 md:-right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-warm border border-amber-100/60 flex items-center justify-center text-ink-secondary hover:text-forest hover:border-forest/30 transition-colors"
                                     aria-label="Next testimonial"
                                 >
                                     <ChevronRight className="w-5 h-5" />
@@ -160,8 +160,8 @@ export function TestimonialSection({ testimonials }: TestimonialSectionProps) {
                                     onClick={() => goToSlide(index)}
                                     className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
                                         index === currentIndex
-                                            ? "bg-miko-blue w-8"
-                                            : "bg-slate-300 hover:bg-slate-400"
+                                            ? "bg-forest w-8"
+                                            : "bg-amber-200 hover:bg-amber-300"
                                     }`}
                                     aria-label={`Go to testimonial ${index + 1}`}
                                 />
@@ -170,29 +170,30 @@ export function TestimonialSection({ testimonials }: TestimonialSectionProps) {
                     )}
                 </div>
 
-                {/* Social Proof Stats */}
-                <div className="mt-12 flex flex-wrap justify-center gap-8 md:gap-16">
-                    <div className="text-center">
-                        <div className="font-heading text-3xl md:text-4xl font-bold text-miko-blue">
-                            500+
+                {/* Social Proof Stats — Forest green card */}
+                <div className="mt-12 rounded-3xl bg-forest p-8 md:p-10">
+                    <div className="flex flex-wrap justify-center gap-8 md:gap-16">
+                        <div className="text-center">
+                            <div className="font-display text-4xl font-bold text-sunshine">
+                                500+
+                            </div>
+                            <div className="text-white/70 text-sm mt-1">Happy Families</div>
                         </div>
-                        <div className="text-slate-500 text-sm mt-1">Happy Families</div>
-                    </div>
-                    <div className="text-center">
-                        <div className="font-heading text-3xl md:text-4xl font-bold text-miko-blue">
-                            4.8★
+                        <div className="text-center">
+                            <div className="font-display text-4xl font-bold text-sunshine">
+                                4.8★
+                            </div>
+                            <div className="text-white/70 text-sm mt-1">Average Rating</div>
                         </div>
-                        <div className="text-slate-500 text-sm mt-1">Average Rating</div>
-                    </div>
-                    <div className="text-center">
-                        <div className="font-heading text-3xl md:text-4xl font-bold text-miko-blue">
-                            100%
+                        <div className="text-center">
+                            <div className="font-display text-4xl font-bold text-sunshine">
+                                100%
+                            </div>
+                            <div className="text-white/70 text-sm mt-1">Safe Materials</div>
                         </div>
-                        <div className="text-slate-500 text-sm mt-1">Safe Materials</div>
                     </div>
                 </div>
             </div>
         </section>
     );
 }
-

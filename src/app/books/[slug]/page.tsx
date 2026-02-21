@@ -17,6 +17,7 @@ import Link from "next/link";
 import { getWhatsAppNumber } from "@/lib/whatsapp";
 import { SINGLE_BOOK_DISCOUNT_PERCENT, formatRupeesFromPaise, getSalePaiseFromMrpPaise } from "@/lib/pricing";
 import { ProductViewTracker } from "@/components/products/ProductViewTracker";
+import { ProductEmailCapture } from "@/components/products/ProductEmailCapture";
 import { bilingualLabelHindiEnglish, isBilingualHindiEnglish } from "@/lib/productFlags";
 
 export async function generateStaticParams() {
@@ -31,9 +32,25 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const product = await getProductBySlug(slug);
     if (!product) return { title: "Book Not Found" };
 
+    const title = product.metaTitle || `${product.title} - NitiVidya Books`;
+    const description = product.metaDescription || product.shortDescription;
+    const ogImage = product.ogImagePath ? getStorageUrl(product.ogImagePath) : getStorageUrl(product.coverPath);
+
     return {
-        title: `${product.title} - NitiVidya Books`,
-        description: product.shortDescription,
+        title,
+        description,
+        openGraph: {
+            title,
+            description,
+            images: [{ url: ogImage, width: 800, height: 800, alt: product.title }],
+            type: "website",
+        },
+        twitter: {
+            card: (product.twitterCard as "summary" | "summary_large_image") || "summary_large_image",
+            title,
+            description,
+            images: [ogImage],
+        },
     };
 }
 
@@ -123,8 +140,44 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         .slice(0, 3)
         .map(img => getStorageUrl(img.path));
 
+    // JSON-LD structured data
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: product.title,
+        description: product.shortDescription,
+        image: product.images.map((img) => getStorageUrl(img.path)),
+        sku: product.sku,
+        brand: {
+            "@type": "Brand",
+            name: "NitiVidya",
+        },
+        offers: {
+            "@type": "Offer",
+            price: (salePaise / 100).toFixed(2),
+            priceCurrency: "INR",
+            availability: product.inventoryQuantity > 0
+                ? "https://schema.org/InStock"
+                : "https://schema.org/OutOfStock",
+            seller: { "@type": "Organization", name: "NitiVidya Books" },
+        },
+        ...(reviews.length > 0 && {
+            aggregateRating: {
+                "@type": "AggregateRating",
+                ratingValue: averageRating.toFixed(1),
+                reviewCount: reviews.length,
+                bestRating: 5,
+                worstRating: 1,
+            },
+        }),
+    };
+
     return (
         <div className="min-h-screen pb-24 md:pb-12">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
             <ProductViewTracker product={product} />
 
             {/* Breadcrumbs */}
@@ -321,6 +374,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                         reviews={reviews}
                     />
                 )}
+
+                {/* Email Capture */}
+                <ProductEmailCapture />
 
             </div>
 

@@ -1,37 +1,63 @@
 @import "tailwindcss";
 
 :root {
-  /* Premium Montessori Palette (calm + trustworthy) */
-  --miko-blue: #4A9EEA;
-  --miko-yellow: #F6D66B;
-  --miko-pink: #FF7BA9;
-  --charcoal: #1F2937;
-
-  /* Backgrounds */
-  --bg-soft: #FFFBF5; /* warm cream */
-  --bg-alt: #F2F7FF;  /* gentle blue tint */
+  --sunshine: #C9A84C;
+  --sunshine-hover: #B8943D;
+  --forest: #1A5C38;
+  --forest-hover: #154d2f;
+  --forest-light: #2a7a4f;
+  --coral: #FF5757;
+  --bg-cream: #FAFAF8;
+  --bg-pale-yellow: #F5F3EE;
+  --bg-pale-green: #EFF9F3;
   --surface: #FFFFFF;
-  --surface-2: rgba(255, 255, 255, 0.75);
-  --border-soft: rgba(15, 23, 42, 0.08);
+  --sky: #74C0FC;
+  --lavender: #C084FC;
+  --ink: #0F1F0F;
+  --ink-secondary: #637074;
+  --border-warm: rgba(201, 168, 76, 0.25);
+  --border-soft: rgba(26, 92, 56, 0.10);
 
-  /* Legacy/Utility mappings */
-  --background: var(--bg-soft);
-  --foreground: var(--charcoal);
+  /* Legacy compat — untouched files still work */
+  --miko-blue: var(--forest);
+  --miko-yellow: var(--sunshine);
+  --miko-pink: var(--coral);
+  --charcoal: var(--ink);
+  --bg-soft: var(--bg-cream);
+  --bg-alt: var(--bg-pale-green);
+  --background: var(--bg-cream);
+  --foreground: var(--ink);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  --color-miko-blue: var(--miko-blue);
-  --color-miko-yellow: var(--miko-yellow);
-  --color-miko-pink: var(--miko-pink);
-  --color-charcoal: var(--charcoal);
-  --color-soft: var(--bg-soft);
-  --color-alt: var(--bg-alt);
+  --color-sunshine: var(--sunshine);
+  --color-sunshine-hover: var(--sunshine-hover);
+  --color-forest: var(--forest);
+  --color-forest-hover: var(--forest-hover);
+  --color-forest-light: var(--forest-light);
+  --color-coral: var(--coral);
+  --color-cream: var(--bg-cream);
+  --color-pale-yellow: var(--bg-pale-yellow);
+  --color-pale-green: var(--bg-pale-green);
+  --color-sky: var(--sky);
+  --color-lavender: var(--lavender);
+  --color-ink: var(--ink);
+  --color-ink-secondary: var(--ink-secondary);
 
-  --font-heading: var(--font-baloo);
-  --font-body: var(--font-quicksand);
+  /* Legacy color mappings */
+  --color-miko-blue: var(--forest);
+  --color-miko-yellow: var(--sunshine);
+  --color-miko-pink: var(--coral);
+  --color-charcoal: var(--ink);
+  --color-soft: var(--bg-cream);
+  --color-alt: var(--bg-pale-green);
+
+  --font-heading: var(--font-fredoka);
+  --font-display: var(--font-fredoka);
+  --font-body: var(--font-nunito);
 
   /* Custom Border Radius */
   --radius-card: 24px;
@@ -60,15 +86,18 @@
       height: 0
     }
   }
+
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+  @keyframes bounce-cta { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+  @keyframes pop { 0%{transform:scale(0.8);opacity:0} 70%{transform:scale(1.08)} 100%{transform:scale(1);opacity:1} }
 }
 
 /* Global Base Styles */
 body {
   background:
-    radial-gradient(900px 500px at 15% 10%, rgba(74, 158, 234, 0.14) 0%, rgba(74, 158, 234, 0.0) 60%),
-    radial-gradient(800px 500px at 85% 0%, rgba(246, 214, 107, 0.16) 0%, rgba(246, 214, 107, 0.0) 55%),
-    linear-gradient(180deg, var(--bg-soft) 0%, #ffffff 45%, var(--bg-soft) 100%);
-  color: var(--charcoal);
+    radial-gradient(600px 400px at 90% 0%, rgba(26,92,56,0.05) 0%, transparent 55%),
+    linear-gradient(180deg, var(--bg-cream) 0%, #ffffff 50%, var(--bg-cream) 100%);
+  color: var(--ink);
 }
 
 h1,
@@ -80,17 +109,18 @@ h6 {
   font-family: var(--font-heading);
 }
 
-/* Subtle pattern overlay (non-distracting) */
+/* Subtle pattern overlay (marigold-tinted dots) */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.05;
+  opacity: 0.04;
   background-image:
-    radial-gradient(circle at 12px 12px, rgba(31, 41, 55, 0.35) 1.2px, transparent 1.3px);
-  background-size: 36px 36px;
+    radial-gradient(circle at 8px 8px, rgba(26,92,56,0.6) 1px, transparent 1.1px),
+    radial-gradient(circle at 32px 32px, rgba(26,92,56,0.3) 0.8px, transparent 0.9px);
+  background-size: 40px 40px;
 }
 
 /* Ensure app content sits above the pattern overlay */
@@ -114,19 +144,15 @@ footer {
   transform: scale(1.05);
 }
 
-/* Soft Shadows */
-.shadow-soft-blue {
-  box-shadow: 0 10px 25px rgba(96, 174, 240, 0.15);
-}
+/* Shadows */
+.shadow-golden { box-shadow: 0 8px 24px rgba(201,168,76,0.25), 0 2px 8px rgba(0,0,0,0.06); }
+.shadow-forest { box-shadow: 0 8px 24px rgba(26,92,56,0.15), 0 2px 8px rgba(0,0,0,0.05); }
+.shadow-warm   { box-shadow: 0 4px 20px rgba(201,168,76,0.15), 0 1px 4px rgba(0,0,0,0.06); }
 
-.shadow-soft-yellow {
-  box-shadow: 0 10px 25px rgba(255, 217, 61, 0.25);
-}
-
-/* Premium surface shadow */
-.shadow-soft {
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
-}
+/* Legacy shadow aliases */
+.shadow-soft-blue { box-shadow: 0 10px 25px rgba(26,92,56,0.12); }
+.shadow-soft-yellow { box-shadow: 0 10px 25px rgba(201,168,76,0.22); }
+.shadow-soft { box-shadow: 0 10px 30px rgba(15,31,15,0.07); }
 
 /* Hide scrollbar utility */
 .scrollbar-hide {

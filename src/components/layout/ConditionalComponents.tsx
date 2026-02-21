@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { LeadCaptureModal } from "@/components/marketing/LeadCaptureModal";
+import { ExitIntentPopup } from "@/components/marketing/ExitIntentPopup";
 
 /**
  * ConditionalComponents
@@ -20,6 +21,7 @@ export function ConditionalComponents() {
         <>
             <CartDrawer />
             <LeadCaptureModal />
+            <ExitIntentPopup />
         </>
     );
 }

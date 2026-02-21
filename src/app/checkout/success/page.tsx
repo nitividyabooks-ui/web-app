@@ -3,6 +3,7 @@
 import { useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { trackEvent } from "@/lib/gtm";
+import { trackFBPixel } from "@/lib/fbpixel";
 import {
     CheckCircle,
     Home,
@@ -11,6 +12,7 @@ import {
 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import Link from "next/link";
+import { buildWhatsAppUrl, getWhatsAppNumber } from "@/lib/whatsapp";
 
 function SuccessContent() {
     const searchParams = useSearchParams();
@@ -22,6 +24,10 @@ function SuccessContent() {
             trackEvent("checkout_complete", {
                 order_id: orderId,
                 method: method || "whatsapp",
+            });
+            trackFBPixel("Purchase", {
+                content_type: "product",
+                currency: "INR",
             });
         }
     }, [orderId, method]);
@@ -108,6 +114,26 @@ function SuccessContent() {
                     >
                         Need Help? Contact Us
                     </Link>
+                </div>
+
+                {/* WhatsApp Parents Club CTA */}
+                <div className="mx-6 mb-6 bg-pale-green rounded-2xl p-5 text-center">
+                    <h3 className="font-heading font-bold text-ink mb-2">Join the Miko Parents Club</h3>
+                    <p className="text-sm text-ink-secondary mb-3">
+                        Get parenting tips, activity ideas, and early access to new books.
+                    </p>
+                    <a
+                        href={buildWhatsAppUrl(
+                            getWhatsAppNumber(),
+                            "Hi! I just ordered from NitiVidya and would like to join the Miko Parents Club"
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 bg-forest text-white font-bold px-6 py-3 rounded-full hover:bg-[var(--forest-hover)] transition-colors"
+                    >
+                        <SiWhatsapp className="w-5 h-5" />
+                        Join on WhatsApp
+                    </a>
                 </div>
             </div>
         </div>

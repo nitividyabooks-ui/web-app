@@ -74,7 +74,7 @@ export function HeroCarousel({ products }: HeroCarouselProps) {
     return (
         <section
             ref={containerRef}
-            className="relative w-full h-[600px] lg:h-[800px] overflow-hidden bg-charcoal touch-pan-y"
+            className="relative w-full h-[600px] lg:h-[800px] overflow-hidden bg-forest touch-pan-y"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -97,15 +97,15 @@ export function HeroCarousel({ products }: HeroCarouselProps) {
                                 priority={idx === 0}
                             />
                         ) : (
-                            <div className="w-full h-full bg-gradient-to-r from-miko-blue to-soft flex items-center justify-center">
-                                <span className="text-9xl opacity-20">🐘</span>
+                            <div className="w-full h-full bg-gradient-to-br from-forest via-[var(--forest-light)] to-[#2d8f5e] flex items-center justify-center">
+                                <span className="text-9xl opacity-20">📚</span>
                             </div>
                         )}
                     </div>
                 ))}
-                {/* Dark Overlay for Readability */}
-                <div className="absolute inset-0 bg-black/40 lg:bg-black/30 backdrop-blur-[2px]"></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30"></div>
+                {/* Warm forest overlay for readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0F1F0F]/85 via-[#1A5C38]/20 to-black/25"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-[#0F1F0F]/30 via-transparent to-transparent"></div>
             </div>
 
             <div className="container mx-auto px-4 md:px-6 relative z-10 h-full flex flex-col justify-center items-center text-center">
@@ -113,14 +113,14 @@ export function HeroCarousel({ products }: HeroCarouselProps) {
                 <div className="max-w-4xl px-4 flex flex-col items-center">
                     {/* Title container - fixed height */}
                     <div className="h-[120px] sm:h-[140px] lg:h-[180px] flex items-center justify-center">
-                        <h1 className="font-heading font-extrabold text-4xl sm:text-5xl lg:text-7xl text-white leading-tight drop-shadow-lg line-clamp-2">
+                        <h1 className="font-display font-extrabold text-4xl sm:text-5xl lg:text-7xl text-white leading-tight drop-shadow-lg line-clamp-2 tracking-wide">
                             {product.bannerTitle || product.title}
                         </h1>
                     </div>
 
                     {/* Subtitle container - fixed height */}
                     <div className="h-[40px] sm:h-[48px] lg:h-[56px] flex items-center justify-center">
-                        <span className="text-miko-yellow text-2xl sm:text-3xl lg:text-4xl font-heading font-bold drop-shadow-lg line-clamp-1">
+                        <span className="text-sunshine text-2xl sm:text-3xl lg:text-4xl font-heading font-bold drop-shadow-lg line-clamp-1">
                             {product.bannerSubtitle || "Big Wisdom for Little Minds."}
                         </span>
                     </div>
@@ -137,7 +137,7 @@ export function HeroCarousel({ products }: HeroCarouselProps) {
                         <Link href={`/books/${product.slug}`}>
                             <Button
                                 size="xl"
-                                className="w-full sm:w-auto bg-miko-blue hover:bg-blue-500 text-white border-none shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 rounded-full px-10 py-6 text-xl font-bold"
+                                className="w-full sm:w-auto bg-sunshine hover:bg-[var(--sunshine-hover)] text-ink border-none shadow-golden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 rounded-full px-10 py-6 text-xl font-extrabold btn-bounce"
                             >
                                 {product.bannerCtaText || "Explore Book"}
                             </Button>
@@ -146,14 +146,14 @@ export function HeroCarousel({ products }: HeroCarouselProps) {
                             <Button
                                 variant="outline"
                                 size="xl"
-                                className="w-full sm:w-auto bg-white/10 backdrop-blur-md border-2 border-white/50 text-white hover:bg-white hover:text-charcoal hover:border-white transition-all duration-300 rounded-full px-10 py-6 text-xl font-bold flex items-center justify-center gap-2"
+                                className="w-full sm:w-auto bg-white/10 backdrop-blur-md border-2 border-white/50 text-white hover:bg-white hover:text-ink hover:border-white transition-all duration-300 rounded-full px-10 py-6 text-xl font-bold flex items-center justify-center gap-2"
                             >
                                 <span>Order on WhatsApp</span>
                             </Button>
                         </Link>
                     </div>
 
-                    {/* Carousel Dots - Positioned below buttons with proper spacing */}
+                    {/* Carousel Dots */}
                     {products.length > 1 && (
                         <div className="mt-8 flex gap-3 z-20">
                             {products.map((_, idx) => (
@@ -162,8 +162,8 @@ export function HeroCarousel({ products }: HeroCarouselProps) {
                                     onClick={() => setCurrentSlide(idx)}
                                     className={`h-3 rounded-full transition-all duration-300 ${
                                         idx === currentSlide
-                                            ? "bg-miko-yellow w-10"
-                                            : "bg-white/50 hover:bg-white/80 w-3"
+                                            ? "bg-sunshine shadow-golden w-10"
+                                            : "bg-white/40 hover:bg-white/80 w-3"
                                     }`}
                                     aria-label={`Go to slide ${idx + 1}`}
                                 />

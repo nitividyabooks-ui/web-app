@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { trackEvent } from "@/lib/gtm";
+import { trackFBPixel } from "@/lib/fbpixel";
 import { Product } from "@/lib/products";
 import { getSalePaiseFromMrpPaise, SINGLE_BOOK_DISCOUNT_PERCENT } from "@/lib/pricing";
 
@@ -22,6 +23,14 @@ export function ProductViewTracker({ product }: { product: Product }) {
                     quantity: 1,
                 },
             ],
+        });
+
+        trackFBPixel("ViewContent", {
+            content_name: product.title,
+            content_ids: [product.id],
+            content_type: "product",
+            value: salePaise / 100,
+            currency: "INR",
         });
     }, [product]);
 

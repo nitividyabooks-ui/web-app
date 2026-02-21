@@ -115,7 +115,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/books/${product.slug}`} className="group" onClick={handleProductClick}>
-      <div className="bg-white rounded-[18px] border border-slate-200/70 shadow-sm hover:shadow-soft-blue transition-all duration-200 overflow-hidden h-full flex flex-col">
+      <div className="bg-white rounded-3xl border border-amber-100/60 shadow-warm hover:shadow-golden hover:border-amber-200 hover:-translate-y-0.5 transition-all duration-200 overflow-hidden h-full flex flex-col">
         {/* Image */}
         <div className="relative aspect-[4/3] bg-slate-50">
           <Image
@@ -126,15 +126,16 @@ export function ProductCard({ product }: ProductCardProps) {
             className="object-cover"
           />
 
-          {/* Badge */}
+          {/* Bestseller Badge */}
           {product.tags?.includes("bestseller") && (
-            <div className="absolute top-2 left-2 bg-miko-pink text-white text-[11px] font-extrabold px-2.5 py-1 rounded-full shadow-sm">
+            <div className="absolute top-2 left-2 bg-coral text-white text-[11px] font-extrabold px-2.5 py-1 rounded-full shadow-sm">
               Bestseller
             </div>
           )}
 
+          {/* Bilingual Badge */}
           {isBilingual && (
-            <div className="absolute top-2 right-2 bg-white/90 backdrop-blur border border-slate-200 text-slate-800 text-[11px] font-extrabold px-2.5 py-1 rounded-full shadow-sm">
+            <div className="absolute top-2 right-2 bg-sky text-white text-[11px] font-extrabold px-2.5 py-1 rounded-full shadow-sm">
               {bilingualLabelHindiEnglish()}
             </div>
           )}
@@ -151,10 +152,10 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Content */}
         <div className="p-3 md:p-4 flex flex-col gap-2 flex-1">
           <div className="flex items-center justify-between gap-2">
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-miko-blue border border-blue-100">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-pale-green text-forest border border-forest/20">
               {product.ageRange}
             </span>
-            <span className="text-[11px] text-slate-500 font-medium">
+            <span className="text-[11px] text-ink-secondary font-medium">
               {product.inventoryStatus === "in_stock" ? "In stock" : product.inventoryStatus}
             </span>
           </div>
@@ -167,43 +168,43 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
           )}
 
-          <h3 className="font-heading font-extrabold text-[15px] md:text-[16px] leading-snug text-charcoal line-clamp-2 group-hover:text-miko-blue transition-colors">
+          <h3 className="font-heading font-extrabold text-[15px] md:text-[16px] leading-snug text-ink line-clamp-2 group-hover:text-forest transition-colors">
             {product.title}
           </h3>
 
           <div className="flex items-end justify-between gap-2 mt-auto pt-2">
             <div className="flex flex-col">
               <div className="flex items-baseline gap-2">
-                <span className="text-lg font-extrabold text-charcoal">{formatRupeesFromPaise(salePaise)}</span>
-                <span className="text-xs text-slate-400 line-through font-semibold">{formatRupeesFromPaise(mrpPaise)}</span>
+                <span className="text-lg font-extrabold text-ink">{formatRupeesFromPaise(salePaise)}</span>
+                <span className="text-xs text-ink-secondary line-through font-semibold">{formatRupeesFromPaise(mrpPaise)}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] text-slate-500 font-medium">{product.format}</span>
-                <span className="text-[11px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">
+                <span className="text-[11px] text-ink-secondary font-medium">{product.format}</span>
+                <span className="text-[11px] font-extrabold text-white bg-forest border border-forest/20 px-2 py-0.5 rounded-full">
                   {discountPercent}% OFF
                 </span>
                 {savingsPaise > 0 && (
-                  <span className="text-[11px] text-slate-500 font-medium">
+                  <span className="text-[11px] text-ink-secondary font-medium">
                     Save {formatRupeesFromPaise(savingsPaise)}
                   </span>
                 )}
               </div>
             </div>
 
-            {/* Blinkit-style add / qty stepper */}
+            {/* Add / qty stepper */}
             {qty === 0 ? (
               <button
                 onClick={handleAdd}
-                className="h-9 px-3 rounded-xl border-2 border-miko-blue text-miko-blue font-extrabold text-sm bg-white hover:bg-blue-50 transition-colors"
+                className="h-9 px-3 rounded-xl border-2 border-forest text-forest font-extrabold text-sm bg-white hover:bg-pale-green transition-colors"
                 aria-label={`Add ${product.title} to cart`}
               >
                 ADD
               </button>
             ) : (
-              <div className="h-9 rounded-xl bg-miko-blue text-white flex items-center overflow-hidden shadow-soft-blue">
+              <div className="h-9 rounded-xl bg-forest text-white flex items-center overflow-hidden shadow-forest">
                 <button
                   onClick={handleMinus}
-                  className="h-9 w-9 flex items-center justify-center hover:bg-blue-500 transition-colors"
+                  className="h-9 w-9 flex items-center justify-center hover:bg-[var(--forest-light)] transition-colors"
                   aria-label={`Decrease quantity of ${product.title}`}
                 >
                   <Minus className="h-4 w-4" />
@@ -211,7 +212,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 <span className="w-8 text-center font-extrabold text-sm">{qty}</span>
                 <button
                   onClick={handlePlus}
-                  className="h-9 w-9 flex items-center justify-center hover:bg-blue-500 transition-colors"
+                  className="h-9 w-9 flex items-center justify-center hover:bg-[var(--forest-light)] transition-colors"
                   aria-label={`Increase quantity of ${product.title}`}
                 >
                   <Plus className="h-4 w-4" />
@@ -224,5 +225,3 @@ export function ProductCard({ product }: ProductCardProps) {
     </Link>
   );
 }
-
-

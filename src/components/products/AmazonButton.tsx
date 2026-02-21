@@ -13,6 +13,18 @@ interface AmazonButtonProps {
     className?: string;
 }
 
+function appendAmazonTag(url: string): string {
+    try {
+        const u = new URL(url);
+        if (!u.searchParams.has("tag")) {
+            u.searchParams.set("tag", "nitividya-web");
+        }
+        return u.toString();
+    } catch {
+        return url;
+    }
+}
+
 export function AmazonButton({
     amazonUrl,
     productId,
@@ -37,9 +49,11 @@ export function AmazonButton({
         ? "flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-[#FF9900] text-white font-bold shadow-md shadow-[#FF9900]/25 hover:bg-[#E88B00] transition-all active:scale-[0.98]"
         : "flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-[#FF9900]/10 border-2 border-[#FF9900]/30 text-[#FF9900] font-semibold hover:bg-[#FF9900]/20 hover:border-[#FF9900]/50 transition-colors";
 
+    const taggedUrl = appendAmazonTag(amazonUrl);
+
     return (
         <a
-            href={amazonUrl}
+            href={taggedUrl}
             target="_blank"
             rel="noopener noreferrer"
             onClick={handleClick}

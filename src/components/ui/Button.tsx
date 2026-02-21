@@ -10,17 +10,17 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         const baseStyles = "inline-flex items-center justify-center rounded-full font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
 
         const variants = {
-            primary: "bg-miko-blue text-white hover:bg-blue-500 focus:ring-miko-blue",
-            secondary: "bg-miko-yellow text-slate-900 hover:bg-yellow-400 focus:ring-miko-yellow",
-            outline: "border-2 border-miko-blue text-miko-blue hover:bg-blue-50 focus:ring-miko-blue",
+            primary: "bg-forest text-white hover:bg-[var(--forest-hover)] focus:ring-forest",
+            secondary: "bg-sunshine text-ink hover:bg-[var(--sunshine-hover)] focus:ring-sunshine",
+            outline: "border-2 border-forest text-forest hover:bg-pale-green focus:ring-forest",
         };
 
         const sizes = {
-            sm: "h-11 rounded-md px-3 min-w-11",  // Increased from h-9 (36px) to h-11 (44px)
-            md: "h-11 px-6 text-base min-w-11",   // Maintains h-11 (44px) height
-            lg: "h-11 rounded-md px-8 min-w-11",  // Maintains h-11 (44px) height
-            xl: "h-14 rounded-btn px-10 text-lg min-w-14", // Maintains h-14 (56px) height
-            icon: "h-11 w-11",                  // Increased from h-10/w-10 (40px) to h-11/w-11 (44px)
+            sm: "h-11 rounded-md px-3 min-w-11",
+            md: "h-11 px-6 text-base min-w-11",
+            lg: "h-11 rounded-md px-8 min-w-11",
+            xl: "h-14 rounded-btn px-10 text-lg min-w-14",
+            icon: "h-11 w-11",
         };
 
         return (

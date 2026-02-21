@@ -9,6 +9,7 @@ import { DeliveryForm, DeliveryFormData } from "@/components/checkout/DeliveryFo
 import { PaymentOptions } from "@/components/checkout/PaymentOptions";
 import { PaymentSuccessModal } from "@/components/checkout/PaymentSuccessModal";
 import { trackEvent } from "@/lib/gtm";
+import { trackFBPixel } from "@/lib/fbpixel";
 import { getSalePaiseFromMrpPaise } from "@/lib/pricing";
 import { buildWhatsAppMessage, buildWhatsAppUrl, getWhatsAppNumber } from "@/lib/whatsapp";
 import { ArrowLeft, ShieldCheck, Truck, Clock } from "lucide-react";
@@ -59,6 +60,14 @@ export default function CheckoutPage() {
                     item_category: "Books",
                     quantity: item.quantity,
                 })),
+            });
+
+            trackFBPixel("InitiateCheckout", {
+                content_ids: items.map((item) => item.productId),
+                content_type: "product",
+                value: totalAmount / 100,
+                currency: "INR",
+                num_items: items.length,
             });
         }
     }, [isHydrated, items, totalAmount, discountPercent]);

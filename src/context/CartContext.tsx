@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { getDiscountPercentForQuantity, getSalePaiseFromMrpPaise } from "@/lib/pricing";
 import { getStorageUrl } from "@/lib/storage";
 import { getVisitorId } from "@/lib/visitor-id";
+import { trackFBPixel } from "@/lib/fbpixel";
 
 // Track event helper
 function trackEvent(event: string, data: Record<string, unknown>) {
@@ -159,6 +160,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             price: newItem.price / 100, // Convert paise to rupees
             quantity: newItem.quantity,
             visitorId,
+        });
+
+        trackFBPixel("AddToCart", {
+            content_name: newItem.title,
+            content_ids: [newItem.productId],
+            content_type: "product",
+            value: newItem.price / 100,
+            currency: "INR",
         });
     }, []);
 
