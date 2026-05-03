@@ -1,24 +1,36 @@
 @import "tailwindcss";
 
 :root {
-  --sunshine: #C9A84C;
-  --sunshine-hover: #B8943D;
-  --forest: #1A5C38;
-  --forest-hover: #154d2f;
-  --forest-light: #2a7a4f;
-  --coral: #FF5757;
-  --bg-cream: #FAFAF8;
-  --bg-pale-yellow: #F5F3EE;
-  --bg-pale-green: #EFF9F3;
-  --surface: #FFFFFF;
-  --sky: #74C0FC;
-  --lavender: #C084FC;
-  --ink: #0F1F0F;
-  --ink-secondary: #637074;
-  --border-warm: rgba(201, 168, 76, 0.25);
-  --border-soft: rgba(26, 92, 56, 0.10);
+  /* Premium v1 — deep evergreen + marigold */
+  --forest:          #0E3B26;
+  --forest-hover:    #0A2D1D;
+  --forest-light:    #1F5F3F;
+  --forest-deep:     #081F14;
+  --sunshine:        #C9A84C;
+  --sunshine-hover:  #B5953B;
+  --sunshine-soft:   #E4CE89;
+  --teal:            #6FA8B8;
+  --teal-deep:       #2D6A7A;
+  --coral:           #C85046;
+  --coral-soft:      #F2DDDB;
+  --bg-cream:        #F7F3EC;
+  --bg-pale-yellow:  #EFE8D8;
+  --bg-pale-green:   #E6EDE3;
+  --bg-warm-yellow:  #FBF5E3;
+  --surface:         #FFFFFF;
+  --surface-warm:    #FCFAF4;
+  --sky:             #A9C9D4;
+  --lavender:        #5B3A6B;
+  --rose:            #B86A6A;
+  --ink:             #111B14;
+  --ink-secondary:   #5A6560;
+  --border-warm:     rgba(201, 168, 76, 0.22);
+  --border-soft:     rgba(14, 59, 38, 0.10);
+  --border-strong:   rgba(14, 59, 38, 0.22);
+  --hairline:        rgba(17, 27, 20, 0.08);
 
   /* Legacy compat — untouched files still work */
+  --font-fredoka: var(--font-baloo);
   --miko-blue: var(--forest);
   --miko-yellow: var(--sunshine);
   --miko-pink: var(--coral);
@@ -35,17 +47,27 @@
 
   --color-sunshine: var(--sunshine);
   --color-sunshine-hover: var(--sunshine-hover);
+  --color-sunshine-soft: var(--sunshine-soft);
   --color-forest: var(--forest);
   --color-forest-hover: var(--forest-hover);
   --color-forest-light: var(--forest-light);
+  --color-forest-deep: var(--forest-deep);
+  --color-teal: var(--teal);
+  --color-teal-deep: var(--teal-deep);
   --color-coral: var(--coral);
+  --color-coral-soft: var(--coral-soft);
   --color-cream: var(--bg-cream);
   --color-pale-yellow: var(--bg-pale-yellow);
   --color-pale-green: var(--bg-pale-green);
+  --color-warm-yellow: var(--bg-warm-yellow);
+  --color-surface-warm: var(--surface-warm);
   --color-sky: var(--sky);
   --color-lavender: var(--lavender);
+  --color-rose: var(--rose);
   --color-ink: var(--ink);
   --color-ink-secondary: var(--ink-secondary);
+  --color-border-strong: var(--border-strong);
+  --color-hairline: var(--hairline);
 
   /* Legacy color mappings */
   --color-miko-blue: var(--forest);
@@ -55,13 +77,14 @@
   --color-soft: var(--bg-cream);
   --color-alt: var(--bg-pale-green);
 
-  --font-heading: var(--font-fredoka);
-  --font-display: var(--font-fredoka);
+  --font-heading: var(--font-baloo);
+  --font-display: var(--font-baloo);
   --font-body: var(--font-nunito);
 
   /* Custom Border Radius */
   --radius-card: 24px;
-  --radius-btn: 50px;
+  --radius-card-lg: 28px;
+  --radius-btn: 9999px;
 
   /* Animations */
   --animate-accordion-down: accordion-down 0.2s ease-out;
@@ -95,7 +118,7 @@
 /* Global Base Styles */
 body {
   background:
-    radial-gradient(600px 400px at 90% 0%, rgba(26,92,56,0.05) 0%, transparent 55%),
+    radial-gradient(600px 400px at 90% 0%, rgba(14,59,38,0.05) 0%, transparent 55%),
     linear-gradient(180deg, var(--bg-cream) 0%, #ffffff 50%, var(--bg-cream) 100%);
   color: var(--ink);
 }
@@ -118,8 +141,8 @@ body::before {
   z-index: 0;
   opacity: 0.04;
   background-image:
-    radial-gradient(circle at 8px 8px, rgba(26,92,56,0.6) 1px, transparent 1.1px),
-    radial-gradient(circle at 32px 32px, rgba(26,92,56,0.3) 0.8px, transparent 0.9px);
+    radial-gradient(circle at 8px 8px, rgba(14,59,38,0.6) 1px, transparent 1.1px),
+    radial-gradient(circle at 32px 32px, rgba(14,59,38,0.3) 0.8px, transparent 0.9px);
   background-size: 40px 40px;
 }
 
@@ -146,13 +169,13 @@ footer {
 
 /* Shadows */
 .shadow-golden { box-shadow: 0 8px 24px rgba(201,168,76,0.25), 0 2px 8px rgba(0,0,0,0.06); }
-.shadow-forest { box-shadow: 0 8px 24px rgba(26,92,56,0.15), 0 2px 8px rgba(0,0,0,0.05); }
+.shadow-forest { box-shadow: 0 8px 24px rgba(14,59,38,0.15), 0 2px 8px rgba(0,0,0,0.05); }
 .shadow-warm   { box-shadow: 0 4px 20px rgba(201,168,76,0.15), 0 1px 4px rgba(0,0,0,0.06); }
 
 /* Legacy shadow aliases */
-.shadow-soft-blue { box-shadow: 0 10px 25px rgba(26,92,56,0.12); }
+.shadow-soft-blue { box-shadow: 0 10px 25px rgba(14,59,38,0.12); }
 .shadow-soft-yellow { box-shadow: 0 10px 25px rgba(201,168,76,0.22); }
-.shadow-soft { box-shadow: 0 10px 30px rgba(15,31,15,0.07); }
+.shadow-soft { box-shadow: 0 10px 30px rgba(17,27,20,0.07); }
 
 /* Hide scrollbar utility */
 .scrollbar-hide {

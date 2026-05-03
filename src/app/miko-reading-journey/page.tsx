@@ -52,10 +52,10 @@ export default async function MikoReadingJourneyPage() {
                                 </div>
 
                                 {/* Content card */}
-                                <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                                <div className="flex-1 bg-white rounded-2xl border overflow-hidden shadow-warm" style={{ borderColor: "var(--hairline)" }}>
                                     <div className="flex flex-col sm:flex-row">
                                         {/* Book cover */}
-                                        <div className="sm:w-36 flex-shrink-0 bg-pale-green p-4 flex items-center justify-center">
+                                        <div className="sm:w-36 flex-shrink-0 p-4 flex items-center justify-center" style={{ background: "var(--surface-warm)" }}>
                                             <div className="relative w-24 h-32">
                                                 <Image
                                                     src={getStorageUrl(book.coverPath)}
@@ -83,7 +83,7 @@ export default async function MikoReadingJourneyPage() {
                                                 {book.shortDescription}
                                             </p>
                                             <div className="flex items-center gap-3 text-xs text-ink-secondary">
-                                                <span className="px-2 py-0.5 rounded-full bg-slate-100 font-semibold">
+                                                <span className="px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(14,59,38,0.08)", color: "var(--forest)" }}>
                                                     {book.ageRange}
                                                 </span>
                                                 <span>{book.pages} pages</span>
@@ -116,6 +116,46 @@ export default async function MikoReadingJourneyPage() {
                     >
                         Shop the Bundle
                     </Link>
+                </div>
+
+                {/* NitiTales Feature */}
+                <div className="mt-12 bg-white rounded-3xl border overflow-hidden shadow-warm" style={{ borderColor: "var(--hairline)" }}>
+                    <div className="p-6 sm:p-8">
+                        <div className="flex items-center gap-3 mb-4">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full bg-sunshine text-ink text-xs font-bold">
+                                New Release
+                            </span>
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold" style={{ background: "rgba(14,59,38,0.08)", color: "var(--forest)" }}>
+                                Hardcover · Ages 2–5
+                            </span>
+                        </div>
+                        <h2 className="font-heading text-2xl sm:text-3xl font-bold text-ink mb-2">
+                            Nititales: Stories That Shape Values
+                        </h2>
+                        <p className="text-ink-secondary mb-4 max-w-xl">
+                            Meet Miko and four new friends — Broody, Minie, Tino & Tini, and the Magic Button crew — in five original stories, each teaching one big value.
+                        </p>
+                        <div className="grid grid-cols-1 sm:grid-cols-5 gap-2 mb-6">
+                            {[
+                                { character: "Miko", value: "Resilience" },
+                                { character: "Tino & Tini", value: "Responsibility" },
+                                { character: "Broody", value: "Kindness" },
+                                { character: "Minie", value: "Courage" },
+                                { character: "Magic Button", value: "Manners" },
+                            ].map(({ character, value }) => (
+                                <div key={value} className="rounded-xl p-3 text-center" style={{ background: "var(--surface-warm)" }}>
+                                    <p className="text-xs text-ink-secondary">{character}</p>
+                                    <p className="text-sm font-bold text-forest">{value}</p>
+                                </div>
+                            ))}
+                        </div>
+                        <Link
+                            href="/books/nititales-stories-shape-values"
+                            className="inline-flex items-center gap-2 bg-forest text-white font-extrabold px-6 py-3 rounded-full hover:bg-forest/90 transition-colors"
+                        >
+                            Explore Nititales →
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>

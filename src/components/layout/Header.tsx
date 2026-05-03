@@ -48,18 +48,18 @@ export function Header() {
             {/* Seasonal Offer Banner */}
             <div className="bg-forest text-white text-center py-2 px-4 relative overflow-hidden z-[60]">
                 <p className="text-sm md:text-base font-bold relative">
-                    <span>🎉</span> Great Gift for Your Baby <span>🎉</span>{" "}
+                    <span>✨</span> New Book Alert <span>✨</span>{" "}
                     <span className="hidden sm:inline">—</span>{" "}
                     <span className="font-extrabold">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/15 text-white border border-white/25 text-xs sm:text-sm mx-1">Complete 5-Book Set</span>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/15 text-white border border-white/25 text-xs sm:text-sm mx-1">Nititales: Stories That Shape Values</span>
                     </span>{" "}
-                    with up to 60% OFF!
+                    Now Available!
                 </p>
             </div>
 
-            <header className="sticky top-0 z-50 w-full border-b border-amber-100/80 bg-[var(--bg-cream)]/90 backdrop-blur-md">
+            <header className="sticky top-0 z-50 w-full border-b bg-[var(--bg-cream)]/90 backdrop-blur-md" style={{ borderColor: "var(--hairline)" }}>
                 {/* Trust strip */}
-                <div className="hidden sm:block border-b border-amber-100/60">
+                <div className="hidden sm:block border-b" style={{ borderColor: "var(--hairline)" }}>
                     <div className="container mx-auto px-4 md:px-6 h-9 flex items-center justify-between text-xs text-ink-secondary">
                         <div className="flex items-center gap-3">
                             <span className="font-semibold text-forest">Safe materials</span>
@@ -126,7 +126,7 @@ export function Header() {
 
                         {/* Mobile menu button */}
                         <button
-                            className="md:hidden h-11 w-11 rounded-full bg-white border border-forest/20 text-forest hover:bg-pale-green transition-colors flex items-center justify-center"
+                            className="md:hidden h-11 w-11 rounded-full bg-white text-forest hover:bg-pale-green transition-colors flex items-center justify-center border" style={{ borderColor: "var(--hairline)" }}
                             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
                             onClick={() => setIsMenuOpen((v) => !v)}
                         >

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, X, ZoomIn, Maximize2 } from "lucide-react";
 
 interface ProductImageGalleryProps {
@@ -17,7 +18,9 @@ export function ProductImageGallery({ images, title }: ProductImageGalleryProps)
     const activeImage = displayImages[activeIndex];
 
     // Touch handling for swipe
+    const swipeAreaRef = useRef<HTMLDivElement>(null);
     const touchStartX = useRef<number | null>(null);
+    const touchStartY = useRef<number | null>(null);
     const touchEndX = useRef<number | null>(null);
     const minSwipeDistance = 50;
 
@@ -32,10 +35,7 @@ export function ProductImageGallery({ images, title }: ProductImageGalleryProps)
     const handleTouchStart = (e: React.TouchEvent) => {
         touchEndX.current = null;
         touchStartX.current = e.targetTouches[0].clientX;
-    };
-
-    const handleTouchMove = (e: React.TouchEvent) => {
-        touchEndX.current = e.targetTouches[0].clientX;
+        touchStartY.current = e.targetTouches[0].clientY;
     };
 
     const handleTouchEnd = () => {
@@ -49,8 +49,30 @@ export function ProductImageGallery({ images, title }: ProductImageGalleryProps)
         else if (isRightSwipe) goToPrev();
 
         touchStartX.current = null;
+        touchStartY.current = null;
         touchEndX.current = null;
     };
+
+    // Non-passive native listener: locks axis as soon as intent is clear,
+    // preventing the page from scrolling vertically during a horizontal swipe.
+    useEffect(() => {
+        const el = swipeAreaRef.current;
+        if (!el) return;
+
+        const onTouchMove = (e: TouchEvent) => {
+            if (touchStartX.current === null || touchStartY.current === null) return;
+            const dx = Math.abs(e.touches[0].clientX - touchStartX.current);
+            const dy = Math.abs(e.touches[0].clientY - touchStartY.current);
+            touchEndX.current = e.touches[0].clientX;
+            if (dx > dy) {
+                // Primarily horizontal — block the vertical page scroll
+                e.preventDefault();
+            }
+        };
+
+        el.addEventListener("touchmove", onTouchMove, { passive: false });
+        return () => el.removeEventListener("touchmove", onTouchMove);
+    }, []);
 
     // Keyboard navigation for lightbox
     useEffect(() => {
@@ -114,22 +136,33 @@ export function ProductImageGallery({ images, title }: ProductImageGalleryProps)
                     {/* Main Image Container */}
                     <div className="flex-1 relative">
                         <div
+                            ref={swipeAreaRef}
                             className="aspect-square bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl relative overflow-hidden cursor-zoom-in group"
                             onClick={openLightbox}
                             onTouchStart={handleTouchStart}
-                            onTouchMove={handleTouchMove}
                             onTouchEnd={handleTouchEnd}
                         >
-                            {/* Main Image */}
-                            <Image
-                                src={activeImage}
-                                alt={title}
-                                fill
-                                sizes="(max-width: 768px) 100vw, 50vw"
-                                className="object-contain p-4 md:p-8 pointer-events-none transition-transform duration-300 group-hover:scale-[1.02]"
-                                priority
-                                draggable={false}
-                            />
+                            {/* Main Image with cross-fade transition */}
+                            <AnimatePresence mode="wait" initial={false}>
+                                <motion.div
+                                    key={activeIndex}
+                                    initial={{ opacity: 0, scale: 0.97 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 1.03 }}
+                                    transition={{ duration: 0.22, ease: "easeOut" }}
+                                    className="absolute inset-0"
+                                >
+                                    <Image
+                                        src={activeImage}
+                                        alt={title}
+                                        fill
+                                        sizes="(max-width: 768px) 100vw, 50vw"
+                                        className="object-contain p-4 md:p-8 pointer-events-none group-hover:scale-[1.02] transition-transform duration-300"
+                                        priority
+                                        draggable={false}
+                                    />
+                                </motion.div>
+                            </AnimatePresence>
 
                             {/* Zoom hint overlay */}
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-200 flex items-center justify-center">
@@ -252,7 +285,6 @@ export function ProductImageGallery({ images, title }: ProductImageGalleryProps)
                         className="absolute inset-0 flex items-center justify-center p-4 md:p-12"
                         onClick={(e) => e.stopPropagation()}
                         onTouchStart={handleTouchStart}
-                        onTouchMove={handleTouchMove}
                         onTouchEnd={handleTouchEnd}
                     >
                         <div

@@ -413,5 +413,113 @@
     "meta": {
       "utm_campaign": "miko_manners_launch"
     }
+  },
+  {
+    "id": "nititales-stories-shape-values",
+    "slug": "nititales-stories-shape-values",
+    "title": "Nititales: Stories That Shape Values",
+    "shortDescription": "5 original moral stories for kids 2–5 years — resilience, kindness, responsibility, courage & manners in one vibrant hardcover.",
+    "longDescription": "<p><strong>Five stories. Five big values. One beautiful hardcover.</strong></p><p>Nititales is a collection of original stories designed to gently plant the seeds of good character in young hearts. Each story introduces a lovable character facing a real-life challenge — and showing children aged 2–5 how to navigate it with heart.</p><ul><li><strong>Miko's Park Day Adventure</strong> — Resilience &amp; Perseverance</li><li><strong>Ready, Set, Oops!</strong> — Responsibility &amp; Honesty</li><li><strong>Broody the Kind Bear</strong> — Kindness &amp; Empathy</li><li><strong>Minie's Big Heroes</strong> — Courage &amp; Self-Worth</li><li><strong>The Magic Button</strong> — Manners &amp; Politeness</li></ul><p>Printed on thick, durable pages with vibrant full-colour illustrations on every spread. Built for little hands, made to last.</p>",
+    "price": 34900,
+    "currency": "INR",
+    "ageRange": "2-5 years",
+    "coverPath": "covers/Front%20Cover.webp",
+    "images": [
+      {
+        "alt": "Nititales front cover — 5 moral stories for kids hardcover",
+        "path": "covers/Front%20Cover.webp",
+        "role": "cover",
+        "order": 0
+      },
+      {
+        "alt": "Nititales back cover",
+        "path": "covers/Back%20Cover.webp",
+        "role": "back-cover",
+        "order": 1
+      },
+      {
+        "alt": "Inside spread — Miko's Park Day Adventure",
+        "path": "covers/MikoPark.webp",
+        "role": "inside",
+        "order": 2
+      },
+      {
+        "alt": "Inside spread — Broody the Kind Bear",
+        "path": "covers/BroodyBear.webp",
+        "role": "inside",
+        "order": 3
+      },
+      {
+        "alt": "Inside spread — Minie's Big Heroes",
+        "path": "covers/Minie.webp",
+        "role": "inside",
+        "order": 4
+      },
+      {
+        "alt": "Inside spread — The Magic Button",
+        "path": "covers/MagicButton.webp",
+        "role": "inside",
+        "order": 5
+      },
+      {
+        "alt": "Inside spread — Ready, Set, Oops!",
+        "path": "covers/Ready%20Set%20Ops.webp",
+        "role": "inside",
+        "order": 6
+      },
+      {
+        "alt": "Nititales hardcover size reference",
+        "path": "covers/66%20content%20page.webp",
+        "role": "size-reference",
+        "order": 7
+      }
+    ],
+    "inventoryQuantity": 100,
+    "inventoryStatus": "in_stock",
+    "sku": "NVB-NT-001",
+    "weightGrams": 400,
+    "dimensionsCm": {
+      "depth": 1.5,
+      "width": 20,
+      "height": 20
+    },
+    "pages": 80,
+    "format": "Hardcover",
+    "author": "NitiVidya",
+    "illustrator": "NitiVidya Studio",
+    "publisher": "NitiVidya Books",
+    "language": "English",
+    "isbn": "NVB-NT-2025-01",
+    "metaTitle": "Nititales: 5 Moral Stories for Kids 2–5 Years — Hardcover | NitiVidya Books",
+    "metaDescription": "Meet Miko, Broody, Minie & friends — 5 original stories teaching resilience, kindness, responsibility, courage & manners. Perfect toddler gift.",
+    "ogImagePath": "covers/Front%20Cover.webp",
+    "twitterCard": "summary_large_image",
+    "hasHeroSlide": true,
+    "heroPriority": 5,
+    "bannerBgPath": "banners/nititales-hero-banner.webp",
+    "bannerTitle": "Nititales: Stories That Shape Values",
+    "bannerSubtitle": "5 Original Stories. 5 Big Values. One Beautiful Hardcover.",
+    "bannerCtaText": "Discover the Book",
+    "bannerCtaType": "PDP",
+    "bannerTarget": "nititales-stories-shape-values",
+    "bannerAltText": "Nititales hardcover — 5 moral stories for kids 2-5 years",
+    "tags": [
+      "values",
+      "moral-stories",
+      "hardcover",
+      "2-5-years",
+      "new",
+      "gifting"
+    ],
+    "collections": [],
+    "isFeatured": true,
+    "published": true,
+    "publishedAt": "2026-05-03T10:00:00.000Z",
+    "createdAt": "2026-05-03T10:00:00.000Z",
+    "updatedAt": "2026-05-03T10:00:00.000Z",
+    "status": "published",
+    "meta": {
+      "utm_campaign": "nititales_launch_2026"
+    }
   }
 ]

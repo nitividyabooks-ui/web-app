@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fredoka, Nunito } from "next/font/google";
+import { Baloo_2, Nunito } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -9,11 +9,12 @@ import GoogleTagManager from "@/components/analytics/GoogleTagManager";
 import FacebookPixel from "@/components/analytics/FacebookPixel";
 import { ConditionalComponents } from "@/components/layout/ConditionalComponents";
 import VisitorTracker from "@/components/analytics/VisitorTracker";
+import { SmoothScrollProvider } from "@/components/layout/SmoothScrollProvider";
 
-const fredoka = Fredoka({
-  variable: "--font-fredoka",
+const baloo = Baloo_2({
+  variable: "--font-baloo",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["500", "600", "700", "800"],
 });
 
 const nunito = Nunito({
@@ -35,22 +36,24 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${fredoka.variable} ${nunito.variable} antialiased font-body bg-cream text-ink flex flex-col min-h-screen`}
+        className={`${baloo.variable} ${nunito.variable} antialiased font-body bg-cream text-ink flex flex-col min-h-screen`}
         suppressHydrationWarning
       >
         <GoogleTagManager />
         <FacebookPixel />
         <VisitorTracker />
-        <UserProvider>
-          <CartProvider>
-            <Header />
-            <main className="flex-1">
-              {children}
-            </main>
-            <Footer />
-            <ConditionalComponents />
-          </CartProvider>
-        </UserProvider>
+        <SmoothScrollProvider>
+          <UserProvider>
+            <CartProvider>
+              <Header />
+              <main className="flex-1">
+                {children}
+              </main>
+              <Footer />
+              <ConditionalComponents />
+            </CartProvider>
+          </UserProvider>
+        </SmoothScrollProvider>
       </body>
     </html>
   );

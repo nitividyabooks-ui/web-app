@@ -124,7 +124,7 @@ function HomeContent({ heroProducts, mikoSeriesProducts, testimonials, allProduc
 
               {/* Design */}
               <div className="flex flex-col items-center text-center space-y-4">
-                <div className="w-20 h-20 bg-coral rounded-full flex items-center justify-center shadow-sm text-white">
+                <div className="w-20 h-20 rounded-full flex items-center justify-center shadow-sm" style={{ background: "var(--coral-soft)", color: "var(--coral)" }}>
                   <Palette className="w-10 h-10" />
                 </div>
                 <h3 className="font-heading font-bold text-xl text-ink">Vivid Colors</h3>
@@ -133,7 +133,7 @@ function HomeContent({ heroProducts, mikoSeriesProducts, testimonials, allProduc
 
               {/* Shipping */}
               <div className="flex flex-col items-center text-center space-y-4">
-                <div className="w-20 h-20 bg-sky/20 rounded-full flex items-center justify-center shadow-sm text-sky-600">
+                <div className="w-20 h-20 rounded-full flex items-center justify-center shadow-sm" style={{ background: "rgba(111,168,184,0.18)", color: "var(--teal-deep)" }}>
                   <Truck className="w-10 h-10" />
                 </div>
                 <h3 className="font-heading font-bold text-xl text-ink">Free Shipping</h3>

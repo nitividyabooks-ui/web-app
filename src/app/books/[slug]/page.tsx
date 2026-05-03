@@ -10,15 +10,17 @@ import { BookQualitySection } from "@/components/products/BookQualitySection";
 import { InsideBookPreview } from "@/components/products/InsideBookPreview";
 import { ReviewSection } from "@/components/products/ReviewSection";
 import { StarRatingInline } from "@/components/products/StarRating";
-import { ArrowLeft, Star, BookOpen, Truck } from "lucide-react";
+import { ArrowLeft, BookOpen } from "lucide-react";
 import { SiWhatsapp, SiAmazon } from "react-icons/si";
 import { AmazonButton } from "@/components/products/AmazonButton";
 import Link from "next/link";
 import { getWhatsAppNumber } from "@/lib/whatsapp";
-import { SINGLE_BOOK_DISCOUNT_PERCENT, formatRupeesFromPaise, getSalePaiseFromMrpPaise } from "@/lib/pricing";
+import { SINGLE_BOOK_DISCOUNT_PERCENT, getSalePaiseFromMrpPaise } from "@/lib/pricing";
 import { ProductViewTracker } from "@/components/products/ProductViewTracker";
 import { ProductEmailCapture } from "@/components/products/ProductEmailCapture";
 import { bilingualLabelHindiEnglish, isBilingualHindiEnglish } from "@/lib/productFlags";
+import { getBookCoverMeta, lightenHex, CoverGlyph } from "@/components/products/BookCoverFallback";
+import { PurchaseCard } from "@/components/products/PurchaseCard";
 
 export async function generateStaticParams() {
     const products = await getAllProducts();
@@ -172,6 +174,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         }),
     };
 
+    const coverMeta = getBookCoverMeta(product.slug);
+
     return (
         <div className="min-h-screen pb-24 md:pb-12">
             <script
@@ -180,140 +184,114 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             />
             <ProductViewTracker product={product} />
 
-            {/* Breadcrumbs */}
-            <div className="container mx-auto px-4 md:px-6 py-4">
-                <Link href="/books" className="inline-flex items-center text-slate-500 hover:text-miko-blue transition-colors font-medium text-sm">
-                    <ArrowLeft className="w-4 h-4 mr-1" /> Back to Library
-                </Link>
-            </div>
+            {/* Full-bleed gradient hero — color derived from book cover */}
+            <section
+                className="relative overflow-hidden"
+                style={{
+                    background: `linear-gradient(180deg, ${lightenHex(coverMeta.coverBg, 0.78)} 0%, var(--bg-cream) 100%)`,
+                }}
+            >
+                {/* Large glyph backdrop */}
+                <div className="absolute right-0 top-0 opacity-[0.06] pointer-events-none hidden md:block">
+                    <CoverGlyph shape={coverMeta.shape} size={560} color={coverMeta.coverInk} />
+                </div>
 
-            <div className="container mx-auto px-4 md:px-6">
-                {/* ═══════════════════════════════════════════════════════════════
-                    SECTION 1: ABOVE THE FOLD
-                    Purpose: Immediate understanding + emotional hook
-                ═══════════════════════════════════════════════════════════════ */}
-                <div className="grid lg:grid-cols-2 gap-8 lg:gap-16">
-
-                    {/* Left Column: Product Images */}
-                    <div className="lg:sticky lg:top-24 h-fit">
-                        <ProductImageGallery
-                            images={product.images.map(img => getStorageUrl(img.path))}
-                            title={product.title}
-                        />
+                <div className="container mx-auto px-4 md:px-6">
+                    {/* Breadcrumbs */}
+                    <div className="py-4">
+                        <Link href="/books" className="inline-flex items-center font-medium text-sm transition-colors hover:opacity-70" style={{ color: "var(--ink-secondary)" }}>
+                            <ArrowLeft className="w-4 h-4 mr-1" /> Back to Library
+                        </Link>
                     </div>
 
-                    {/* Right Column: Purchase Decision Layer */}
-                    <div className="space-y-5">
+                    {/* Two-column above fold */}
+                    <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 pb-14 lg:pb-20">
 
-                        {/* Title & Value Proposition */}
-                        <div>
-                            <h1 className="font-heading text-3xl md:text-4xl font-bold text-charcoal leading-tight">
-                                {product.title}
-                            </h1>
-                            {reviews.length > 0 && (
-                                <div className="mt-2">
-                                    <StarRatingInline rating={averageRating} reviewCount={reviews.length} />
+                        {/* Left: Product Images */}
+                        <div className="lg:sticky lg:top-24 h-fit">
+                            <ProductImageGallery
+                                images={product.images.map(img => getStorageUrl(img.path))}
+                                title={product.title}
+                            />
+                        </div>
+
+                        {/* Right: Purchase Decision */}
+                        <div className="space-y-5">
+
+                            {/* Badges */}
+                            <div className="flex flex-wrap gap-2">
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold bg-[rgba(14,59,38,0.08)] text-forest">
+                                    {product.ageRange}
+                                </span>
+                                {isBilingual && (
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold bg-[rgba(111,168,184,0.18)] text-[var(--teal-deep)]">
+                                        <BookOpen className="w-3.5 h-3.5" />
+                                        {bilingualLabelHindiEnglish()}
+                                    </span>
+                                )}
+                                <span className="px-3 py-1.5 rounded-full text-sm font-semibold bg-[rgba(14,59,38,0.06)] text-[var(--ink-secondary)]">
+                                    {product.format}
+                                </span>
+                            </div>
+
+                            {/* Title */}
+                            <div>
+                                <h1 className="font-heading text-3xl md:text-[2.75rem] font-extrabold leading-[1.05]" style={{ color: "var(--forest)" }}>
+                                    {product.title}
+                                </h1>
+                                {reviews.length > 0 && (
+                                    <div className="mt-3">
+                                        <StarRatingInline rating={averageRating} reviewCount={reviews.length} />
+                                    </div>
+                                )}
+                                <p className="text-lg mt-3 leading-relaxed" style={{ color: "var(--ink)" }}>
+                                    {valueProposition}
+                                </p>
+                            </div>
+
+                            {/* Purchase card with bundle toggle */}
+                            <PurchaseCard
+                                product={product}
+                                mrpPaise={mrpPaise}
+                                salePaise={salePaise}
+                                discountPercent={SINGLE_BOOK_DISCOUNT_PERCENT}
+                                seriesProducts={isMikoSeries ? mikoSeriesProducts : []}
+                                seriesName="Miko Series"
+                            />
+
+                            {/* Amazon CTA */}
+                            {product.amazonUrl && (
+                                <div className="hidden md:block">
+                                    <AmazonButton
+                                        amazonUrl={product.amazonUrl}
+                                        productId={product.id}
+                                        productName={product.title}
+                                        productPrice={product.price}
+                                        variant="primary"
+                                        location="desktop"
+                                        className="flex items-center justify-center gap-3 py-3 px-6 rounded-full bg-[#FF9900] text-white font-bold text-base shadow-md shadow-[#FF9900]/30 hover:bg-[#E88B00] transition-all hover:scale-[1.01] active:scale-[0.98]"
+                                    />
+                                    <div className="flex items-center justify-center gap-2 text-sm mt-2" style={{ color: "var(--ink-secondary)" }}>
+                                        <SiAmazon className="w-4 h-4 text-[#FF9900]" />
+                                        <span>Also available on Amazon.in</span>
+                                    </div>
                                 </div>
                             )}
-                            <p className="text-lg text-slate-600 mt-2 leading-relaxed">
-                                {valueProposition}
-                            </p>
-                        </div>
 
-                        {/* Compact Badges (Max 3) */}
-                        <div className="flex flex-wrap gap-2">
-                            {/* Age Range - Always shown */}
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 border border-green-200/70">
-                                <Star className="w-3.5 h-3.5 fill-green-500 text-green-500" />
-                                {product.ageRange}
-                            </span>
-
-                            {/* Bilingual badge - if applicable */}
-                            {isBilingual && (
-                                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-700 border border-amber-200/70">
-                                    <BookOpen className="w-3.5 h-3.5" />
-                                    {bilingualLabelHindiEnglish()}
-                                </span>
-                            )}
-
-                            {/* Format badge */}
-                            <span className="px-3 py-1.5 rounded-full text-sm font-semibold bg-slate-50 text-slate-600 border border-slate-200/70">
-                                {product.format}
-                            </span>
-                        </div>
-
-                        {/* Price Block */}
-                        <div className="bg-white rounded-2xl border border-slate-200/70 p-5 space-y-3">
-                            <div className="flex items-baseline gap-3 flex-wrap">
-                                <span className="font-heading text-3xl font-bold text-miko-blue">
-                                    {formatRupeesFromPaise(salePaise)}
-                                </span>
-                                <span className="text-lg text-slate-400 line-through font-medium">
-                                    {formatRupeesFromPaise(mrpPaise)}
-                                </span>
-                                <span className="bg-emerald-50 text-emerald-700 px-2 py-1 rounded-md text-sm font-bold border border-emerald-100">
-                                    {SINGLE_BOOK_DISCOUNT_PERCENT}% OFF
-                                </span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-slate-600">
-                                <Truck className="w-4 h-4 text-miko-blue" />
-                                Free shipping above ₹499
-                            </div>
-                        </div>
-
-                        {/* Primary CTA - Desktop */}
-                        <div className="hidden md:flex flex-col gap-4">
-                            {/* Amazon Primary CTA */}
-                            {product.amazonUrl && (
-                                <AmazonButton
-                                    amazonUrl={product.amazonUrl}
-                                    productId={product.id}
-                                    productName={product.title}
-                                    productPrice={product.price}
-                                    variant="primary"
-                                    location="desktop"
-                                    className="flex items-center justify-center gap-3 py-4 px-6 rounded-2xl bg-[#FF9900] text-white font-bold text-lg shadow-lg shadow-[#FF9900]/30 hover:bg-[#E88B00] transition-all hover:scale-[1.02] active:scale-[0.98]"
+                            {/* Series bundle CTA (keeps existing component for non-bundle UI) */}
+                            {isMikoSeries && mikoSeriesProducts.length > 0 && !isMikoSeries && (
+                                <SeriesBundleCTA
+                                    products={mikoSeriesProducts}
+                                    seriesName="Miko Series"
+                                    addMode="missing_only"
                                 />
                             )}
-
-                            {/* Secondary Actions Row */}
-                            <div className="flex gap-3">
-                                {/* Add to Cart - Icon Button */}
-                                <div className="flex-1">
-                                    <AddToCartButton product={product} />
-                                </div>
-
-                                {/* WhatsApp Icon Button */}
-                                <a
-                                    href={`https://wa.me/${getWhatsAppNumber()}?text=Hi! I'm interested in ${product.title}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center justify-center w-14 h-14 rounded-xl bg-green-50 border-2 border-green-200 text-green-600 hover:bg-green-100 hover:border-green-300 transition-colors flex-shrink-0"
-                                    aria-label="Order on WhatsApp"
-                                >
-                                    <SiWhatsapp className="w-6 h-6" />
-                                </a>
-                            </div>
-
-                            {/* Trust Badge */}
-                            {product.amazonUrl && (
-                                <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
-                                    <SiAmazon className="w-4 h-4 text-[#FF9900]" />
-                                    <span>Also available on Amazon.in</span>
-                                </div>
-                            )}
                         </div>
-
-                        {/* Complete Series CTA (for Miko series products) */}
-                        {isMikoSeries && mikoSeriesProducts.length > 0 && (
-                            <SeriesBundleCTA
-                                products={mikoSeriesProducts}
-                                seriesName="Miko Series"
-                                addMode="missing_only"
-                            />
-                        )}
                     </div>
                 </div>
+            </section>
+
+            <div className="container mx-auto px-4 md:px-6">
 
                 {/* ═══════════════════════════════════════════════════════════════
                     SECTION 2: WHY PARENTS CHOOSE THIS BOOK
@@ -346,27 +324,35 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 ═══════════════════════════════════════════════════════════════ */}
                 <BookQualitySection />
 
-                {/* ═══════════════════════════════════════════════════════════════
-                    SECTION 4: A PEEK INSIDE (Interior Preview)
-                    Purpose: Reduce purchase anxiety
-                ═══════════════════════════════════════════════════════════════ */}
-                {previewImages.length > 0 && (
-                    <InsideBookPreview
-                        images={previewImages}
-                        title={product.title}
-                    />
-                )}
+            </div>
 
-                {/* ═══════════════════════════════════════════════════════════════
-                    SECTION 5: FAQ (SIMPLIFIED)
-                    Purpose: Answer buyer-stopping questions only
-                ═══════════════════════════════════════════════════════════════ */}
+            {/* SECTION 4: PEEK INSIDE — full-bleed forest */}
+            {previewImages.length > 0 && (
+                <section
+                    className="py-16 md:py-24 relative overflow-hidden"
+                    style={{ background: "var(--forest)", color: "var(--bg-cream)" }}
+                >
+                    <div
+                        className="absolute inset-0 opacity-[0.06]"
+                        style={{
+                            backgroundImage: `radial-gradient(circle at 8px 8px, var(--sunshine-soft) 1px, transparent 1.2px)`,
+                            backgroundSize: "30px 30px",
+                        }}
+                    />
+                    <div className="container mx-auto px-4 md:px-6 relative">
+                        <InsideBookPreview
+                            images={previewImages}
+                            title={product.title}
+                        />
+                    </div>
+                </section>
+            )}
+
+            <div className="container mx-auto px-4 md:px-6">
+                {/* SECTION 5: FAQ */}
                 <ProductFAQ />
 
-                {/* ═══════════════════════════════════════════════════════════════
-                    SECTION 6: CUSTOMER REVIEWS
-                    Purpose: Social proof from real parents
-                ═══════════════════════════════════════════════════════════════ */}
+                {/* SECTION 6: REVIEWS */}
                 {reviews.length > 0 && (
                     <ReviewSection
                         productId={product.id}
@@ -381,9 +367,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             </div>
 
             {/* Mobile Sticky Action Bar */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-3 md:hidden z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+            <div
+                className="fixed bottom-0 left-0 right-0 p-3 md:hidden z-50 border-t"
+                style={{ background: "white", borderColor: "var(--border-soft)", boxShadow: "0 -4px 6px -1px rgba(0,0,0,0.08)" }}
+            >
                 <div className="flex flex-col gap-2">
-                    {/* Amazon Primary - Full Width */}
                     {product.amazonUrl && (
                         <AmazonButton
                             amazonUrl={product.amazonUrl}
@@ -392,11 +380,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                             productPrice={product.price}
                             variant="primary"
                             location="mobile"
-                            className="flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-[#FF9900] text-white font-bold shadow-md shadow-[#FF9900]/25 hover:bg-[#E88B00] transition-all active:scale-[0.98]"
+                            className="flex items-center justify-center gap-2 py-3.5 px-6 rounded-full bg-[#FF9900] text-white font-bold shadow-md shadow-[#FF9900]/25 hover:bg-[#E88B00] transition-all active:scale-[0.98]"
                         />
                     )}
-
-                    {/* Secondary Row: Cart + WhatsApp - Equal Width */}
                     <div className="flex gap-2">
                         <div className="flex-1">
                             <AddToCartButton product={product} />
@@ -405,11 +391,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                             href={`https://wa.me/${getWhatsAppNumber()}?text=Hi! I'm interested in ${product.title}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex-1 flex items-center justify-center gap-2 h-12 rounded-xl bg-green-50 border-2 border-green-200 text-green-700 font-semibold hover:bg-green-100 transition-colors"
+                            className="flex items-center justify-center gap-2 h-12 px-4 rounded-full border-2 font-semibold text-sm transition-colors"
+                            style={{ background: "#F0FDF4", borderColor: "#86EFAC", color: "#15803D" }}
                             aria-label="Order on WhatsApp"
                         >
                             <SiWhatsapp className="w-5 h-5" />
-                            <span className="text-sm">WhatsApp</span>
+                            <span>WhatsApp</span>
                         </a>
                     </div>
                 </div>

@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, BookOpen } from "lucide-react";
 
 interface InsideBookPreviewProps {
@@ -9,7 +10,6 @@ interface InsideBookPreviewProps {
     title: string;
 }
 
-// Captions for interior previews based on content type
 const defaultCaptions = [
     "Simple illustrations and few words per page—perfect for toddlers",
     "Vibrant colors and friendly characters that capture attention",
@@ -17,36 +17,29 @@ const defaultCaptions = [
 ];
 
 export function InsideBookPreview({ images, title }: InsideBookPreviewProps) {
-    const scrollContainerRef = useRef<HTMLDivElement>(null);
-    const [showLeftArrow, setShowLeftArrow] = useState(false);
-    const [showRightArrow, setShowRightArrow] = useState(true);
-
-    // Filter for interior/preview images if available, otherwise use the images as-is
     const previewImages = images.slice(0, 3);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [direction, setDirection] = useState(0);
 
-    if (previewImages.length === 0) {
-        return null;
-    }
+    if (previewImages.length === 0) return null;
 
-    const handleScroll = () => {
-        const container = scrollContainerRef.current;
-        if (!container) return;
-
-        setShowLeftArrow(container.scrollLeft > 20);
-        setShowRightArrow(
-            container.scrollLeft < container.scrollWidth - container.clientWidth - 20
-        );
+    const goTo = (idx: number) => {
+        setDirection(idx > currentIndex ? 1 : -1);
+        setCurrentIndex(idx);
     };
 
-    const scrollTo = (direction: "left" | "right") => {
-        const container = scrollContainerRef.current;
-        if (!container) return;
+    const goNext = () => {
+        if (currentIndex < previewImages.length - 1) goTo(currentIndex + 1);
+    };
 
-        const scrollAmount = container.clientWidth * 0.7;
-        container.scrollBy({
-            left: direction === "left" ? -scrollAmount : scrollAmount,
-            behavior: "smooth"
-        });
+    const goPrev = () => {
+        if (currentIndex > 0) goTo(currentIndex - 1);
+    };
+
+    const variants = {
+        enter: (dir: number) => ({ x: dir > 0 ? "100%" : "-100%", opacity: 0 }),
+        center: { x: 0, opacity: 1 },
+        exit: (dir: number) => ({ x: dir > 0 ? "-100%" : "100%", opacity: 0 }),
     };
 
     return (
@@ -64,74 +57,122 @@ export function InsideBookPreview({ images, title }: InsideBookPreviewProps) {
                 </p>
             </div>
 
-            <div className="relative">
-                {/* Left Navigation Arrow */}
-                {showLeftArrow && (
-                    <button
-                        onClick={() => scrollTo("left")}
-                        className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-lg border border-slate-100 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:scale-110 transition-all hidden md:flex"
-                        aria-label="Scroll left"
+            {/* Desktop: all cards side by side */}
+            <div className="hidden md:grid md:grid-cols-3 gap-6">
+                {previewImages.map((image, index) => (
+                    <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 24 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.45, delay: index * 0.1, ease: "easeOut" }}
+                        className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden"
                     >
-                        <ChevronLeft className="w-5 h-5" />
-                    </button>
-                )}
+                        <div className="relative aspect-[4/3] bg-gradient-to-br from-slate-50 to-slate-100">
+                            <Image
+                                src={image}
+                                alt={`${title} interior page ${index + 1}`}
+                                fill
+                                sizes="320px"
+                                className="object-contain p-3"
+                            />
+                        </div>
+                        <div className="p-4 bg-gradient-to-br from-amber-50/50 to-orange-50/30 border-t border-amber-100/50">
+                            <p className="text-slate-700 text-sm font-medium leading-relaxed">
+                                {defaultCaptions[index] || defaultCaptions[0]}
+                            </p>
+                        </div>
+                    </motion.div>
+                ))}
+            </div>
 
-                {/* Right Navigation Arrow */}
-                {showRightArrow && previewImages.length > 1 && (
-                    <button
-                        onClick={() => scrollTo("right")}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-lg border border-slate-100 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:scale-110 transition-all hidden md:flex"
-                        aria-label="Scroll right"
-                    >
-                        <ChevronRight className="w-5 h-5" />
-                    </button>
-                )}
-
-                {/* Scrollable Container */}
-                <div
-                    ref={scrollContainerRef}
-                    onScroll={handleScroll}
-                    className="flex gap-4 md:gap-6 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-4 -mx-4 px-4 md:mx-0 md:px-0"
-                >
-                    {previewImages.map((image, index) => (
-                        <div
-                            key={index}
-                            className="flex-shrink-0 w-[280px] md:w-[320px] snap-start"
+            {/* Mobile: swipeable single-card carousel */}
+            <div className="md:hidden relative">
+                <div className="relative overflow-hidden rounded-2xl">
+                    <AnimatePresence mode="wait" custom={direction} initial={false}>
+                        <motion.div
+                            key={currentIndex}
+                            custom={direction}
+                            variants={variants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            transition={{ type: "spring", stiffness: 320, damping: 34, mass: 0.9 }}
+                            drag="x"
+                            dragConstraints={{ left: 0, right: 0 }}
+                            dragElastic={0.18}
+                            onDragEnd={(_, info) => {
+                                const threshold = 50;
+                                if (info.offset.x < -threshold) goNext();
+                                else if (info.offset.x > threshold) goPrev();
+                            }}
+                            className="cursor-grab active:cursor-grabbing select-none"
                         >
-                            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                                {/* Preview Image */}
+                            <div className="bg-white border border-slate-100 shadow-sm overflow-hidden rounded-2xl">
                                 <div className="relative aspect-[4/3] bg-gradient-to-br from-slate-50 to-slate-100">
                                     <Image
-                                        src={image}
-                                        alt={`${title} interior page ${index + 1}`}
+                                        src={previewImages[currentIndex]}
+                                        alt={`${title} interior page ${currentIndex + 1}`}
                                         fill
-                                        sizes="(max-width: 768px) 280px, 320px"
-                                        className="object-contain p-3"
+                                        sizes="100vw"
+                                        className="object-contain p-3 pointer-events-none"
+                                        draggable={false}
                                     />
                                 </div>
-
-                                {/* Caption */}
                                 <div className="p-4 bg-gradient-to-br from-amber-50/50 to-orange-50/30 border-t border-amber-100/50">
                                     <p className="text-slate-700 text-sm font-medium leading-relaxed">
-                                        {defaultCaptions[index] || defaultCaptions[0]}
+                                        {defaultCaptions[currentIndex] || defaultCaptions[0]}
                                     </p>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        </motion.div>
+                    </AnimatePresence>
                 </div>
 
-                {/* Mobile Scroll Indicator */}
+                {/* Navigation arrows */}
                 {previewImages.length > 1 && (
-                    <div className="flex justify-center gap-1.5 mt-4 md:hidden">
-                        {previewImages.map((_, idx) => (
-                            <div
-                                key={idx}
-                                className="h-1.5 w-6 rounded-full bg-slate-200"
-                            />
-                        ))}
+                    <div className="flex items-center justify-between mt-4 px-1">
+                        <button
+                            onClick={goPrev}
+                            disabled={currentIndex === 0}
+                            className="w-10 h-10 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all hover:shadow-md active:scale-95"
+                            aria-label="Previous page"
+                        >
+                            <ChevronLeft className="w-5 h-5" />
+                        </button>
+
+                        {/* Dot indicators */}
+                        <div className="flex items-center gap-2">
+                            {previewImages.map((_, idx) => (
+                                <motion.button
+                                    key={idx}
+                                    onClick={() => goTo(idx)}
+                                    animate={{
+                                        width: idx === currentIndex ? 24 : 8,
+                                        backgroundColor: idx === currentIndex ? "#1e293b" : "#cbd5e1",
+                                    }}
+                                    transition={{ duration: 0.25 }}
+                                    className="h-2 rounded-full"
+                                    aria-label={`Go to page ${idx + 1}`}
+                                />
+                            ))}
+                        </div>
+
+                        <button
+                            onClick={goNext}
+                            disabled={currentIndex === previewImages.length - 1}
+                            className="w-10 h-10 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all hover:shadow-md active:scale-95"
+                            aria-label="Next page"
+                        >
+                            <ChevronRight className="w-5 h-5" />
+                        </button>
                     </div>
                 )}
+
+                {/* Swipe hint */}
+                <p className="text-center text-xs text-slate-400 mt-3">
+                    Swipe to browse · {currentIndex + 1} of {previewImages.length}
+                </p>
             </div>
         </section>
     );

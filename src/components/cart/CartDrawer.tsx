@@ -49,7 +49,6 @@ export function CartDrawer() {
                     quantity: item.quantity,
                 })),
             });
-            // Prevent body scroll when cart is open
             document.body.style.overflow = "hidden";
         } else {
             document.body.style.overflow = "";
@@ -165,19 +164,23 @@ export function CartDrawer() {
             {/* Drawer */}
             <div className="relative z-50 w-full max-w-md bg-white shadow-2xl flex flex-col h-full animate-in slide-in-from-right duration-300">
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-white">
+                <div
+                    className="flex items-center justify-between p-4 border-b"
+                    style={{ background: "var(--surface-warm)", borderColor: "var(--hairline)" }}
+                >
                     <div className="flex items-center gap-2">
-                        <ShoppingBag className="w-5 h-5 text-blue-600" />
-                        <h2 className="text-lg font-bold text-slate-900">Your Cart</h2>
+                        <ShoppingBag className="w-5 h-5" style={{ color: "var(--forest)" }} />
+                        <h2 className="text-lg font-bold text-ink">Your Cart</h2>
                         {items.length > 0 && (
-                            <span className="bg-blue-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                            <span className="text-white text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: "var(--forest)" }}>
                                 {items.reduce((a, i) => a + i.quantity, 0)}
                             </span>
                         )}
                     </div>
                     <button
                         onClick={() => setIsCartOpen(false)}
-                        className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors"
+                        className="p-2 rounded-full transition-colors"
+                        style={{ color: "var(--ink-secondary)" }}
                         aria-label="Close cart"
                     >
                         <X className="h-5 w-5" />
@@ -186,18 +189,25 @@ export function CartDrawer() {
 
                 {/* Free Shipping Progress */}
                 {items.length > 0 && !isFreeShipping && (
-                    <div className="px-4 py-3 bg-amber-50 border-b border-amber-100">
-                        <div className="flex items-center gap-2 text-sm text-amber-800">
+                    <div
+                        className="px-4 py-3 border-b"
+                        style={{ background: "var(--bg-pale-yellow)", borderColor: "var(--hairline)" }}
+                    >
+                        <div className="flex items-center gap-2 text-sm" style={{ color: "var(--forest)" }}>
                             <Truck className="w-4 h-4 flex-shrink-0" />
                             <span>
                                 Add <span className="font-bold">{formatRupeesFromPaise(amountToFreeShipping)}</span> more for{" "}
                                 <span className="font-bold">FREE shipping</span>!
                             </span>
                         </div>
-                        <div className="mt-2 h-1.5 bg-amber-200 rounded-full overflow-hidden">
+                        <div
+                            className="mt-2 h-1.5 rounded-full overflow-hidden"
+                            style={{ background: "var(--sunshine-soft)" }}
+                        >
                             <div
-                                className="h-full bg-amber-500 rounded-full transition-all duration-500"
+                                className="h-full rounded-full transition-all duration-500"
                                 style={{
+                                    background: "var(--sunshine)",
                                     width: `${Math.min(100, (totalAmount / FREE_SHIPPING_THRESHOLD) * 100)}%`,
                                 }}
                             />
@@ -206,10 +216,13 @@ export function CartDrawer() {
                 )}
 
                 {isFreeShipping && items.length > 0 && (
-                    <div className="px-4 py-3 bg-green-50 border-b border-green-100">
-                        <div className="flex items-center gap-2 text-sm text-green-800 font-medium">
+                    <div
+                        className="px-4 py-3 border-b"
+                        style={{ background: "var(--bg-pale-green)", borderColor: "var(--hairline)" }}
+                    >
+                        <div className="flex items-center gap-2 text-sm font-medium" style={{ color: "var(--forest)" }}>
                             <Truck className="w-4 h-4" />
-                            <span>🎉 You've unlocked FREE shipping!</span>
+                            <span>🎉 You&apos;ve unlocked FREE shipping!</span>
                         </div>
                     </div>
                 )}
@@ -218,12 +231,15 @@ export function CartDrawer() {
                 <div className="flex-1 overflow-y-auto p-4 space-y-3">
                     {items.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full text-center py-12">
-                            <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                                <ShoppingBag className="w-10 h-10 text-slate-400" />
+                            <div
+                                className="w-20 h-20 rounded-full flex items-center justify-center mb-4"
+                                style={{ background: "var(--surface-warm)" }}
+                            >
+                                <ShoppingBag className="w-10 h-10" style={{ color: "var(--ink-secondary)" }} />
                             </div>
-                            <h3 className="font-bold text-slate-900 mb-1">Your cart is empty</h3>
-                            <p className="text-slate-500 text-sm mb-6">
-                                Discover our beautiful children's books
+                            <h3 className="font-bold text-ink mb-1">Your cart is empty</h3>
+                            <p className="text-sm mb-6" style={{ color: "var(--ink-secondary)" }}>
+                                Discover our beautiful children&apos;s books
                             </p>
                             <Button
                                 variant="outline"
@@ -238,9 +254,13 @@ export function CartDrawer() {
                             return (
                                 <div
                                     key={item.productId}
-                                    className="flex gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100"
+                                    className="flex gap-3 p-3 rounded-xl border"
+                                    style={{ background: "var(--surface-warm)", borderColor: "var(--hairline)" }}
                                 >
-                                    <div className="relative h-20 w-20 bg-white rounded-lg overflow-hidden border border-slate-100 flex-shrink-0">
+                                    <div
+                                        className="relative h-20 w-20 bg-white rounded-lg overflow-hidden border flex-shrink-0"
+                                        style={{ borderColor: "var(--hairline)" }}
+                                    >
                                         <Image
                                             src={item.image || "/images/placeholder-book.jpg"}
                                             alt={item.title}
@@ -250,41 +270,45 @@ export function CartDrawer() {
                                         />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <h3 className="font-medium text-slate-900 text-sm leading-tight line-clamp-2">
+                                        <h3 className="font-medium text-ink text-sm leading-tight line-clamp-2">
                                             {item.title}
                                         </h3>
                                         <div className="flex items-center gap-2 mt-1">
-                                            <span className="font-bold text-blue-600">
+                                            <span className="font-extrabold" style={{ color: "var(--forest)" }}>
                                                 {formatRupeesFromPaise(salePrice)}
                                             </span>
-                                            <span className="text-xs text-slate-400 line-through">
+                                            <span className="text-xs line-through" style={{ color: "var(--ink-secondary)" }}>
                                                 {formatRupeesFromPaise(item.price)}
                                             </span>
                                         </div>
 
                                         <div className="flex items-center justify-between mt-2">
-                                            <div className="flex items-center gap-1 bg-white rounded-lg border border-slate-200">
+                                            <div
+                                                className="flex items-center gap-1 bg-white rounded-lg border"
+                                                style={{ borderColor: "var(--hairline)" }}
+                                            >
                                                 <button
                                                     onClick={() => handleUpdateQuantity(item, item.quantity - 1)}
-                                                    className="p-2 hover:bg-slate-50 transition-colors rounded-l-lg"
+                                                    className="p-2 transition-colors rounded-l-lg hover:bg-[var(--surface-warm)]"
                                                     aria-label="Decrease quantity"
                                                 >
-                                                    <Minus className="h-3 w-3 text-slate-600" />
+                                                    <Minus className="h-3 w-3 text-ink" />
                                                 </button>
                                                 <span className="text-sm font-semibold w-6 text-center">
                                                     {item.quantity}
                                                 </span>
                                                 <button
                                                     onClick={() => handleUpdateQuantity(item, item.quantity + 1)}
-                                                    className="p-2 hover:bg-slate-50 transition-colors rounded-r-lg"
+                                                    className="p-2 transition-colors rounded-r-lg hover:bg-[var(--surface-warm)]"
                                                     aria-label="Increase quantity"
                                                 >
-                                                    <Plus className="h-3 w-3 text-slate-600" />
+                                                    <Plus className="h-3 w-3 text-ink" />
                                                 </button>
                                             </div>
                                             <button
                                                 onClick={() => handleRemove(item)}
-                                                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                                                style={{ color: "var(--ink-secondary)" }}
                                                 aria-label="Remove item"
                                             >
                                                 <Trash2 className="h-4 w-4" />
@@ -299,48 +323,54 @@ export function CartDrawer() {
 
                 {/* Footer - Sticky */}
                 {items.length > 0 && (
-                    <div className="border-t border-slate-200 bg-white p-4 space-y-4 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+                    <div
+                        className="border-t bg-white p-4 space-y-4 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]"
+                        style={{ borderColor: "var(--hairline)" }}
+                    >
                         {/* Price Summary */}
                         <div className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
-                                <span className="text-slate-600">Subtotal (MRP)</span>
-                                <span className="text-slate-500 line-through">
+                                <span style={{ color: "var(--ink-secondary)" }}>Subtotal (MRP)</span>
+                                <span className="line-through" style={{ color: "var(--ink-secondary)" }}>
                                     {formatRupeesFromPaise(totalMrpAmount)}
                                 </span>
                             </div>
                             {savings > 0 && (
                                 <div className="flex items-center justify-between text-sm">
-                                    <span className="text-green-700 flex items-center gap-1.5">
+                                    <span className="flex items-center gap-1.5 font-semibold" style={{ color: "var(--forest)" }}>
                                         <Tag className="w-3.5 h-3.5" />
                                         Discount ({discountPercent}%)
                                     </span>
-                                    <span className="font-semibold text-green-700">
+                                    <span className="font-semibold" style={{ color: "var(--forest)" }}>
                                         -{formatRupeesFromPaise(savings)}
                                     </span>
                                 </div>
                             )}
                             <div className="flex items-center justify-between text-sm">
-                                <span className="text-slate-600">Subtotal</span>
-                                <span className="text-slate-700 font-medium">
+                                <span style={{ color: "var(--ink-secondary)" }}>Subtotal</span>
+                                <span className="font-medium text-ink">
                                     {formatRupeesFromPaise(totalAmount)}
                                 </span>
                             </div>
                             <div className="flex items-center justify-between text-sm">
-                                <span className="text-slate-600 flex items-center gap-1.5">
+                                <span className="flex items-center gap-1.5" style={{ color: "var(--ink-secondary)" }}>
                                     <Truck className="w-3.5 h-3.5" />
                                     Shipping
                                 </span>
                                 {isFreeShipping ? (
-                                    <span className="font-semibold text-green-700">FREE</span>
+                                    <span className="font-semibold" style={{ color: "var(--forest)" }}>FREE</span>
                                 ) : (
-                                    <span className="text-slate-700 font-medium">
+                                    <span className="font-medium text-ink">
                                         {formatRupeesFromPaise(shippingFee)}
                                     </span>
                                 )}
                             </div>
-                            <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                                <span className="font-bold text-slate-900">Total</span>
-                                <span className="text-xl font-extrabold text-slate-900">
+                            <div
+                                className="flex items-center justify-between pt-2 border-t"
+                                style={{ borderColor: "var(--hairline)" }}
+                            >
+                                <span className="font-bold text-ink">Total</span>
+                                <span className="text-xl font-extrabold" style={{ color: "var(--forest)" }}>
                                     {formatRupeesFromPaise(grandTotal)}
                                 </span>
                             </div>
@@ -350,7 +380,7 @@ export function CartDrawer() {
                         <div className="space-y-2">
                             <div className="relative group">
                                 <Button
-                                    className="w-full shadow-lg shadow-blue-600/25"
+                                    className="w-full shadow-lg shadow-forest/25"
                                     size="lg"
                                     onClick={handleCheckout}
                                 >
@@ -367,7 +397,7 @@ export function CartDrawer() {
                         </div>
 
                         {/* Trust Text */}
-                        <p className="text-center text-xs text-slate-500">
+                        <p className="text-center text-xs" style={{ color: "var(--ink-secondary)" }}>
                             Free shipping on orders above ₹499 • Secure Online Payment
                         </p>
                     </div>

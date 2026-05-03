@@ -115,7 +115,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/books/${product.slug}`} className="group" onClick={handleProductClick}>
-      <div className="bg-white rounded-3xl border border-amber-100/60 shadow-warm hover:shadow-golden hover:border-amber-200 hover:-translate-y-0.5 transition-all duration-200 overflow-hidden h-full flex flex-col">
+      <div className="bg-[var(--surface-warm)] rounded-3xl border border-[var(--border-soft)] shadow-warm hover:shadow-[0_24px_48px_-24px_rgba(14,59,38,0.3)] hover:border-[var(--border-strong)] hover:-translate-y-1 transition-all duration-200 overflow-hidden h-full flex flex-col">
         {/* Image */}
         <div className="relative aspect-[4/3] bg-slate-50">
           <Image
@@ -128,14 +128,14 @@ export function ProductCard({ product }: ProductCardProps) {
 
           {/* Bestseller Badge */}
           {product.tags?.includes("bestseller") && (
-            <div className="absolute top-2 left-2 bg-coral text-white text-[11px] font-extrabold px-2.5 py-1 rounded-full shadow-sm">
-              Bestseller
+            <div className="absolute top-2 left-2 bg-forest text-[var(--sunshine-soft)] text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow-sm tracking-wide uppercase">
+              ★ Bestseller
             </div>
           )}
 
           {/* Bilingual Badge */}
           {isBilingual && (
-            <div className="absolute top-2 right-2 bg-sky text-white text-[11px] font-extrabold px-2.5 py-1 rounded-full shadow-sm">
+            <div className="absolute top-2 right-2 bg-[rgba(111,168,184,0.18)] text-[var(--teal-deep)] text-[11px] font-extrabold px-2.5 py-1 rounded-full shadow-sm">
               {bilingualLabelHindiEnglish()}
             </div>
           )}
@@ -152,7 +152,7 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Content */}
         <div className="p-3 md:p-4 flex flex-col gap-2 flex-1">
           <div className="flex items-center justify-between gap-2">
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-pale-green text-forest border border-forest/20">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-[rgba(14,59,38,0.08)] text-forest">
               {product.ageRange}
             </span>
             <span className="text-[11px] text-ink-secondary font-medium">
@@ -180,8 +180,8 @@ export function ProductCard({ product }: ProductCardProps) {
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-[11px] text-ink-secondary font-medium">{product.format}</span>
-                <span className="text-[11px] font-extrabold text-white bg-forest border border-forest/20 px-2 py-0.5 rounded-full">
-                  {discountPercent}% OFF
+                <span className="text-[11px] font-extrabold text-coral bg-coral-soft px-2 py-0.5 rounded">
+                  {discountPercent}% off
                 </span>
                 {savingsPaise > 0 && (
                   <span className="text-[11px] text-ink-secondary font-medium">
