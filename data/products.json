@@ -519,7 +519,9 @@
     "updatedAt": "2026-05-03T10:00:00.000Z",
     "status": "published",
     "meta": {
-      "utm_campaign": "nititales_launch_2026"
+      "utm_campaign": "nititales_launch_2026",
+      "youtubeVideoIds": ["DvLjtTpKcpI", "W67LcJEqiw0", "7f4HVfY2rOU", "CamMWOppax0", "hZuE4QOa8ho"],
+      "youtubeVideoLabels": ["Miko's Park Day", "Ready, Set, Oops!", "Broody the Kind Bear", "Minie's Big Heroes", "The Magic Button"]
     }
   }
 ]

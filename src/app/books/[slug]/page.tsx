@@ -21,6 +21,7 @@ import { ProductEmailCapture } from "@/components/products/ProductEmailCapture";
 import { bilingualLabelHindiEnglish, isBilingualHindiEnglish } from "@/lib/productFlags";
 import { getBookCoverMeta, lightenHex, CoverGlyph } from "@/components/products/BookCoverFallback";
 import { PurchaseCard } from "@/components/products/PurchaseCard";
+import { BookReadAloudSection } from "@/components/products/BookReadAloudSection";
 
 export async function generateStaticParams() {
     const products = await getAllProducts();
@@ -323,6 +324,18 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     Purpose: Build trust through quality/safety messaging
                 ═══════════════════════════════════════════════════════════════ */}
                 <BookQualitySection />
+
+                {/* ═══════════════════════════════════════════════════════════════
+                    SECTION 3b: READ-ALOUD VIDEOS (if available for this product)
+                ═══════════════════════════════════════════════════════════════ */}
+                {(() => {
+                    const meta = (product.meta as Record<string, unknown>) ?? {};
+                    const videoIds = (meta.youtubeVideoIds as string[]) ?? [];
+                    const videoLabels = (meta.youtubeVideoLabels as string[]) ?? [];
+                    return videoIds.length > 0 ? (
+                        <BookReadAloudSection videoIds={videoIds} labels={videoLabels} />
+                    ) : null;
+                })()}
 
             </div>
 

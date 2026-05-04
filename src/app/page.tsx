@@ -7,6 +7,7 @@ import { MikoBundles } from "@/components/products/MikoBundles";
 import { TestimonialSection } from "@/components/home/TestimonialSection";
 import { NewsletterForm } from "@/components/home/NewsletterForm";
 import { WhatsAppActivityKit } from "@/components/home/WhatsAppActivityKit";
+import { YouTubeChannelSection } from "@/components/home/YouTubeChannelSection";
 import { BUNDLE_5_DISCOUNT_PERCENT, SINGLE_BOOK_DISCOUNT_PERCENT } from "@/lib/pricing";
 
 export default async function Home() {
@@ -64,6 +65,9 @@ function HomeContent({ heroProducts, mikoSeriesProducts, testimonials, allProduc
       {testimonials.length > 0 && (
         <TestimonialSection testimonials={testimonials} />
       )}
+
+      {/* YouTube Channel Section */}
+      <YouTubeChannelSection />
 
       {/* All Books Section */}
       <section className="py-20 lg:py-28 bg-pale-yellow">

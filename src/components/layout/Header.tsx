@@ -37,6 +37,7 @@ export function Header() {
         { name: "Home", href: "/" },
         { name: "Books", href: "/books" },
         { name: "Reading Journey", href: "/miko-reading-journey" },
+        { name: "Story Time", href: "/story-time" },
         { name: "Blog", href: "/blog" },
         { name: "About", href: "/about" },
         { name: "FAQ", href: "/faq" },
