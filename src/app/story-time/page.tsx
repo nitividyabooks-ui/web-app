@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 const CHANNEL_URL = "https://www.youtube.com/channel/UCHuY7vX820c3N1T9iBOsn6g";
 const SUBSCRIBE_URL = "https://www.youtube.com/channel/UCHuY7vX820c3N1T9iBOsn6g?sub_confirmation=1";
-const PLAYLIST_EMBED = "https://www.youtube.com/embed/videoseries?list=UUHuY7vX820c3N1T9iBOsn6g";
+const FEATURED_VIDEO_EMBED = "https://www.youtube.com/embed/DvLjtTpKcpI";
 
 const NITITALES_VIDEOS = {
     ids: ["DvLjtTpKcpI", "W67LcJEqiw0", "7f4HVfY2rOU", "CamMWOppax0", "hZuE4QOa8ho"],
@@ -64,16 +64,17 @@ export default function StoryTimePage() {
                 </div>
             </section>
 
-            {/* Featured Playlist Embed */}
+            {/* Featured Video */}
             <section className="py-12 md:py-16 bg-white">
                 <div className="container mx-auto px-4 md:px-6">
-                    <h2 className="font-heading text-2xl md:text-3xl font-bold text-ink text-center mb-6">
-                        Watch the Full Playlist
+                    <h2 className="font-heading text-2xl md:text-3xl font-bold text-ink text-center mb-2">
+                        Start with Miko
                     </h2>
+                    <p className="text-center text-ink-secondary mb-6">Miko's Park Day Adventure — a story about resilience</p>
                     <div className="max-w-3xl mx-auto rounded-2xl overflow-hidden shadow-xl aspect-video">
                         <iframe
-                            src={PLAYLIST_EMBED}
-                            title="NitiVidya Story Time Playlist"
+                            src={FEATURED_VIDEO_EMBED}
+                            title="Miko's Park Day Adventure — Nititales"
                             className="w-full h-full"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowFullScreen
