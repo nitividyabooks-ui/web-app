@@ -11,7 +11,8 @@
     "start": "next start",
     "lint": "eslint",
     "products:export": "node scripts/export-products.js",
-    "products:import": "node scripts/import-products.js"
+    "products:import": "node scripts/import-products.js",
+    "check:apis": "node --env-file=.env scripts/check-api-keys.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.74.0",

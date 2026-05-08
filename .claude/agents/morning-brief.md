@@ -20,7 +20,10 @@ The owner reads this brief on their phone (Claude app) every morning. It should 
 
 Run these in parallel where possible, then wait for all results:
 
-### Check 0: Pending Deployments
+### Check 0: API Health (fast — runs first)
+Call `https://nitividyabooks.com/api/admin/health` via curl. If any service is down, flag it at the top of the brief as 🚨 URGENT before running other checks — no point syncing Amazon data if the DB is down.
+
+### Check 1: Pending Deployments
 Run `git log origin/main..HEAD --oneline` to check if there are any local commits not yet pushed to GitHub. If yes, note them in the brief as "⚠️ Unpushed changes detected — say 'deploy pending changes' to push them live."
 
 ### Check A: Amazon Listings
