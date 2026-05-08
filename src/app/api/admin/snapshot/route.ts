@@ -73,20 +73,29 @@ export async function GET(req: NextRequest) {
         }
 
         if (section === "all" || section === "products") {
-            const products = await prisma.product.findMany({
-                select: {
-                    id: true,
-                    title: true,
-                    slug: true,
-                    price: true,
-                    published: true,
-                    metaTitle: true,
-                    metaDescription: true,
-                    inventoryQuantity: true,
-                    inventoryStatus: true,
-                },
-                orderBy: { title: "asc" },
-            });
+            const [products, orderCounts] = await Promise.all([
+                prisma.product.findMany({
+                    select: {
+                        id: true,
+                        title: true,
+                        slug: true,
+                        price: true,
+                        published: true,
+                        metaTitle: true,
+                        metaDescription: true,
+                        inventoryQuantity: true,
+                        inventoryStatus: true,
+                    },
+                    orderBy: { title: "asc" },
+                }),
+                prisma.orderItem.groupBy({
+                    by: ["productId"],
+                    _count: { _all: true },
+                }),
+            ]);
+            const orderCountMap = Object.fromEntries(
+                orderCounts.map(o => [o.productId, o._count._all])
+            );
             results.products = products.map(p => ({
                 id: p.id,
                 title: p.title,
@@ -95,6 +104,7 @@ export async function GET(req: NextRequest) {
                 active: p.published,
                 inventoryQuantity: p.inventoryQuantity,
                 inventoryStatus: p.inventoryStatus,
+                totalOrders: orderCountMap[p.id] ?? 0,
                 metaTitleLength: p.metaTitle?.length ?? 0,
                 metaDescriptionLength: p.metaDescription?.length ?? 0,
                 metaTitle: p.metaTitle,

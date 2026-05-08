@@ -1,20 +1,24 @@
-import { BetaAnalyticsDataClient } from "@google-analytics/data";
+import { BetaAnalyticsDataClient, v1alpha } from "@google-analytics/data";
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
 // Credentials come from env vars extracted from the service account JSON key.
 // GA4_PRIVATE_KEY stores newlines as literal \n — replace them here.
-function getClient() {
+function getCredentials() {
     const email = process.env.GA4_CLIENT_EMAIL;
     const rawKey = process.env.GA4_PRIVATE_KEY;
     if (!email || !rawKey) {
         throw new Error("GA4_CLIENT_EMAIL or GA4_PRIVATE_KEY not set. See setup guide.");
     }
-    return new BetaAnalyticsDataClient({
-        credentials: {
-            client_email: email,
-            private_key: rawKey.replace(/\\n/g, "\n"),
-        },
-    });
+    return { client_email: email, private_key: rawKey.replace(/\\n/g, "\n") };
+}
+
+function getClient() {
+    return new BetaAnalyticsDataClient({ credentials: getCredentials() });
+}
+
+// runFunnelReport is only available on the v1alpha client
+function getAlphaClient() {
+    return new v1alpha.AlphaAnalyticsDataClient({ credentials: getCredentials() });
 }
 
 const PROPERTY = () => {
@@ -50,7 +54,7 @@ export type TopPage = {
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-function val(row: { dimensionValues?: { value?: string | null }[]; metricValues?: { value?: string | null }[] } | null | undefined, type: "dim" | "met", idx: number): string {
+function val(row: { dimensionValues?: { value?: string | null }[] | null; metricValues?: { value?: string | null }[] | null } | null | undefined, type: "dim" | "met", idx: number): string {
     if (!row) return "0";
     const arr = type === "dim" ? row.dimensionValues : row.metricValues;
     return arr?.[idx]?.value ?? "0";
@@ -152,9 +156,10 @@ export async function getTrafficOverview(): Promise<TrafficOverview> {
 // ─── Purchase Funnel ─────────────────────────────────────────────────────────
 // Tracks the full journey: Homepage → Product → Cart → Checkout → Payment
 export async function getPurchaseFunnel(): Promise<PurchaseFunnel> {
-    const client = getClient();
+    const client = getAlphaClient();
 
-    const [res] = await client.runFunnelReport({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [res] = await (client.runFunnelReport as any)({
         property: PROPERTY(),
         dateRanges: [{ startDate: "30daysAgo", endDate: "today" }],
         funnel: {
@@ -196,7 +201,7 @@ export async function getPurchaseFunnel(): Promise<PurchaseFunnel> {
         funnelVisualizationType: "STANDARD_FUNNEL",
     });
 
-    const counts = (res.funnelTable?.rows ?? []).map(r =>
+    const counts = ((res as any).funnelTable?.rows ?? []).map((r: any) =>
         parseInt(r.metricValues?.[0]?.value ?? "0", 10)
     );
 
@@ -209,9 +214,10 @@ export async function getPurchaseFunnel(): Promise<PurchaseFunnel> {
 
 // ─── Lead Capture Funnel ─────────────────────────────────────────────────────
 export async function getLeadFunnel(): Promise<LeadFunnel> {
-    const client = getClient();
+    const client = getAlphaClient();
 
-    const [res] = await client.runFunnelReport({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [res] = await (client.runFunnelReport as any)({
         property: PROPERTY(),
         dateRanges: [{ startDate: "30daysAgo", endDate: "today" }],
         funnel: {
@@ -229,7 +235,7 @@ export async function getLeadFunnel(): Promise<LeadFunnel> {
         funnelVisualizationType: "STANDARD_FUNNEL",
     });
 
-    const counts = (res.funnelTable?.rows ?? []).map(r =>
+    const counts = ((res as any).funnelTable?.rows ?? []).map((r: any) =>
         parseInt(r.metricValues?.[0]?.value ?? "0", 10)
     );
 
