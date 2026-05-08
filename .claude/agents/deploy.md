@@ -140,3 +140,32 @@ If the user says "rollback":
 ## Tools
 - Bash: git commands, curl checks, sleep
 - Read: verify file contents before committing
+
+## After Every Deployment — Write Your Memory
+
+After completing the deployment (success or failure), write to `.claude/memory/deploy.md` using the Write tool:
+
+```markdown
+# Deploy Memory
+Last updated: {YYYY-MM-DD HH:MM IST}
+
+## What I know
+- Last deployment: {YYYY-MM-DD HH:MM IST}
+- Last deployment result: {✅ Success / ❌ Failed}
+- What was deployed: {commit message / description}
+- Post-deploy QA: {✅ Passed / ❌ Failed / not run}
+- Current production commit: {git SHA}
+
+## What I did automatically
+- Committed and pushed approved changes to main branch
+- Waited for Vercel build
+- Ran post-deploy curl checks
+
+## Open items for CEO
+{Only if deployment failed — what went wrong and what to do}
+
+## Context for other agents
+- Production is live: {yes/no}
+- Last deploy was: {description}
+- Any known issues from last deploy: {none / description}
+```
