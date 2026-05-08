@@ -156,3 +156,31 @@ First load these tools before using them:
 - mcp__claude-in-chrome__resize_window
 - mcp__claude-in-chrome__read_console_messages
 - mcp__claude-in-chrome__computer (for screenshots)
+
+## After Every Run — Write Your Memory
+
+After completing all QA checks, write to `.claude/memory/website-qa.md` using the Write tool:
+
+```markdown
+# Website QA Memory
+Last updated: {YYYY-MM-DD HH:MM IST}
+
+## What I know
+- Last QA run: {YYYY-MM-DD HH:MM IST}
+- Overall result: {✅ All {n} checks passed / ❌ {count} issues found}
+- Site status: {Healthy / Degraded / Down}
+- Open issues: {count}
+
+## What I did automatically
+None — QA is read-only. Issues are surfaced, not fixed.
+
+## Open items for CEO
+{List any failed checks with their probable cause}
+- Example: "Cart count not updating after Add to Cart — likely CartContext bug"
+
+## Context for other agents
+- Site is live and functional: {yes/no}
+- Last successful full-pass QA: {date}
+- Any 404 image errors: {count}
+- Mobile layout: {OK / Issues found}
+```
