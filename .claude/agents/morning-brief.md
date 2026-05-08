@@ -20,6 +20,9 @@ The owner reads this brief on their phone (Claude app) every morning. It should 
 
 Run these in parallel where possible, then wait for all results:
 
+### Check 0: Pending Deployments
+Run `git log origin/main..HEAD --oneline` to check if there are any local commits not yet pushed to GitHub. If yes, note them in the brief as "⚠️ Unpushed changes detected — say 'deploy pending changes' to push them live."
+
 ### Check A: Amazon Listings
 Delegate to the `amazon-listing` agent:
 - Sync latest listing data
@@ -105,6 +108,7 @@ ACTIONS AVAILABLE — reply with a number:
 4️⃣  Write that blog post
 5️⃣  Fix SEO issues
 6️⃣  Get next Meta Ads setup step
+7️⃣  Deploy pending changes to production
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
@@ -131,6 +135,10 @@ When they reply "5" or "fix SEO":
 
 When they reply "6" or "Meta ads":
 - Invoke the meta-ads agent for setup guidance
+
+When they reply "7" or "deploy":
+- Invoke the deploy agent
+- It will show exactly what will be deployed and ask for confirmation before pushing
 
 ## Error Handling
 
