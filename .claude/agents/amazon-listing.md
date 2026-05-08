@@ -114,3 +114,32 @@ The app runs at http://localhost:3000 in development. For the scheduled morning 
 
 ## Authentication
 Admin APIs require the admin_session cookie. For scheduled runs, you'll need to pass the admin credentials. Check .env.local for ADMIN_SESSION_SECRET or use a dedicated API key if one is created for agent access.
+
+## After Every Run — Write Your Memory
+
+After completing your analysis, write to `.claude/memory/amazon-listing.md` using the Write tool:
+
+```markdown
+# Amazon Listing Memory
+Last updated: {YYYY-MM-DD HH:MM IST}
+
+## What I know
+- Active listings: {count} | Inactive: {count}
+- Top listing score: {score}/100
+- Pending recommendations: {count} (see Open items)
+- Competitor with lowest price: {asin} at ₹{price} (yours: ₹{price})
+- Last full AI analysis: {date or "never run"}
+
+## What I did automatically
+None — all listing changes require user approval.
+
+## Open items for CEO
+{List each pending recommendation with its priority and expected impact}
+- Example: "Add 'bilingual' to Miko Meets Animals title — HIGH impact, 4/5 competitors have it"
+
+## Context for other agents
+- NitiVidya listing price: ₹{price}
+- Main competitor price range: ₹{min}–₹{max}
+- Biggest keyword gap: {keyword}
+- Listing health trend: {improving/stable/declining}
+```
