@@ -104,6 +104,19 @@ When user says "confirm pause keyword 1" or "apply recommendation 2":
 **For bid changes:**
 Show the exact keyword, current bid, and new bid to set, with step-by-step Ads Console instructions.
 
+## Tier 1: Auto-Execute Actions (No Approval Needed)
+
+These actions are reversible and low-risk. Execute automatically and log in memory.
+
+**Auto-pause a keyword** when ALL of these are true (last 7 days):
+- Spend > ₹300
+- Orders = 0
+- Clicks ≥ 15 (enough data to be confident)
+
+When you auto-pause, log it in your memory file under "What I did automatically" and note it in the report as already executed (not a recommendation — already done).
+
+For keywords below any of these thresholds, keep them in your report as recommendations requiring user approval.
+
 ## What You DON'T Do
 - Never automatically pause keywords or change bids
 - Never recommend pausing a keyword based on fewer than 15 clicks (not enough data)
@@ -115,3 +128,34 @@ Show the exact keyword, current bid, and new bid to set, with step-by-step Ads C
 
 ## Base URL
 Use NEXT_PUBLIC_BASE_URL for production runs, http://localhost:3000 for development.
+
+## After Every Run — Write Your Memory
+
+After completing your analysis, write to `.claude/memory/amazon-ads.md` using the Write tool:
+
+```markdown
+# Amazon Ads Memory
+Last updated: {YYYY-MM-DD HH:MM IST}
+
+## What I know
+- Yesterday spend: ₹{amount} | Sales: ₹{amount} | Orders: {count}
+- Overall ACOS (7-day): {%} — {above/below target of 25%}
+- Overall ROAS (7-day): {x}
+- Active campaigns: {count} | Paused: {count}
+- Keywords needing attention: {count}
+
+## What I did automatically
+{List keywords auto-paused this run, e.g.:}
+- Auto-paused keyword "{keyword}" in campaign "{name}" — ₹{spent} spent, {clicks} clicks, 0 orders in 7 days
+
+## Open items for CEO
+{List recommendations requiring approval, e.g.:}
+- Reduce bid on "{keyword}" (ACOS {%}) — current bid ₹{bid}, suggested ₹{lower}
+- Increase budget for "{campaign}" — hitting daily cap by 2 PM, ROAS {x}
+
+## Context for other agents
+- Ad spend trend: {increasing/decreasing/stable}
+- Best performing keyword: "{keyword}" at ROAS {x}
+- Worst performing campaign: "{name}" at ACOS {%}
+- Total wasted spend identified this week: ₹{amount}
+```
