@@ -12,7 +12,11 @@
     "lint": "eslint",
     "products:export": "node scripts/export-products.js",
     "products:import": "node scripts/import-products.js",
-    "check:apis": "node --env-file=.env scripts/check-api-keys.mjs"
+    "check:apis": "node --env-file=.env scripts/check-api-keys.mjs",
+    "test": "playwright test",
+    "test:prod": "BASE_URL=https://www.nitividyabooks.com playwright test",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.74.0",
@@ -39,6 +43,7 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^3.0.0",
     "@types/node": "^20",

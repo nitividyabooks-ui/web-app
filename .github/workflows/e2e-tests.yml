@@ -1,0 +1,82 @@
+name: E2E Tests
+
+on:
+  # Runs automatically after Vercel finishes deploying
+  deployment_status:
+  # Can also be triggered manually from GitHub Actions tab
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "URL to test (leave blank for production)"
+        required: false
+        default: "https://www.nitividyabooks.com"
+
+jobs:
+  test:
+    # Only run when Vercel deployment succeeds (not on pending/failure)
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success')
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: npx playwright test
+        env:
+          # Use the deployment URL from Vercel event, or the manual input, or production
+          BASE_URL: |
+            ${{
+              github.event.deployment_status.environment_url ||
+              github.event.inputs.base_url ||
+              'https://www.nitividyabooks.com'
+            }}
+          CI: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results-${{ github.run_number }}
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 14
+
+      - name: Comment on commit with results
+        if: always() && github.event_name == 'deployment_status'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let summary = '✅ All E2E tests passed';
+            try {
+              const results = JSON.parse(fs.readFileSync('test-results/results.json', 'utf8'));
+              const passed = results.suites?.reduce((a, s) => a + (s.specs?.filter(sp => sp.ok).length || 0), 0) || 0;
+              const failed = results.suites?.reduce((a, s) => a + (s.specs?.filter(sp => !sp.ok).length || 0), 0) || 0;
+              if (failed > 0) {
+                summary = `❌ ${failed} E2E test(s) failed, ${passed} passed`;
+              } else {
+                summary = `✅ All ${passed} E2E tests passed`;
+              }
+            } catch {}
+            github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: `**E2E Test Results** — [View details](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})\n\n${summary}`
+            });
