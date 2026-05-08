@@ -45,12 +45,19 @@ Delegate to the `website-qa` agent:
 - Run the 8-point QA checklist on the live site
 - Report: all pass / issues found
 
-### Check D: SEO + Blog Opportunity
+### Check D: Analytics Snapshot
+Call `https://www.nitividyabooks.com/api/admin/analytics` and extract:
+- Today's sessions + users
+- Biggest funnel drop-off step (where are most people leaving?)
+- Lead capture conversion rate
+If GA4 is not configured yet, skip this section and note it's pending setup.
+
+### Check E: SEO + Blog Opportunity
 Delegate to the `seo-optimizer` agent for a quick audit:
 - Check if any product pages have obvious SEO issues (title too long, missing meta description)
 - Suggest 1 blog topic for this week (use web search to find trending parent searches)
 
-### Check E: Meta Ads Status
+### Check F: Meta Ads Status
 Delegate to the `meta-ads` agent:
 - What setup step are we on?
 - Any action needed from the owner today?

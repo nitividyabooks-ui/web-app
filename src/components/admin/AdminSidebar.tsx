@@ -16,6 +16,7 @@ import {
     BarChart2,
     Target,
     Sparkles,
+    LineChart,
 } from "lucide-react";
 
 const navItems = [
@@ -28,6 +29,7 @@ const navItems = [
     { href: "/admin/testimonials", label: "Testimonials", icon: MessageSquare },
     { href: "/admin/messages", label: "Messages", icon: Mail },
     { href: "/admin/campaigns", label: "Campaigns", icon: TrendingUp },
+    { href: "/admin/analytics", label: "Analytics", icon: LineChart },
 ];
 
 const amazonNavItems = [
