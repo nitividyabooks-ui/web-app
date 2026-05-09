@@ -17,13 +17,16 @@ function getCredentials() {
     return { client_email: email, private_key: privateKey };
 }
 
+// Vercel serverless can't maintain gRPC connections — force REST transport
+const CLIENT_OPTS = { fallback: true } as const;
+
 function getClient() {
-    return new BetaAnalyticsDataClient({ credentials: getCredentials() });
+    return new BetaAnalyticsDataClient({ credentials: getCredentials(), ...CLIENT_OPTS });
 }
 
 // runFunnelReport is only available on the v1alpha client
 function getAlphaClient() {
-    return new v1alpha.AlphaAnalyticsDataClient({ credentials: getCredentials() });
+    return new v1alpha.AlphaAnalyticsDataClient({ credentials: getCredentials(), ...CLIENT_OPTS });
 }
 
 const PROPERTY = () => {
