@@ -121,17 +121,6 @@ export async function getTrafficOverview(): Promise<TrafficOverview> {
         }),
     ]);
 
-    const parse = (rangeName: string) => {
-        const rows = overviewRes[0]?.rows?.filter(r => val(r, "dim", 0) === rangeName) ?? [];
-        if (rows.length === 0) {
-            // When no dimension is requested, rows are indexed by dateRange
-            const idx = rangeName === "today" ? 0 : rangeName === "7d" ? 1 : 2;
-            const r = overviewRes[0]?.rows?.[idx];
-            return { sessions: num(r, 0), users: num(r, 1), newUsers: num(r, 2), pageViews: num(r, 3) };
-        }
-        return { sessions: num(rows[0], 0), users: num(rows[0], 1), newUsers: num(rows[0], 2), pageViews: num(rows[0], 3) };
-    };
-
     // When multiple dateRanges and no dimension, GA returns one row per dateRange
     const todayRow = overviewRes[0]?.rows?.[0];
     const sevenRow = overviewRes[0]?.rows?.[1];

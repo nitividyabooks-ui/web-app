@@ -73,15 +73,6 @@ export async function GET(req: Request) {
                 { status: 401 }
             );
         }
-        const raw = process.env.GA4_PRIVATE_KEY ?? "";
-        const processed = raw.replace(/^["']|["']$/g, "").replace(/\\n/g, "\n").replace(/\r\n/g, "\n");
-        return NextResponse.json({
-            error: message,
-            debug: {
-                rawFirst30: raw.slice(0, 30),
-                processedFirst30: processed.slice(0, 30),
-                processedStartsWithBegin: processed.startsWith("-----BEGIN"),
-            },
-        }, { status: 500 });
+        return NextResponse.json({ error: message }, { status: 500 });
     }
 }
