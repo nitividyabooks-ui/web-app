@@ -9,7 +9,11 @@ function getCredentials() {
     if (!email || !rawKey) {
         throw new Error("GA4_CLIENT_EMAIL or GA4_PRIVATE_KEY not set. See setup guide.");
     }
-    return { client_email: email, private_key: rawKey.replace(/\\n/g, "\n") };
+    const privateKey = rawKey
+        .replace(/\\n/g, "\n")  // literal \n sequences → actual newline (dotenv format)
+        .replace(/\r\n/g, "\n") // CRLF → LF (Windows paste into Vercel)
+        .replace(/\r/g, "\n");  // stray CR → LF
+    return { client_email: email, private_key: privateKey };
 }
 
 function getClient() {
