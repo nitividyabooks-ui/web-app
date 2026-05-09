@@ -163,12 +163,12 @@ export async function getPurchaseFunnel(): Promise<PurchaseFunnel> {
             steps: [
                 {
                     name: "1. Visited Site",
-                    filterExpression: { funnel: { funnelEventFilter: { eventName: "page_view" } } },
+                    filterExpression: { funnelFilter: { funnelEventFilter: { eventName: "page_view" } } },
                 },
                 {
                     name: "2. Viewed a Product",
                     filterExpression: {
-                        funnel: {
+                        funnelFilter: {
                             funnelEventFilter: {
                                 eventName: "page_view",
                                 funnelParameterFilterExpression: {
@@ -183,15 +183,15 @@ export async function getPurchaseFunnel(): Promise<PurchaseFunnel> {
                 },
                 {
                     name: "3. Added to Cart",
-                    filterExpression: { funnel: { funnelEventFilter: { eventName: "add_to_cart" } } },
+                    filterExpression: { funnelFilter: { funnelEventFilter: { eventName: "add_to_cart" } } },
                 },
                 {
                     name: "4. Started Checkout",
-                    filterExpression: { funnel: { funnelEventFilter: { eventName: "checkout_started" } } },
+                    filterExpression: { funnelFilter: { funnelEventFilter: { eventName: "checkout_started" } } },
                 },
                 {
                     name: "5. Completed Payment",
-                    filterExpression: { funnel: { funnelEventFilter: { eventName: "payment_success" } } },
+                    filterExpression: { funnelFilter: { funnelEventFilter: { eventName: "payment_success" } } },
                 },
             ],
         },
@@ -221,11 +221,11 @@ export async function getLeadFunnel(): Promise<LeadFunnel> {
             steps: [
                 {
                     name: "1. Modal Shown",
-                    filterExpression: { funnel: { funnelEventFilter: { eventName: "lead_modal_shown" } } },
+                    filterExpression: { funnelFilter: { funnelEventFilter: { eventName: "lead_modal_shown" } } },
                 },
                 {
                     name: "2. Lead Captured",
-                    filterExpression: { funnel: { funnelEventFilter: { eventName: "lead_captured" } } },
+                    filterExpression: { funnelFilter: { funnelEventFilter: { eventName: "lead_captured" } } },
                 },
             ],
         },
