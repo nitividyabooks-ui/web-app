@@ -73,6 +73,17 @@ export async function GET(req: Request) {
                 { status: 401 }
             );
         }
-        return NextResponse.json({ error: message }, { status: 500 });
+        const key = process.env.GA4_PRIVATE_KEY ?? "";
+        return NextResponse.json({
+            error: message,
+            debug: {
+                keyLength: key.length,
+                keyHasLiteralBackslashN: key.includes("\\n"),
+                keyHasActualNewlines: key.includes("\n"),
+                keyHasCRLF: key.includes("\r\n"),
+                keyStartsCorrectly: key.trimStart().startsWith("-----BEGIN"),
+                keyEndsCorrectly: key.trimEnd().endsWith("-----"),
+            },
+        }, { status: 500 });
     }
 }
