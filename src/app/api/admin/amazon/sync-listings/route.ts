@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { gunzip } from "zlib";
+import { promisify } from "util";
 import { prisma } from "@/lib/prisma";
 import { signedSpApiRequest } from "@/lib/amazon-sp-api";
+
+const gunzipAsync = promisify(gunzip);
 
 // POST  — create the listings report, return reportId immediately
 // GET   — poll status; when DONE download TSV and upsert AmazonListing rows
@@ -80,13 +84,16 @@ export async function GET(req: NextRequest) {
         const downloadUrl: string = docData.url;
         const compression: string = docData.compressionAlgorithm ?? "none";
 
-        // 3. Download TSV
+        // 3. Download and decompress TSV (Amazon often returns GZIP-compressed reports)
         const tsvRes = await fetch(downloadUrl);
         if (!tsvRes.ok) {
             return NextResponse.json({ error: `Download failed: ${tsvRes.status}` }, { status: 500 });
         }
 
-        const tsvText = await tsvRes.text();
+        const rawBuffer = Buffer.from(await tsvRes.arrayBuffer());
+        const tsvText = compression === "GZIP"
+            ? (await gunzipAsync(rawBuffer)).toString("utf-8")
+            : rawBuffer.toString("utf-8");
 
         // debug=1 — return raw info so we can inspect headers/compression
         if (req.nextUrl.searchParams.get("debug") === "1") {
