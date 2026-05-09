@@ -163,19 +163,17 @@ export async function getPurchaseFunnel(): Promise<PurchaseFunnel> {
             steps: [
                 {
                     name: "1. Visited Site",
-                    filterExpression: { funnelFilter: { funnelEventFilter: { eventName: "page_view" } } },
+                    filterExpression: { funnelEventFilter: { eventName: "page_view" } },
                 },
                 {
                     name: "2. Viewed a Product",
                     filterExpression: {
-                        funnelFilter: {
-                            funnelEventFilter: {
-                                eventName: "page_view",
-                                funnelParameterFilterExpression: {
-                                    funnelParameterFilter: {
-                                        eventParameterName: "page_location",
-                                        stringFilter: { matchType: "CONTAINS", value: "/books/" },
-                                    },
+                        funnelEventFilter: {
+                            eventName: "page_view",
+                            funnelParameterFilterExpression: {
+                                funnelParameterFilter: {
+                                    eventParameterName: "page_location",
+                                    stringFilter: { matchType: "CONTAINS", value: "/books/" },
                                 },
                             },
                         },
@@ -183,15 +181,15 @@ export async function getPurchaseFunnel(): Promise<PurchaseFunnel> {
                 },
                 {
                     name: "3. Added to Cart",
-                    filterExpression: { funnelFilter: { funnelEventFilter: { eventName: "add_to_cart" } } },
+                    filterExpression: { funnelEventFilter: { eventName: "add_to_cart" } },
                 },
                 {
                     name: "4. Started Checkout",
-                    filterExpression: { funnelFilter: { funnelEventFilter: { eventName: "checkout_started" } } },
+                    filterExpression: { funnelEventFilter: { eventName: "checkout_started" } },
                 },
                 {
                     name: "5. Completed Payment",
-                    filterExpression: { funnelFilter: { funnelEventFilter: { eventName: "payment_success" } } },
+                    filterExpression: { funnelEventFilter: { eventName: "payment_success" } },
                 },
             ],
         },
@@ -221,11 +219,11 @@ export async function getLeadFunnel(): Promise<LeadFunnel> {
             steps: [
                 {
                     name: "1. Modal Shown",
-                    filterExpression: { funnelFilter: { funnelEventFilter: { eventName: "lead_modal_shown" } } },
+                    filterExpression: { funnelEventFilter: { eventName: "lead_modal_shown" } },
                 },
                 {
                     name: "2. Lead Captured",
-                    filterExpression: { funnelFilter: { funnelEventFilter: { eventName: "lead_captured" } } },
+                    filterExpression: { funnelEventFilter: { eventName: "lead_captured" } },
                 },
             ],
         },
