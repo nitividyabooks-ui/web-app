@@ -78,11 +78,10 @@ export async function GET(req: Request) {
             error: message,
             debug: {
                 keyLength: key.length,
+                keyFirst40: key.slice(0, 40),
+                keyLast20: key.slice(-20),
                 keyHasLiteralBackslashN: key.includes("\\n"),
                 keyHasActualNewlines: key.includes("\n"),
-                keyHasCRLF: key.includes("\r\n"),
-                keyStartsCorrectly: key.trimStart().startsWith("-----BEGIN"),
-                keyEndsCorrectly: key.trimEnd().endsWith("-----"),
             },
         }, { status: 500 });
     }
