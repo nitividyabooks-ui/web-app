@@ -78,6 +78,7 @@ export async function GET(req: NextRequest) {
 
         const docData = await docRes.json();
         const downloadUrl: string = docData.url;
+        const compression: string = docData.compressionAlgorithm ?? "none";
 
         // 3. Download TSV
         const tsvRes = await fetch(downloadUrl);
@@ -86,6 +87,17 @@ export async function GET(req: NextRequest) {
         }
 
         const tsvText = await tsvRes.text();
+
+        // debug=1 — return raw info so we can inspect headers/compression
+        if (req.nextUrl.searchParams.get("debug") === "1") {
+            return NextResponse.json({
+                compression,
+                byteLength: tsvText.length,
+                firstLine: tsvText.split("\n")[0]?.slice(0, 500),
+                lineCount: tsvText.split("\n").filter(Boolean).length,
+            });
+        }
+
         const rows = parseTsv(tsvText);
 
         // 4. Upsert listings
