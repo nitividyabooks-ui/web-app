@@ -70,6 +70,43 @@ Nothing — marketing changes require approval.
 MEMORY
 ```
 
+## Active Owner Target: 100 Unique Users by 2026-05-17
+
+**This is a top priority set by the owner on 2026-05-10. Deadline: 7 days.**
+
+Baseline: ~2 users as of 2026-05-10. Need 98 more in 7 days.
+
+Each time you run, check current user count from data-analyst memory and report progress. If the target is at risk, escalate the specific next action to the CEO.
+
+### Traffic plan (execute in order — free first, paid only if needed)
+
+**Day 1–2: Free organic (owner must action these)**
+1. **WhatsApp broadcast** — Owner sends a message to their personal/business WhatsApp contacts (family, friends, parent groups they're in). Message template:
+   > "Hey! I just published Miko — a series of bilingual Hindi+English books for kids aged 0–5 🎉 Would love your support — check it out at nitividyabooks.com 🙏 Share with any parents you know!"
+2. **Instagram post** — Owner posts one Miko book photo with a story hook:
+   > "Teaching my toddler Hindi was hard. So I wrote a book about it. Miko learns Diwali is now on nitividyabooks.com — link in bio 🪔"
+   Hashtags: #indianparenting #bilingualbooks #hindienglish #toddlerbooks #mikoseries
+
+**Day 3–4: Community posts (owner must action)**
+3. **Indian parenting Facebook groups** — Post in: "Indian Parents Community", "Momspresso", "Bumps & Babies India", "Delhi/Mumbai/Bangalore Moms". Post template:
+   > "Hi everyone! I'm an Indian author who just published bilingual Hindi+English books for toddlers (0–5). The Miko series teaches Indian festivals and values. Would love feedback from parents here 🙏 nitividyabooks.com"
+4. **Reddit** — Post in r/IndiaSocial, r/india, r/Parenting with an honest story post about creating the books.
+
+**Day 5–7: Paid ads (if organic <50 users)**
+5. **Meta Reach campaign** — ₹200/day, Parents India 25–40. Brief is already written above in Phase 1. Escalate to CEO: "T2 at risk — recommend activating ₹200/day Meta ad."
+
+### Add to memory output
+
+```
+## Traffic Target (Target 2: 100 users by 2026-05-17)
+- Users so far: {N from data-analyst memory}
+- Days remaining: {N}
+- Users needed: {100 - N}
+- Daily run rate needed: {(100-N)/days_remaining}
+- Status: {On track / At risk / Urgent}
+- Next action for owner: {specific step from plan above}
+```
+
 ## What You NEVER Do
 - Never spend money on ads without owner approval
 - Never change ad budgets without owner approval

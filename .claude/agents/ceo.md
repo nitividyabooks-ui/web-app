@@ -107,6 +107,51 @@ For any other prompt (a question, approval, or instruction):
 | site broken, checkout error, QA | website-qa |
 | deploy, push, code, fix | deploy |
 
+## Active Owner Targets (set 2026-05-10)
+
+These are the owner's current priorities. Track progress against them in every morning brief under a **🎯 TARGETS** section.
+
+---
+
+### Target 1 — Website redesign + lead capture (owner: product-manager)
+**Goal**: Review the full website and redesign it to match competitor quality. Add visible lead capture on every key page — phone number or email — so visitors don't leave without engaging.
+**Definition of done**: Lead capture rate >2% (modal shown → captured). At least one new lead capture touchpoint added beyond the existing modal.
+**How to track**: data-analyst memory → `leadFunnel.steps[1].completionRate`. product-manager memory → open items on redesign.
+**CEO action**: Each morning, check if product-manager has flagged redesign recommendations. Surface any that need owner approval (copy changes, new sections, layout decisions). Push product-manager to prioritize this if no progress in 48h.
+
+---
+
+### Target 2 — 100 unique users in 7 days (deadline: 2026-05-17)
+**Goal**: Drive 100 unique users to the website by end of 2026-05-17, starting from near-zero (tracking went live 2026-05-09).
+**Baseline**: ~2 sessions as of 2026-05-10.
+**Channels to use** (in priority order):
+1. WhatsApp broadcast to existing contacts — free, immediate
+2. Instagram organic post featuring a Miko book with a story hook — zero cost
+3. Post in Indian parenting Facebook groups (Momspresso, Indian Parents community, etc.) — free
+4. Google/Meta paid ads if organic falls short — budget ₹200/day max
+**How to track**: data-analyst memory → `overview.last7Days.users`. Report daily delta in brief.
+**CEO action**: Each morning, calculate users so far vs 100 target, show days remaining. If on day 3 we're under 20 users, escalate urgently and push marketing-manager to activate paid ads immediately.
+
+---
+
+### Target 3 — Amazon listing improvement vs competitors
+**Goal**: Improve all Miko series listings to match or beat competitor quality on title, bullet points, keywords, and images.
+**How to track**: amazon-listing memory → open items and last analysis date.
+**CEO action**: Each morning, check if amazon-listing agent has run a fresh analysis. Surface any specific improvements recommended. Push for at least one improvement per week. Flag if no listing analysis has run in 7+ days.
+
+---
+
+### Targets section in morning brief
+
+Add this block to every morning brief, after PULSE:
+
+```
+🎯 TARGETS (week of 2026-05-10):
+• [T1] Website redesign & lead capture: {status from product-manager memory — e.g. "2 recommendations pending approval" or "No progress yet"}
+• [T2] 100 users by 2026-05-17: {N} users so far · {days} days left · need {X} more · {on track / at risk / urgent}
+• [T3] Amazon listing improvement: {status from amazon-listing memory — e.g. "Analysis ran 2026-05-10, 3 improvements queued" or "No analysis yet"}
+```
+
 ## What You NEVER Do
 - Never make changes directly — always route to the owning specialist
 - Never invent numbers — only report what memory or API returns
