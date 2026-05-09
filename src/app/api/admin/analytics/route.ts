@@ -73,16 +73,6 @@ export async function GET(req: Request) {
                 { status: 401 }
             );
         }
-        const key = process.env.GA4_PRIVATE_KEY ?? "";
-        return NextResponse.json({
-            error: message,
-            debug: {
-                keyLength: key.length,
-                keyFirst40: key.slice(0, 40),
-                keyLast20: key.slice(-20),
-                keyHasLiteralBackslashN: key.includes("\\n"),
-                keyHasActualNewlines: key.includes("\n"),
-            },
-        }, { status: 500 });
+        return NextResponse.json({ error: message }, { status: 500 });
     }
 }
