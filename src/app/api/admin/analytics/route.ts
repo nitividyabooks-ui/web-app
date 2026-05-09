@@ -65,14 +65,27 @@ export async function GET(req: Request) {
             generatedAt: new Date().toISOString(),
         });
     } catch (err) {
-        const message = (err as Error).message;
-        // Surface auth errors clearly
+        const e = err as Error & { code?: unknown; details?: unknown; statusCode?: unknown };
+        const message = e.message ?? String(err);
         if (message.includes("invalid_grant") || message.includes("unauthorized")) {
             return NextResponse.json(
                 { error: "GA4 authentication failed. Check your service account credentials and make sure it has Viewer access to the GA4 property." },
                 { status: 401 }
             );
         }
-        return NextResponse.json({ error: message }, { status: 500 });
+        const raw = process.env.GA4_PRIVATE_KEY ?? "";
+        const processed = raw.replace(/^["']|["']$/g, "").replace(/\\n/g, "\n").replace(/\r\n/g, "\n");
+        return NextResponse.json({
+            error: message,
+            diag: {
+                errCode: e.code,
+                errDetails: e.details,
+                errStatusCode: e.statusCode,
+                errName: e.name,
+                keyLen: processed.length,
+                keyStart: processed.startsWith("-----BEGIN PRIVATE KEY-----"),
+                keyEnd: processed.trimEnd().endsWith("-----END PRIVATE KEY-----"),
+            },
+        }, { status: 500 });
     }
 }
