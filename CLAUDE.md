@@ -2,6 +2,38 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Read These First
+
+**For agent structure and company context**: See [`AGENTS.md`](./AGENTS.md) — covers all 11 agents, memory system, API endpoints, inter-agent data flow, and go-to-market phase.
+
+**For marketing strategy**: See `marketing/` folder — brand positioning, GTM phases, Amazon strategy, Instagram, Meta ads.
+
+---
+
+## Company
+
+**NitiVidya Books** — Indian cultural children's book brand. The **Miko series** (5 books, ages 0–5) teaches Indian festivals, values, and bilingual Hindi+English learning. Sold on the NitiVidya website and Amazon India.
+
+**Owner**: Nitin Sharma. Solo founder. Runs the business via Claude on phone.
+
+**Current phase**: Phase 1 → Phase 2 (building Amazon reviews and audience).
+
+---
+
+## Agent System
+
+NitiVidya runs 11 Claude agents that manage daily operations autonomously. The **CEO agent** is the owner's sole interface — it orchestrates all specialists and compiles a morning brief. See `AGENTS.md` for the full roster.
+
+Agent files live in `.claude/agents/`. Memory files live in `.claude/memory/`. Memory is committed to git by the CEO agent after each morning brief.
+
+---
+
+## Recent Changes (keep until superseded)
+
+- **2026-05-09**: GA4 browser tracking fixed. Removed `NEXT_PUBLIC_GTM_ID=GTM-XXXXXX` (placeholder) from Vercel. GA4 Measurement ID `G-1E32RCMV28` now loads directly. Data accumulating from this date. Server-side GA4 API (property `516454398`) was always configured.
+
+---
+
 ## Commands
 
 ```bash

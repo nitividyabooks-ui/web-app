@@ -83,4 +83,4 @@ These events are already flowing to GA4 from your site:
 | `lead_modal_shown` | Lead modal impression |
 | `lead_captured` | Phone number submitted |
 
-All events are sent via GTM + GA4 tag already configured in your site.
+All events are sent via GA4 direct (`G-1E32RCMV28`). The site previously used a GTM container (`GTM-XXXXXX` placeholder) which was removed on 2026-05-09 — GA4 now loads directly via `NEXT_PUBLIC_GA_ID`. Events flow through `window.dataLayer` → GA4 script.
