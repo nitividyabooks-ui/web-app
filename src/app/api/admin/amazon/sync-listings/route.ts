@@ -105,10 +105,10 @@ export async function GET(req: NextRequest) {
             });
         }
 
+        // 4. Upsert listings — strip BOM from first header key
         const rows = parseTsv(tsvText);
-
-        // 4. Upsert listings
         let synced = 0;
+        const errors: string[] = [];
         for (const row of rows) {
             const asin = row["product-id"] || row["asin1"] || "";
             if (!asin) continue;
@@ -118,6 +118,8 @@ export async function GET(req: NextRequest) {
             const qty = row["quantity"] ? parseInt(row["quantity"], 10) : null;
             const channel = row["fulfillment-channel"] ?? "";
             const status = row["status"] || (qty != null && qty > 0 ? "Active" : "Inactive");
+            // strip BOM from title key
+            const title = row["item-name"] || row["﻿item-name"] || "";
 
             try {
                 await prisma.amazonListing.upsert({
@@ -125,7 +127,7 @@ export async function GET(req: NextRequest) {
                     create: {
                         asin,
                         sku: row["seller-sku"] || null,
-                        title: row["item-name"] || "",
+                        title,
                         price: price && !isNaN(price) ? price : null,
                         inventoryQty: qty && !isNaN(qty) ? qty : null,
                         inventoryStatus: channel || null,
@@ -135,7 +137,7 @@ export async function GET(req: NextRequest) {
                     },
                     update: {
                         sku: row["seller-sku"] || null,
-                        title: row["item-name"] || "",
+                        title,
                         price: price && !isNaN(price) ? price : null,
                         inventoryQty: qty && !isNaN(qty) ? qty : null,
                         inventoryStatus: channel || null,
@@ -145,12 +147,12 @@ export async function GET(req: NextRequest) {
                     },
                 });
                 synced++;
-            } catch {
-                // skip rows with invalid data
+            } catch (e) {
+                errors.push(`${asin}: ${(e as Error).message}`);
             }
         }
 
-        return NextResponse.json({ reportId, status: "DONE", synced });
+        return NextResponse.json({ reportId, status: "DONE", parsed: rows.length, synced, errors });
     } catch (err) {
         return NextResponse.json({ error: (err as Error).message }, { status: 500 });
     }
