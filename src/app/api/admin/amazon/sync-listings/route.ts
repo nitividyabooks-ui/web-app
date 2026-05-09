@@ -95,16 +95,6 @@ export async function GET(req: NextRequest) {
             ? (await gunzipAsync(rawBuffer)).toString("utf-8")
             : rawBuffer.toString("utf-8");
 
-        // debug=1 — return raw info so we can inspect headers/compression
-        if (req.nextUrl.searchParams.get("debug") === "1") {
-            return NextResponse.json({
-                compression,
-                byteLength: tsvText.length,
-                firstLine: tsvText.split("\n")[0]?.slice(0, 500),
-                lineCount: tsvText.split("\n").filter(Boolean).length,
-            });
-        }
-
         // 4. Upsert listings — strip BOM from first header key
         const rows = parseTsv(tsvText);
         let synced = 0;
