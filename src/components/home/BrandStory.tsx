@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Languages, Sparkles, HandHeart } from "lucide-react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { Reveal } from "@/components/motion/Reveal";
 
 const PILLARS = [
     {
@@ -24,16 +25,19 @@ export function BrandStory() {
     return (
         <section className="py-14 lg:py-20 bg-paper">
             <div className="container mx-auto px-4 md:px-6">
-                <SectionHeading
-                    eyebrow="Why NitiVidya"
-                    title="More than just ABCs and talking animals"
-                    className="mb-10"
-                />
+                <Reveal>
+                    <SectionHeading
+                        eyebrow="Why NitiVidya"
+                        title="More than just ABCs and talking animals"
+                        className="mb-10"
+                    />
+                </Reveal>
 
                 <div className="grid sm:grid-cols-3 gap-5 md:gap-6">
-                    {PILLARS.map((pillar) => (
-                        <div
+                    {PILLARS.map((pillar, i) => (
+                        <Reveal
                             key={pillar.title}
+                            delay={i * 0.1}
                             className="bg-surface rounded-card border border-hairline shadow-card p-6 md:p-7"
                         >
                             <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-evergreen-soft text-evergreen">
@@ -43,7 +47,7 @@ export function BrandStory() {
                                 {pillar.title}
                             </h3>
                             <p className="mt-2 text-sm leading-relaxed text-ink-soft">{pillar.body}</p>
-                        </div>
+                        </Reveal>
                     ))}
                 </div>
 

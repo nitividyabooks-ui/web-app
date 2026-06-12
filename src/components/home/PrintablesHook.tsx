@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Printer, Palette, Hash, BookOpen } from "lucide-react";
+import { Reveal } from "@/components/motion/Reveal";
 
 const KIT_ITEMS = [
     { icon: <Palette className="w-4 h-4" />, label: "Coloring pages" },
@@ -15,7 +16,7 @@ export function PrintablesHook() {
     return (
         <section className="py-14 lg:py-20 bg-blush">
             <div className="container mx-auto px-4 md:px-6">
-                <div className="max-w-3xl mx-auto text-center">
+                <Reveal className="max-w-3xl mx-auto text-center">
                     <span className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-terracotta text-white mx-auto">
                         <Printer className="w-6 h-6" />
                     </span>
@@ -46,7 +47,7 @@ export function PrintablesHook() {
                         Get the free activity kit
                         <ArrowRight className="w-4 h-4" />
                     </Link>
-                </div>
+                </Reveal>
             </div>
         </section>
     );

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, Star } from "lucide-react";
 import { Product } from "@/lib/products";
 import { getStorageUrl } from "@/lib/storage";
+import { Parallax } from "@/components/motion/Parallax";
 
 interface HeroProps {
     products: Product[];
@@ -58,13 +59,16 @@ export function Hero({ products }: HeroProps) {
                         </div>
                     </div>
 
-                    {/* Fanned book stack */}
-                    <div className="anim-fade-up anim-delay-2 relative flex justify-center lg:justify-end min-w-0">
-                        <div
-                            className="absolute inset-x-4 top-1/2 -translate-y-1/2 h-[78%] rounded-[40%] bg-paper-deep"
-                            aria-hidden="true"
-                        />
-                        <div className="relative flex items-center -space-x-8 sm:-space-x-12 py-8 pr-2">
+                    {/* Fanned book stack — Parallax nested inside the CSS load
+                        animation; the two can't share an element (animation
+                        fill-mode overrides framer's inline transform) */}
+                    <div className="anim-fade-up anim-delay-2 min-w-0">
+                        <Parallax drift={18} className="relative flex justify-center lg:justify-end">
+                            <div
+                                className="absolute inset-x-4 top-1/2 -translate-y-1/2 h-[78%] rounded-[40%] bg-paper-deep"
+                                aria-hidden="true"
+                            />
+                            <div className="relative flex items-center -space-x-8 sm:-space-x-12 py-8 pr-2">
                             {covers.map((p, i) => (
                                 <Link
                                     key={p.id}
@@ -83,7 +87,8 @@ export function Hero({ products }: HeroProps) {
                                     />
                                 </Link>
                             ))}
-                        </div>
+                            </div>
+                        </Parallax>
                     </div>
                 </div>
             </div>

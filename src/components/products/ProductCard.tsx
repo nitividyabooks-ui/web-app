@@ -69,8 +69,12 @@ export function ProductCard({ product, listName = "All Books" }: ProductCardProp
     };
 
     return (
-        <Link href={`/books/${product.slug}`} className="group h-full" onClick={handleProductClick}>
-            <article className="bg-surface rounded-card border border-hairline shadow-card hover:shadow-lift hover:-translate-y-1 transition-all duration-200 overflow-hidden h-full flex flex-col">
+        <Link
+            href={`/books/${product.slug}`}
+            className="group block h-full tilt-parent"
+            onClick={handleProductClick}
+        >
+            <article className="tilt-card bg-surface rounded-card border border-hairline shadow-card hover:shadow-lift overflow-hidden h-full flex flex-col">
                 {/* Cover */}
                 <div className="relative aspect-[4/3] bg-paper-deep">
                     <Image

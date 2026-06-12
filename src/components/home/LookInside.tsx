@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Product } from "@/lib/products";
 import { getStorageUrl } from "@/lib/storage";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { Reveal } from "@/components/motion/Reveal";
 
 interface LookInsideProps {
     products: Product[];
@@ -38,20 +39,23 @@ export function LookInside({ products }: LookInsideProps) {
     return (
         <section id="look-inside" className="py-14 lg:py-20 bg-paper scroll-mt-24">
             <div className="container mx-auto px-4 md:px-6">
-                <SectionHeading
-                    eyebrow="Look inside"
-                    title="Open a page before you buy"
-                    subtitle="Real spreads from the books — bold Indian art, one idea per page, Hindi and English side by side."
-                    className="mb-10"
-                />
+                <Reveal>
+                    <SectionHeading
+                        eyebrow="Look inside"
+                        title="Open a page before you buy"
+                        subtitle="Real spreads from the books — bold Indian art, one idea per page, Hindi and English side by side."
+                        className="mb-10"
+                    />
+                </Reveal>
 
                 <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-4 px-4 pb-2 lg:grid lg:grid-cols-3 lg:mx-0 lg:px-0 lg:overflow-visible lg:gap-6">
-                    {spreads.map((spread) => (
-                        <Link
+                    {spreads.map((spread, i) => (
+                        <Reveal
                             key={spread.src}
-                            href={`/books/${spread.productSlug}`}
-                            className="snap-start flex-shrink-0 w-[80%] sm:w-[55%] lg:w-auto group"
+                            delay={(i % 3) * 0.08}
+                            className="snap-start flex-shrink-0 w-[80%] sm:w-[55%] lg:w-auto"
                         >
+                        <Link href={`/books/${spread.productSlug}`} className="group block">
                             <div className="relative aspect-[4/3] rounded-card overflow-hidden border border-hairline shadow-card group-hover:shadow-lift transition-shadow">
                                 <Image
                                     src={spread.src}
@@ -65,6 +69,7 @@ export function LookInside({ products }: LookInsideProps) {
                                 {spread.productTitle}
                             </p>
                         </Link>
+                        </Reveal>
                     ))}
                 </div>
             </div>

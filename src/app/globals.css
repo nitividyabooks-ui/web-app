@@ -226,6 +226,31 @@ footer {
   }
 }
 
+/* 3D book-pickup tilt — hover-capable devices only, so touch
+   devices never get a stuck hover state */
+.tilt-parent {
+  perspective: 900px;
+}
+
+.tilt-card {
+  transform-style: preserve-3d;
+  transition:
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.35s ease;
+}
+
+@media (hover: hover) {
+  .tilt-parent:hover .tilt-card {
+    transform: rotateX(3deg) rotateY(-5deg) translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tilt-parent:hover .tilt-card {
+    transform: none;
+  }
+}
+
 /* Hide scrollbar utility */
 .scrollbar-hide {
   -ms-overflow-style: none;
