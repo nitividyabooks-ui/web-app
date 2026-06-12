@@ -2,11 +2,12 @@
 export const metadata = {
     title: "Shipping Policy — NitiVidya Books",
     description: "Shipping and Delivery Policy for NitiVidya Books.",
+    alternates: { canonical: "/shipping-policy" },
 };
 
 export default function ShippingPolicyPage() {
     return (
-        <div className="container mx-auto px-4 py-12 prose prose-slate max-w-3xl min-h-screen">
+        <div className="container mx-auto px-4 py-12 max-w-3xl min-h-screen legal-content">
             <h1>Shipping Policy</h1>
             <p>Last updated: {new Date().toLocaleDateString()}</p>
 
@@ -42,7 +43,7 @@ export default function ShippingPolicyPage() {
 
             <h2>4. Tracking Your Order</h2>
             <p>
-                Once your order is shipped, we will share the tracking details with you via WhatsApp or Email. You can use these details to track the status of your shipment on the courier partner's website.
+                Once your order is shipped, we will share the tracking details with you via WhatsApp or Email. You can use these details to track the status of your shipment on the courier partner&apos;s website.
             </p>
 
             <h2>5. Damaged or Missing Items</h2>

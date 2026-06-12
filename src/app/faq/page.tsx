@@ -4,6 +4,7 @@ import { FAQContent } from "./FAQContent";
 export const metadata: Metadata = {
     title: "FAQ - Frequently Asked Questions | NitiVidya Books",
     description: "Find answers to common questions about NitiVidya children's books, ordering, shipping, returns, and more.",
+    alternates: { canonical: "/faq" },
 };
 
 // FAQ data organized by category
@@ -11,7 +12,7 @@ const FAQ_CATEGORIES = [
     {
         id: "products",
         title: "About Our Books",
-        icon: "📚",
+        icon: "books",
         faqs: [
             {
                 question: "What age group are your books suitable for?",
@@ -38,7 +39,7 @@ const FAQ_CATEGORIES = [
     {
         id: "ordering",
         title: "Ordering & Payment",
-        icon: "🛒",
+        icon: "ordering",
         faqs: [
             {
                 question: "What payment methods do you accept?",
@@ -65,7 +66,7 @@ const FAQ_CATEGORIES = [
     {
         id: "shipping",
         title: "Shipping & Delivery",
-        icon: "🚚",
+        icon: "shipping",
         faqs: [
             {
                 question: "How long does delivery take?",
@@ -92,7 +93,7 @@ const FAQ_CATEGORIES = [
     {
         id: "returns",
         title: "Returns & Refunds",
-        icon: "↩️",
+        icon: "returns",
         faqs: [
             {
                 question: "What is your return policy?",
@@ -115,7 +116,7 @@ const FAQ_CATEGORIES = [
     {
         id: "other",
         title: "Other Questions",
-        icon: "❓",
+        icon: "help",
         faqs: [
             {
                 question: "How can I contact customer support?",

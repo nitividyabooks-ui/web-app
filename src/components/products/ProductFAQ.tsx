@@ -54,7 +54,7 @@ export function ProductFAQ() {
             />
 
             <div className="text-center mb-8">
-                <h2 className="font-heading text-2xl md:text-3xl font-bold text-charcoal">
+                <h2 className="font-heading text-2xl md:text-3xl font-bold text-ink">
                     Common Questions
                 </h2>
                 <p className="text-slate-500 mt-2 text-sm md:text-base">
@@ -68,10 +68,10 @@ export function ProductFAQ() {
                         <AccordionItem
                             key={index}
                             value={`item-${index}`}
-                            className="border border-slate-200 rounded-xl px-4 bg-white data-[state=open]:bg-blue-50/30 data-[state=open]:border-miko-blue/20 transition-colors"
+                            className="border border-slate-200 rounded-xl px-4 bg-white data-[state=open]:bg-blue-50/30 data-[state=open]:border-evergreen/20 transition-colors"
                         >
                             <AccordionTrigger
-                                className="font-heading font-bold text-charcoal text-left hover:text-miko-blue hover:no-underline py-4 text-base"
+                                className="font-heading font-bold text-ink text-left hover:text-evergreen hover:no-underline py-4 text-base"
                                 onClick={() => {
                                     trackEvent("faq_open", {
                                         question: faq.question,

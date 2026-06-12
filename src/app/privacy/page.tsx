@@ -1,11 +1,12 @@
 export const metadata = {
     title: "Privacy Policy — NitiVidya Books",
     description: "How NitiVidya Books collects, uses, and protects your personal information.",
+    alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {
     return (
-        <div className="container mx-auto px-4 py-12 prose prose-slate max-w-3xl min-h-screen">
+        <div className="container mx-auto px-4 py-12 max-w-3xl min-h-screen legal-content">
             <h1>Privacy Policy</h1>
             <p>Last updated: {new Date().toLocaleDateString()}</p>
 
@@ -69,7 +70,7 @@ export default function PrivacyPage() {
             <h2>6. Third-Party Services</h2>
             <p>Our website may contain links to third-party services including:</p>
             <ul>
-                <li><strong>WhatsApp</strong> — for order communications (governed by WhatsApp's privacy policy)</li>
+                <li><strong>WhatsApp</strong> — for order communications (governed by WhatsApp&apos;s privacy policy)</li>
                 <li><strong>Google Analytics</strong> — for website analytics</li>
                 <li><strong>Social media platforms</strong> — for social sharing</li>
             </ul>
@@ -92,7 +93,7 @@ export default function PrivacyPage() {
                 We retain your order information for as long as necessary to fulfill our services, comply with legal obligations, and resolve disputes. Typically, order data is retained for 7 years for tax and legal purposes.
             </p>
 
-            <h2>9. Children's Privacy</h2>
+            <h2>9. Children&apos;s Privacy</h2>
             <p>
                 While our products are designed for children, our website and ordering services are intended for adults (parents/guardians). We do not knowingly collect personal information from children under 13. If you believe a child has provided us with personal information, please contact us.
             </p>

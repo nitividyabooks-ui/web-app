@@ -25,14 +25,14 @@ export const pageview = (url: string) => {
 
     const userId = getAnalyticsUserId();
 
-    // GTM
-    if (window.dataLayer) {
-        window.dataLayer.push({
-            event: "page_view",
-            page: url,
-            ...(userId && { user_id: userId }),
-        });
-    }
+    // GTM/gtag queue — create if missing so events fired before the
+    // GA script loads are processed once it arrives
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+        event: "page_view",
+        page: url,
+        ...(userId && { user_id: userId }),
+    });
 
     // GA4 direct
     if (window.gtag) {
@@ -52,13 +52,11 @@ export const trackEvent = (eventName: string, params: Record<string, unknown> = 
         ...(userId && { user_id: userId }),
     };
 
-    // GTM
-    if (window.dataLayer) {
-        window.dataLayer.push({
-            event: eventName,
-            ...enhancedParams,
-        });
-    }
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+        event: eventName,
+        ...enhancedParams,
+    });
 
     // GA4 direct
     if (window.gtag) {

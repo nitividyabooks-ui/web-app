@@ -5,8 +5,8 @@ export default function robots(): MetadataRoute.Robots {
         rules: {
             userAgent: "*",
             allow: "/",
-            disallow: ["/admin/", "/api/"],
+            disallow: ["/admin/", "/api/", "/checkout", "/payment/"],
         },
-        sitemap: "https://nitividya.com/sitemap.xml",
+        sitemap: "https://www.nitividyabooks.com/sitemap.xml",
     };
 }

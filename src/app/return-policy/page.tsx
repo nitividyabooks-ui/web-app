@@ -2,11 +2,12 @@
 export const metadata = {
     title: "Return and Refund Policy — NitiVidya Books",
     description: "Return and Refund Policy for NitiVidya Books. Read about our eligibility criteria, return process, timeframes, and refund options.",
+    alternates: { canonical: "/return-policy" },
 };
 
 export default function ReturnPolicyPage() {
     return (
-        <div className="container mx-auto px-4 py-12 prose prose-slate max-w-3xl min-h-screen">
+        <div className="container mx-auto px-4 py-12 max-w-3xl min-h-screen legal-content">
             <h1>Return and Refund Policy</h1>
             <p>Last updated: {new Date().toLocaleDateString()}</p>
 

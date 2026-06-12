@@ -49,7 +49,7 @@ export function InsideBookPreview({ images, title }: InsideBookPreviewProps) {
                     <BookOpen className="w-4 h-4" />
                     Preview
                 </div>
-                <h2 className="font-heading text-2xl md:text-3xl font-bold text-charcoal">
+                <h2 className="font-heading text-2xl md:text-3xl font-bold text-ink">
                     A Peek Inside
                 </h2>
                 <p className="text-slate-500 mt-2 text-sm md:text-base">

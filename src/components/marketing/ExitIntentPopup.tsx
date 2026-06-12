@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { X, Gift, CheckCircle, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/Button";
-import { trackEvent } from "@/lib/gtm";
+import { X, FileText, CheckCircle, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { trackGenerateLead, trackViewPromotion } from "@/lib/analytics";
 import { trackFBPixel } from "@/lib/fbpixel";
 
 const DISMISSED_KEY = "nv_exit_popup_dismissed";
 const EMAIL_CAPTURED_KEY = "nv_email_captured";
+const PRINTABLES_UNLOCKED_KEY = "nv_printables_unlocked";
 
 export function ExitIntentPopup() {
     const [isOpen, setIsOpen] = useState(false);
@@ -25,6 +26,7 @@ export function ExitIntentPopup() {
         try {
             if (localStorage.getItem(DISMISSED_KEY)) return false;
             if (localStorage.getItem(EMAIL_CAPTURED_KEY)) return false;
+            if (localStorage.getItem(PRINTABLES_UNLOCKED_KEY)) return false;
         } catch {
             return false;
         }
@@ -37,23 +39,23 @@ export function ExitIntentPopup() {
 
         let triggered = false;
 
+        const open = () => {
+            triggered = true;
+            setIsOpen(true);
+            trackViewPromotion("printables_offer", "exit_intent");
+        };
+
         // Desktop: mouse leaves viewport at top
         const handleMouseLeave = (e: MouseEvent) => {
-            if (e.clientY <= 0 && !triggered) {
-                triggered = true;
-                setIsOpen(true);
-                trackEvent("exit_intent_shown", { trigger: "mouseleave" });
-            }
+            if (e.clientY <= 0 && !triggered) open();
         };
 
         // Mobile: back button (popstate)
         const handlePopState = () => {
             if (!triggered) {
-                triggered = true;
                 // Push state back so the user doesn't actually navigate
                 window.history.pushState(null, "", window.location.href);
-                setIsOpen(true);
-                trackEvent("exit_intent_shown", { trigger: "popstate" });
+                open();
             }
         };
 
@@ -75,7 +77,6 @@ export function ExitIntentPopup() {
         } catch {
             // ignore
         }
-        trackEvent("exit_intent_dismissed");
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -99,15 +100,10 @@ export function ExitIntentPopup() {
             setIsSuccess(true);
             localStorage.setItem(EMAIL_CAPTURED_KEY, "true");
             localStorage.setItem(DISMISSED_KEY, "true");
+            localStorage.setItem(PRINTABLES_UNLOCKED_KEY, "true");
 
-            trackEvent("lead_captured", {
-                source: "exit_intent",
-                is_new: data.isNew,
-            });
+            trackGenerateLead("exit_intent", "email");
             trackFBPixel("Lead", { content_name: "exit_intent" });
-
-            // Auto-close after 3s
-            setTimeout(() => setIsOpen(false), 3000);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Something went wrong");
         } finally {
@@ -120,13 +116,13 @@ export function ExitIntentPopup() {
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <div
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                className="absolute inset-0 bg-ink/55 backdrop-blur-sm animate-in fade-in duration-200"
                 onClick={handleClose}
             />
-            <div className="relative bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="relative bg-surface rounded-card-lg shadow-lift max-w-md w-full overflow-hidden animate-in zoom-in-95 duration-300">
                 <button
                     onClick={handleClose}
-                    className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors z-10"
+                    className="absolute top-4 right-4 p-2 text-ink-soft hover:text-ink rounded-full hover:bg-paper-deep transition-colors z-10"
                     aria-label="Close"
                 >
                     <X className="w-5 h-5" />
@@ -134,30 +130,38 @@ export function ExitIntentPopup() {
 
                 {isSuccess ? (
                     <div className="p-8 text-center">
-                        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-                            <CheckCircle className="w-8 h-8 text-green-600" />
+                        <div className="w-16 h-16 rounded-full bg-evergreen-soft flex items-center justify-center mx-auto mb-4">
+                            <CheckCircle className="w-8 h-8 text-evergreen" />
                         </div>
-                        <h2 className="font-heading text-2xl font-bold text-ink mb-2">
+                        <h2 className="font-heading text-2xl font-semibold text-ink mb-2">
                             You&apos;re in!
                         </h2>
-                        <p className="text-ink-secondary">
-                            Check your email for the free activity kit.
+                        <p className="text-ink-soft mb-5">
+                            All free worksheets are unlocked for you.
                         </p>
+                        <Link
+                            href="/free-printables"
+                            onClick={() => setIsOpen(false)}
+                            className="inline-flex items-center justify-center h-12 px-7 rounded-btn bg-evergreen hover:bg-evergreen-deep text-white font-bold transition-colors"
+                        >
+                            Go to printables
+                        </Link>
                     </div>
                 ) : (
                     <>
-                        <div className="bg-gradient-to-br from-forest to-[var(--forest-light)] px-8 pt-10 pb-8 text-center text-white">
-                            <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-4">
-                                <Gift className="w-8 h-8" />
+                        <div className="bg-marigold-soft px-8 pt-10 pb-8 text-center">
+                            <div className="w-16 h-16 rounded-full bg-surface flex items-center justify-center mx-auto mb-4 shadow-card">
+                                <FileText className="w-8 h-8 text-terracotta" />
                             </div>
-                            <h2 className="font-heading text-2xl font-bold mb-2">
-                                Wait — don&apos;t go yet!
+                            <h2 className="font-heading text-2xl font-semibold text-ink mb-2">
+                                Before you go — free worksheets
                             </h2>
-                            <p className="text-white/80 text-sm">
-                                Get our free Indian toddler activity kit before you leave.
+                            <p className="text-ink-soft text-sm">
+                                Coloring pages, alphabet tracing, and Hindi varnamala for ages 0–5.
+                                Print at home today.
                             </p>
                         </div>
-                        <div className="p-8">
+                        <div className="p-7">
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <input
                                     type="email"
@@ -165,25 +169,24 @@ export function ExitIntentPopup() {
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="Enter your email"
                                     required
-                                    className="w-full px-4 py-4 border-2 border-slate-200 rounded-xl text-lg focus:outline-none focus:border-forest focus:ring-2 focus:ring-forest/20 transition-all"
+                                    className="w-full h-12 rounded-input border border-hairline-strong bg-surface px-4 text-base text-ink placeholder:text-ink-soft/60 focus:outline-none focus:border-evergreen focus:ring-2 focus:ring-evergreen/20"
                                 />
                                 {error && (
-                                    <p className="text-red-600 text-sm text-center">{error}</p>
+                                    <p className="text-terracotta-deep text-sm text-center">{error}</p>
                                 )}
-                                <Button
+                                <button
                                     type="submit"
-                                    size="lg"
                                     disabled={isLoading}
-                                    className="w-full rounded-full bg-sunshine hover:bg-[var(--sunshine-hover)] text-ink font-extrabold shadow-golden"
+                                    className="w-full h-13 rounded-btn bg-marigold hover:bg-marigold-deep text-evergreen-deep hover:text-paper font-bold transition-colors disabled:opacity-60"
                                 >
                                     {isLoading ? (
-                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                        <Loader2 className="w-5 h-5 animate-spin mx-auto" />
                                     ) : (
-                                        "Send Me the Free Kit"
+                                        "Send me the free worksheets"
                                     )}
-                                </Button>
+                                </button>
                             </form>
-                            <p className="text-center text-xs text-slate-400 mt-4">
+                            <p className="text-center text-xs text-ink-soft mt-4">
                                 No spam, ever. Unsubscribe anytime.
                             </p>
                         </div>

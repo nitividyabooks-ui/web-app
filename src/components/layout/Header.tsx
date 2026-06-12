@@ -2,12 +2,34 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingCart, Menu, X } from "lucide-react";
+import { ShoppingBag, Menu, X, ArrowRight } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import { useCart } from "@/context/CartContext";
-import { trackEvent } from "@/lib/gtm";
+import { trackWhatsAppClick, trackSelectPromotion } from "@/lib/analytics";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { BUNDLE_5_DISCOUNT_PERCENT } from "@/lib/pricing";
+
+const NAV_LINKS = [
+    { name: "Books", href: "/books" },
+    { name: "Story Time", href: "/story-time" },
+    { name: "Free Printables", href: "/free-printables" },
+    { name: "Blog", href: "/blog" },
+    { name: "About", href: "/about" },
+];
+
+const MENU_ONLY_LINKS = [
+    { name: "Reading Journey", href: "/miko-reading-journey" },
+    { name: "FAQ", href: "/faq" },
+    { name: "Contact", href: "/contact" },
+];
+
+const SHOP_BY_AGE_LINKS = [
+    { name: "0–1 years", href: "/collections/books-for-1-year-old" },
+    { name: "2 years", href: "/collections/books-for-2-year-old" },
+    { name: "3–5 years", href: "/collections/books-for-3-year-old" },
+    { name: "Hindi books", href: "/collections/hindi-books-for-kids" },
+];
 
 export function Header() {
     const { totalItems, setIsCartOpen, isHydrated } = useCart();
@@ -15,9 +37,6 @@ export function Header() {
     const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "919999999999";
     const whatsappLink = `https://wa.me/${whatsappNumber}`;
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-    // Hide header on admin routes
-    const isAdminRoute = pathname.startsWith("/admin");
 
     useEffect(() => {
         if (!isMenuOpen) return;
@@ -28,78 +47,60 @@ export function Header() {
         };
     }, [isMenuOpen]);
 
-    // Don't render header on admin routes
-    if (isAdminRoute) {
+    // Header is hidden on admin routes
+    if (pathname.startsWith("/admin")) {
         return null;
     }
 
-    const navLinks = [
-        { name: "Home", href: "/" },
-        { name: "Books", href: "/books" },
-        { name: "Reading Journey", href: "/miko-reading-journey" },
-        { name: "Story Time", href: "/story-time" },
-        { name: "Blog", href: "/blog" },
-        { name: "About", href: "/about" },
-        { name: "FAQ", href: "/faq" },
-        { name: "Contact", href: "/contact" },
-    ];
-
     return (
         <>
-            {/* Seasonal Offer Banner */}
-            <div className="bg-forest text-white text-center py-2 px-4 relative overflow-hidden z-[60]">
-                <p className="text-sm md:text-base font-bold relative">
-                    <span>✨</span> New Book Alert <span>✨</span>{" "}
-                    <span className="hidden sm:inline">—</span>{" "}
-                    <span className="font-extrabold">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/15 text-white border border-white/25 text-xs sm:text-sm mx-1">Nititales: Stories That Shape Values</span>
-                    </span>{" "}
-                    Now Available!
-                </p>
+            {/* Announcement bar */}
+            <div className="bg-evergreen-deep text-paper z-[60]">
+                <Link
+                    href="/books"
+                    className="block text-center py-2.5 px-4 text-sm font-semibold tracking-wide hover:text-marigold transition-colors"
+                    onClick={() => trackSelectPromotion("launch_offer", "announcement_bar")}
+                >
+                    Launch offer — up to {BUNDLE_5_DISCOUNT_PERCENT}% off the complete Miko set
+                    <ArrowRight className="inline-block w-3.5 h-3.5 ml-1.5 -mt-0.5" />
+                </Link>
             </div>
 
-            <header className="sticky top-0 z-50 w-full border-b bg-[var(--bg-cream)]/90 backdrop-blur-md" style={{ borderColor: "var(--hairline)" }}>
-                {/* Trust strip */}
-                <div className="hidden sm:block border-b" style={{ borderColor: "var(--hairline)" }}>
-                    <div className="container mx-auto px-4 md:px-6 h-9 flex items-center justify-between text-xs text-ink-secondary">
-                        <div className="flex items-center gap-3">
-                            <span className="font-semibold text-forest">Safe materials</span>
-                            <span className="text-forest/40">•</span>
-                            <span>WhatsApp order support</span>
-                            <span className="text-forest/40">•</span>
-                            <span>Free shipping above ₹499</span>
-                        </div>
-                        <div className="hidden md:block">
-                            <span className="animate-pulse">🎁</span> Perfect Baby Gift Bundle Available!
-                        </div>
-                    </div>
-                </div>
+            <header className="sticky top-0 z-50 w-full border-b border-hairline bg-paper/95 backdrop-blur-md">
+                <div className="container mx-auto flex h-16 md:h-[4.5rem] items-center justify-between px-4 md:px-6 gap-3">
+                    {/* Mobile menu button */}
+                    <button
+                        className="md:hidden h-11 w-11 -ml-2 rounded-full text-ink hover:bg-paper-deep transition-colors flex items-center justify-center"
+                        aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+                        onClick={() => setIsMenuOpen((v) => !v)}
+                    >
+                        {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                    </button>
 
-                <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
-                    <Link href="/" className="flex items-center">
-                        <div className="relative h-10 w-40 sm:h-11 sm:w-44">
+                    <Link href="/" className="flex items-center md:mr-4">
+                        <div className="relative h-10 w-36 sm:h-11 sm:w-44">
                             <Image
                                 src="https://zpetbavsoftzxaoqixna.supabase.co/storage/v1/object/public/nitividyabooks/logo.png"
                                 alt="NitiVidya Books"
                                 fill
-                                sizes="(max-width: 768px) 160px, 176px"
+                                sizes="(max-width: 768px) 144px, 176px"
                                 className="object-contain object-left"
                                 priority
                             />
                         </div>
                     </Link>
 
-                    <nav className="hidden md:flex items-center gap-1">
-                        {navLinks.map((link) => {
+                    <nav className="hidden md:flex items-center gap-1 flex-1">
+                        {NAV_LINKS.map((link) => {
                             const isActive = pathname === link.href;
                             return (
                                 <Link
                                     key={link.name}
                                     href={link.href}
-                                    className={`px-4 py-3 rounded-full text-sm font-semibold transition-colors min-h-11 min-w-11 flex items-center justify-center ${
+                                    className={`px-4 py-2.5 rounded-full text-sm font-semibold transition-colors ${
                                         isActive
-                                            ? "bg-forest text-white shadow-forest"
-                                            : "text-ink hover:text-forest hover:bg-pale-green"
+                                            ? "text-evergreen-deep bg-evergreen-soft"
+                                            : "text-ink-soft hover:text-evergreen-deep hover:bg-paper-deep"
                                     }`}
                                 >
                                     {link.name}
@@ -108,40 +109,28 @@ export function Header() {
                         })}
                     </nav>
 
-                    <div className="flex items-center gap-2 sm:gap-3">
-                        {/* WhatsApp Help */}
-                        <Link
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                        <a
                             href={whatsappLink}
                             target="_blank"
-                            className="inline-flex items-center justify-center gap-2 h-11 w-11 sm:w-auto sm:px-4 rounded-full bg-forest text-white text-sm font-bold hover:bg-[var(--forest-hover)] transition-colors"
-                            aria-label="Get WhatsApp order support"
-                            onClick={() => {
-                                trackEvent("whatsapp_help_click", {
-                                    location: "header",
-                                });
-                            }}
+                            rel="noopener noreferrer"
+                            className="hidden sm:inline-flex items-center justify-center gap-2 h-11 px-4 rounded-full border border-hairline-strong text-ink text-sm font-semibold hover:border-evergreen hover:text-evergreen transition-colors"
+                            aria-label="Order help on WhatsApp"
+                            onClick={() => trackWhatsAppClick("header")}
                         >
-                            <SiWhatsapp className="h-4 w-4" />
-                            <span className="hidden sm:inline">WhatsApp Help</span>
-                        </Link>
-
-                        {/* Mobile menu button */}
-                        <button
-                            className="md:hidden h-11 w-11 rounded-full bg-white text-forest hover:bg-pale-green transition-colors flex items-center justify-center border" style={{ borderColor: "var(--hairline)" }}
-                            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-                            onClick={() => setIsMenuOpen((v) => !v)}
-                        >
-                            {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                        </button>
+                            <SiWhatsapp className="h-4 w-4 text-[#1FAF5E]" />
+                            <span className="hidden lg:inline">WhatsApp</span>
+                        </a>
 
                         <button
-                            className="relative h-11 w-11 rounded-full bg-forest text-white hover:bg-[var(--forest-hover)] transition-colors flex items-center justify-center shadow-forest"
+                            className="relative inline-flex items-center justify-center gap-2 h-11 px-4 sm:px-5 rounded-full bg-evergreen text-white text-sm font-semibold hover:bg-evergreen-deep transition-colors"
                             onClick={() => setIsCartOpen(true)}
-                            aria-label="Open cart"
+                            aria-label="Open bag"
                         >
-                            <ShoppingCart className="h-5 w-5" />
+                            <ShoppingBag className="h-4.5 w-4.5" />
+                            <span className="hidden sm:inline">Bag</span>
                             {isHydrated && totalItems > 0 && (
-                                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-coral text-xs font-extrabold text-white shadow-sm border-2 border-white">
+                                <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 px-1 items-center justify-center rounded-full bg-terracotta text-[11px] font-bold text-white border-2 border-paper">
                                     {totalItems}
                                 </span>
                             )}
@@ -150,66 +139,68 @@ export function Header() {
                 </div>
             </header>
 
-            {/* Mobile menu drawer - rendered outside header */}
+            {/* Mobile menu overlay */}
             {isMenuOpen && (
-                <>
-                    {/* Backdrop */}
-                    <div
-                        className="md:hidden fixed inset-0 z-[200] bg-black/40 backdrop-blur-sm"
-                        onClick={() => setIsMenuOpen(false)}
-                        aria-hidden="true"
-                    />
-                    {/* Menu content - full screen */}
-                    <div className="md:hidden fixed inset-0 z-[210] bg-[var(--bg-cream)] overflow-auto">
-                        {/* Forest green header strip */}
-                        <div className="flex items-center justify-between p-4 bg-gradient-to-r from-forest to-[var(--forest-light)]">
-                            <span className="font-display font-bold text-lg text-sunshine">Menu</span>
-                            <button
-                                className="h-11 w-11 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors flex items-center justify-center"
-                                aria-label="Close menu"
-                                onClick={() => setIsMenuOpen(false)}
-                            >
-                                <X className="h-5 w-5" />
-                            </button>
-                        </div>
-                        <div className="container mx-auto px-4 py-5">
-                            <div className="grid gap-2">
-                                {navLinks.map((link, idx) => {
-                                    const borderColors = [
-                                        "border-sunshine",
-                                        "border-coral",
-                                        "border-sky",
-                                        "border-lavender",
-                                        "border-forest",
-                                    ];
-                                    return (
-                                        <Link
-                                            key={link.name}
-                                            href={link.href}
-                                            className={`w-full rounded-2xl px-4 py-4 text-lg font-bold text-ink hover:bg-pale-green transition-colors min-h-11 flex items-center border-l-4 ${borderColors[idx % borderColors.length]}`}
-                                            onClick={() => setIsMenuOpen(false)}
-                                        >
-                                            {link.name}
-                                        </Link>
-                                    );
-                                })}
+                <div className="md:hidden fixed inset-0 z-[210] bg-paper overflow-auto">
+                    <div className="flex items-center justify-between px-4 h-16 border-b border-hairline">
+                        <span className="font-heading text-title font-semibold text-ink">Menu</span>
+                        <button
+                            className="h-11 w-11 -mr-2 rounded-full text-ink hover:bg-paper-deep transition-colors flex items-center justify-center"
+                            aria-label="Close menu"
+                            onClick={() => setIsMenuOpen(false)}
+                        >
+                            <X className="h-5 w-5" />
+                        </button>
+                    </div>
+                    <nav className="px-4 py-6">
+                        <ul>
+                            {[...NAV_LINKS, ...MENU_ONLY_LINKS].map((link) => (
+                                <li key={link.name} className="border-b border-hairline">
+                                    <Link
+                                        href={link.href}
+                                        className="flex items-center justify-between py-4 font-heading text-xl font-medium text-ink hover:text-evergreen transition-colors"
+                                        onClick={() => setIsMenuOpen(false)}
+                                    >
+                                        {link.name}
+                                        <ArrowRight className="w-4 h-4 text-ink-soft/50" />
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
 
-                                <Link
-                                    href={whatsappLink}
-                                    target="_blank"
-                                    className="w-full rounded-2xl px-4 py-4 text-lg font-bold text-sunshine bg-forest hover:bg-[var(--forest-hover)] inline-flex items-center gap-2 transition-colors mt-4 min-h-11"
-                                    onClick={() => {
-                                        setIsMenuOpen(false);
-                                        trackEvent("whatsapp_help_click", { location: "mobile_menu" });
-                                    }}
-                                >
-                                    <SiWhatsapp className="h-5 w-5" />
-                                    WhatsApp Help
-                                </Link>
+                        <div className="mt-6">
+                            <p className="text-xs font-bold uppercase tracking-[0.14em] text-terracotta-deep mb-3">
+                                Shop by age
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                                {SHOP_BY_AGE_LINKS.map((link) => (
+                                    <Link
+                                        key={link.href}
+                                        href={link.href}
+                                        className="px-4 py-2 rounded-full border border-hairline bg-surface text-sm font-semibold text-ink hover:border-evergreen hover:text-evergreen transition-colors"
+                                        onClick={() => setIsMenuOpen(false)}
+                                    >
+                                        {link.name}
+                                    </Link>
+                                ))}
                             </div>
                         </div>
-                    </div>
-                </>
+
+                        <a
+                            href={whatsappLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-8 w-full inline-flex items-center justify-center gap-2 h-12 rounded-full bg-[#1FAF5E] text-white font-semibold hover:bg-[#178F4D] transition-colors"
+                            onClick={() => {
+                                setIsMenuOpen(false);
+                                trackWhatsAppClick("mobile_menu");
+                            }}
+                        >
+                            <SiWhatsapp className="h-5 w-5" />
+                            Order on WhatsApp
+                        </a>
+                    </nav>
+                </div>
             )}
         </>
     );

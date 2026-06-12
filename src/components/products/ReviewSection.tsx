@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { StarRating } from "./StarRating";
 import { ReviewCard, ReviewData } from "./ReviewCard";
 import { trackEvent } from "@/lib/gtm";
-import { MessageSquareQuote } from "lucide-react";
+import { MessageSquareQuote, Star } from "lucide-react";
 
 interface ReviewSectionProps {
     productId: string;
@@ -63,10 +63,10 @@ export function ReviewSection({ productId, productName, reviews }: ReviewSection
     return (
         <section ref={sectionRef} className="py-12 md:py-16">
             <div className="text-center mb-8 md:mb-10">
-                <h2 className="font-heading text-2xl md:text-3xl font-bold text-charcoal">
+                <h2 className="font-heading text-2xl md:text-3xl font-bold text-ink">
                     What Parents Are Saying
                 </h2>
-                <p className="text-slate-500 mt-2 text-sm md:text-base">
+                <p className="text-ink-soft mt-2 text-sm md:text-base">
                     Real reviews from real families
                 </p>
             </div>
@@ -76,11 +76,11 @@ export function ReviewSection({ productId, productName, reviews }: ReviewSection
                 <div className="flex flex-col md:flex-row items-center gap-6">
                     {/* Average Rating */}
                     <div className="text-center md:text-left">
-                        <div className="text-5xl font-bold text-charcoal mb-2">
+                        <div className="text-5xl font-bold text-ink mb-2">
                             {averageRating.toFixed(1)}
                         </div>
                         <StarRating rating={averageRating} size="lg" />
-                        <p className="text-sm text-slate-500 mt-2">
+                        <p className="text-sm text-ink-soft mt-2">
                             Based on {reviews.length} {reviews.length === 1 ? "review" : "reviews"}
                         </p>
                     </div>
@@ -89,8 +89,9 @@ export function ReviewSection({ productId, productName, reviews }: ReviewSection
                     <div className="flex-1 w-full space-y-2">
                         {ratingCounts.map(({ stars, count, percentage }) => (
                             <div key={stars} className="flex items-center gap-3">
-                                <span className="text-sm font-medium text-slate-600 w-8">
-                                    {stars}★
+                                <span className="text-sm font-medium text-ink-soft w-8 inline-flex items-center gap-0.5">
+                                    {stars}
+                                    <Star className="w-3 h-3 fill-marigold text-marigold" />
                                 </span>
                                 <div className="flex-1 h-2 bg-amber-100 rounded-full overflow-hidden">
                                     <div
@@ -98,7 +99,7 @@ export function ReviewSection({ productId, productName, reviews }: ReviewSection
                                         style={{ width: `${percentage}%` }}
                                     />
                                 </div>
-                                <span className="text-xs text-slate-400 w-8">
+                                <span className="text-xs text-ink-soft/60 w-8">
                                     {count}
                                 </span>
                             </div>
@@ -122,13 +123,13 @@ export function NoReviewsPlaceholder() {
     return (
         <section className="py-12 md:py-16">
             <div className="max-w-md mx-auto text-center">
-                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <MessageSquareQuote className="w-8 h-8 text-slate-400" />
+                <div className="w-16 h-16 bg-paper-deep rounded-full flex items-center justify-center mx-auto mb-4">
+                    <MessageSquareQuote className="w-8 h-8 text-ink-soft/60" />
                 </div>
-                <h3 className="font-heading text-xl font-bold text-slate-900 mb-2">
+                <h3 className="font-heading text-xl font-bold text-ink mb-2">
                     No reviews yet
                 </h3>
-                <p className="text-slate-500 text-sm">
+                <p className="text-ink-soft text-sm">
                     Be the first to share your experience with this book!
                 </p>
             </div>

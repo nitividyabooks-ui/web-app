@@ -115,7 +115,7 @@ export function ProductImageGallery({ images, title }: ProductImageGalleryProps)
                                 className={`
                                     relative h-[95px] w-[76px] rounded-xl transition-all duration-200 group bg-white
                                     ${activeIndex === idx
-                                        ? "shadow-[0_4px_20px_rgba(74,158,234,0.25)] ring-2 ring-miko-blue/40 scale-[1.03]"
+                                        ? "shadow-[0_4px_20px_rgba(74,158,234,0.25)] ring-2 ring-evergreen/40 scale-[1.03]"
                                         : "shadow-sm hover:shadow-md ring-1 ring-slate-200/60 hover:ring-slate-300"
                                     }
                                 `}
@@ -230,7 +230,7 @@ export function ProductImageGallery({ images, title }: ProductImageGalleryProps)
                                 className={`
                                     relative h-20 w-16 shrink-0 rounded-xl transition-all duration-200 snap-start bg-white
                                     ${activeIndex === idx
-                                        ? "shadow-[0_4px_16px_rgba(74,158,234,0.25)] ring-2 ring-miko-blue/40"
+                                        ? "shadow-[0_4px_16px_rgba(74,158,234,0.25)] ring-2 ring-evergreen/40"
                                         : "shadow-sm ring-1 ring-slate-200/60"
                                     }
                                 `}

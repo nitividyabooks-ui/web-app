@@ -47,7 +47,7 @@ export function ComingSoonForm() {
 
     if (isSuccess) {
         return (
-            <div className="flex items-center justify-center gap-2 text-forest font-bold text-lg">
+            <div className="flex items-center justify-center gap-2 text-evergreen font-bold text-lg">
                 <CheckCircle className="w-6 h-6" />
                 You&apos;ll be the first to know!
             </div>
@@ -62,7 +62,7 @@ export function ComingSoonForm() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
                 required
-                className="flex-1 px-4 py-3 rounded-full border-2 border-forest/20 focus:border-forest focus:ring-forest outline-none text-ink bg-white"
+                className="flex-1 px-4 py-3 rounded-full border-2 border-evergreen/20 focus:border-evergreen focus:ring-evergreen outline-none text-ink bg-white"
             />
             <Button
                 type="submit"

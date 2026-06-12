@@ -6,6 +6,10 @@ export const BUNDLE_5_DISCOUNT_PERCENT = 60;  // Complete 5-book set
 
 export const BUNDLE_5_MIN_QTY = 5;
 
+// Shipping (paise)
+export const FREE_SHIPPING_THRESHOLD_PAISE = 49900; // free shipping at ₹499+
+export const SHIPPING_FEE_PAISE = 4900; // ₹49 below threshold
+
 export function getDiscountPercentForQuantity(totalQty: number) {
   if (totalQty >= BUNDLE_5_MIN_QTY) return BUNDLE_5_DISCOUNT_PERCENT;
   return SINGLE_BOOK_DISCOUNT_PERCENT;

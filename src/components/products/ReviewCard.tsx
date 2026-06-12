@@ -41,7 +41,7 @@ export function ReviewCard({ review }: ReviewCardProps) {
 
             {/* Title */}
             {review.title && (
-                <h4 className="font-heading font-bold text-charcoal">
+                <h4 className="font-heading font-bold text-ink">
                     {review.title}
                 </h4>
             )}

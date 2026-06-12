@@ -10,21 +10,21 @@ export const metadata: Metadata = {
 
 export default function ComingSoonPage() {
     return (
-        <div className="min-h-screen bg-pale-yellow flex items-center justify-center px-4 py-12">
+        <div className="min-h-screen bg-paper-deep flex items-center justify-center px-4 py-12">
             <div className="max-w-lg w-full text-center space-y-6">
                 {/* Illustration placeholder */}
-                <div className="w-24 h-24 rounded-full bg-forest/10 flex items-center justify-center mx-auto">
-                    <BookOpen className="w-12 h-12 text-forest" />
+                <div className="w-24 h-24 rounded-full bg-evergreen/10 flex items-center justify-center mx-auto">
+                    <BookOpen className="w-12 h-12 text-evergreen" />
                 </div>
 
                 <div className="space-y-3">
-                    <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-sunshine text-ink text-sm font-bold">
+                    <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-marigold text-ink text-sm font-bold">
                         Coming Soon
                     </span>
                     <h1 className="font-heading text-4xl sm:text-5xl font-bold text-ink leading-tight">
                         The Next Miko Book is Coming
                     </h1>
-                    <p className="text-lg text-ink-secondary font-medium">
+                    <p className="text-lg text-ink-soft font-medium">
                         A brand new adventure awaits! Be the first to know when it launches.
                     </p>
                 </div>
@@ -34,7 +34,7 @@ export default function ComingSoonPage() {
                         Get notified on launch day
                     </h2>
                     <ComingSoonForm />
-                    <p className="text-xs text-ink-secondary">
+                    <p className="text-xs text-ink-soft">
                         No spam — just one email when the book is ready.
                     </p>
                 </div>

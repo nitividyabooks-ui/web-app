@@ -47,8 +47,8 @@ export function ProductEmailCapture() {
 
     if (isSuccess) {
         return (
-            <section className="mt-16 bg-pale-green rounded-3xl p-8 text-center">
-                <div className="flex items-center justify-center gap-2 text-forest font-bold text-lg">
+            <section className="mt-16 bg-evergreen-soft rounded-3xl p-8 text-center">
+                <div className="flex items-center justify-center gap-2 text-evergreen font-bold text-lg">
                     <CheckCircle className="w-6 h-6" />
                     You&apos;re on the list! We&apos;ll keep you posted.
                 </div>
@@ -57,10 +57,10 @@ export function ProductEmailCapture() {
     }
 
     return (
-        <section className="mt-16 bg-pale-green rounded-3xl p-8 max-w-2xl mx-auto">
+        <section className="mt-16 bg-evergreen-soft rounded-3xl p-8 max-w-2xl mx-auto">
             <div className="text-center space-y-3">
-                <div className="w-12 h-12 rounded-full bg-forest/10 flex items-center justify-center mx-auto">
-                    <Mail className="w-6 h-6 text-forest" />
+                <div className="w-12 h-12 rounded-full bg-evergreen/10 flex items-center justify-center mx-auto">
+                    <Mail className="w-6 h-6 text-evergreen" />
                 </div>
                 <h3 className="font-heading text-xl font-bold text-ink">
                     Be first to hear about new Miko books
@@ -72,7 +72,7 @@ export function ProductEmailCapture() {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="Enter your email"
                         required
-                        className="flex-1 px-4 py-3 rounded-full border-2 border-forest/20 focus:border-forest focus:ring-forest outline-none text-ink bg-white"
+                        className="flex-1 px-4 py-3 rounded-full border-2 border-evergreen/20 focus:border-evergreen focus:ring-evergreen outline-none text-ink bg-white"
                     />
                     <Button
                         type="submit"

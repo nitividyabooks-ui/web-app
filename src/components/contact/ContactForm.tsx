@@ -64,7 +64,7 @@ export function ContactForm() {
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700" htmlFor="contact-name">
+          <label className="text-sm font-semibold text-ink" htmlFor="contact-name">
             Name
           </label>
           <input
@@ -72,12 +72,12 @@ export function ContactForm() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Your full name"
-            className="w-full rounded-2xl border border-slate-200 bg-white/80 backdrop-blur px-4 py-3 text-sm font-medium text-slate-800 outline-none focus:border-miko-blue focus:ring-2 focus:ring-miko-blue/20"
+            className="w-full rounded-input border border-hairline-strong bg-surface px-4 py-3 text-sm font-medium text-ink outline-none focus:border-evergreen focus:ring-2 focus:ring-evergreen/20"
             required
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700" htmlFor="contact-email">
+          <label className="text-sm font-semibold text-ink" htmlFor="contact-email">
             Email
           </label>
           <input
@@ -86,12 +86,12 @@ export function ContactForm() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
             type="email"
-            className="w-full rounded-2xl border border-slate-200 bg-white/80 backdrop-blur px-4 py-3 text-sm font-medium text-slate-800 outline-none focus:border-miko-blue focus:ring-2 focus:ring-miko-blue/20"
+            className="w-full rounded-input border border-hairline-strong bg-surface px-4 py-3 text-sm font-medium text-ink outline-none focus:border-evergreen focus:ring-2 focus:ring-evergreen/20"
             required
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700" htmlFor="contact-phone">
+          <label className="text-sm font-semibold text-ink" htmlFor="contact-phone">
             Phone (optional)
           </label>
           <input
@@ -100,11 +100,11 @@ export function ContactForm() {
             onChange={(e) => setPhone(e.target.value)}
             placeholder="+91..."
             inputMode="tel"
-            className="w-full rounded-2xl border border-slate-200 bg-white/80 backdrop-blur px-4 py-3 text-sm font-medium text-slate-800 outline-none focus:border-miko-blue focus:ring-2 focus:ring-miko-blue/20"
+            className="w-full rounded-input border border-hairline-strong bg-surface px-4 py-3 text-sm font-medium text-ink outline-none focus:border-evergreen focus:ring-2 focus:ring-evergreen/20"
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700" htmlFor="contact-subject">
+          <label className="text-sm font-semibold text-ink" htmlFor="contact-subject">
             Subject (optional)
           </label>
           <input
@@ -112,13 +112,13 @@ export function ContactForm() {
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             placeholder="How can we help?"
-            className="w-full rounded-2xl border border-slate-200 bg-white/80 backdrop-blur px-4 py-3 text-sm font-medium text-slate-800 outline-none focus:border-miko-blue focus:ring-2 focus:ring-miko-blue/20"
+            className="w-full rounded-input border border-hairline-strong bg-surface px-4 py-3 text-sm font-medium text-ink outline-none focus:border-evergreen focus:ring-2 focus:ring-evergreen/20"
           />
         </div>
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-semibold text-slate-700" htmlFor="contact-message">
+        <label className="text-sm font-semibold text-ink" htmlFor="contact-message">
           Message
         </label>
         <textarea
@@ -127,23 +127,23 @@ export function ContactForm() {
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Write your message…"
           rows={6}
-          className="w-full rounded-2xl border border-slate-200 bg-white/80 backdrop-blur px-4 py-3 text-sm font-medium text-slate-800 outline-none focus:border-miko-blue focus:ring-2 focus:ring-miko-blue/20"
+          className="w-full rounded-input border border-hairline-strong bg-surface px-4 py-3 text-sm font-medium text-ink outline-none focus:border-evergreen focus:ring-2 focus:ring-evergreen/20"
           required
         />
-        <p className="text-xs text-slate-500 font-medium">
-          Or email us directly at <span className="text-slate-900">nitividyabooks@gmail.com</span> or call{" "}
-          <span className="text-slate-900">+919315383801</span>.
+        <p className="text-xs text-ink-soft font-medium">
+          Or email us directly at <span className="text-ink font-semibold">nitividyabooks@gmail.com</span> or call{" "}
+          <span className="text-ink font-semibold">+919315383801</span>.
         </p>
       </div>
 
       {status === "success" && (
-        <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
+        <div className="rounded-input border border-evergreen/20 bg-evergreen-soft px-4 py-3 text-sm font-semibold text-evergreen-deep">
           Thanks! We received your message and will get back to you shortly.
         </div>
       )}
 
       {status === "error" && (
-        <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">
+        <div className="rounded-input border border-terracotta/30 bg-blush px-4 py-3 text-sm font-semibold text-terracotta-deep">
           {error || "Something went wrong."}
         </div>
       )}
@@ -152,7 +152,7 @@ export function ContactForm() {
         <Button
           type="submit"
           size="lg"
-          className="rounded-full bg-slate-900 hover:bg-slate-800 text-white"
+          className="rounded-btn bg-evergreen hover:bg-evergreen-deep text-white"
           disabled={!canSubmit || status === "submitting"}
         >
           {status === "submitting" ? (
@@ -164,7 +164,7 @@ export function ContactForm() {
             "Send message"
           )}
         </Button>
-        <span className="text-xs text-slate-500 font-semibold">
+        <span className="text-xs text-ink-soft font-semibold">
           We typically respond within 1–2 business days.
         </span>
       </div>

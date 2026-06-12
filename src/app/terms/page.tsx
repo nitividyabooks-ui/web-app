@@ -3,11 +3,12 @@ import Link from "next/link";
 export const metadata = {
     title: "Terms and Conditions — NitiVidya Books",
     description: "Terms and conditions for using NitiVidya Books website and services.",
+    alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {
     return (
-        <div className="container mx-auto px-4 py-12 prose prose-slate max-w-3xl min-h-screen">
+        <div className="container mx-auto px-4 py-12 max-w-3xl min-h-screen legal-content">
             <h1>Terms and Conditions</h1>
             <p>Last updated: {new Date().toLocaleDateString()}</p>
 
@@ -17,7 +18,7 @@ export default function TermsPage() {
 
             <h2>1. About Our Service</h2>
             <p>
-                NitiVidya Books is an online platform for purchasing children's books. We currently operate on a <strong>WhatsApp-based ordering system</strong>. When you place an order, your order details are saved in our system, and you are redirected to WhatsApp to confirm and complete the order with our team.
+                NitiVidya Books is an online platform for purchasing children&apos;s books. We currently operate on a <strong>WhatsApp-based ordering system</strong>. When you place an order, your order details are saved in our system, and you are redirected to WhatsApp to confirm and complete the order with our team.
             </p>
 
             <h2>2. Ordering Process</h2>
@@ -46,7 +47,7 @@ export default function TermsPage() {
 
             <h2>6. Returns & Refunds</h2>
             <p>
-                For details on returns and refunds, please refer to our <Link href="/return-policy" className="text-primary hover:underline">Return Policy</Link>.
+                For details on returns and refunds, please refer to our <Link href="/return-policy" className="text-evergreen hover:underline">Return Policy</Link>.
             </p>
 
             <h2>7. Intellectual Property</h2>
@@ -61,7 +62,7 @@ export default function TermsPage() {
 
             <h2>9. Privacy</h2>
             <p>
-                Your use of our website is also governed by our <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>. By using our services, you consent to the collection and use of your information as described therein.
+                Your use of our website is also governed by our <Link href="/privacy" className="text-evergreen hover:underline">Privacy Policy</Link>. By using our services, you consent to the collection and use of your information as described therein.
             </p>
 
             <h2>10. Changes to Terms</h2>

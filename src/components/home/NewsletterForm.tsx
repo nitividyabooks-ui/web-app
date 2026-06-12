@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/Button";
-import { trackEvent } from "@/lib/gtm";
+import { trackGenerateLead, trackSignUp } from "@/lib/analytics";
 import { trackFBPixel } from "@/lib/fbpixel";
 import { CheckCircle, Loader2 } from "lucide-react";
 
+/**
+ * Email capture form, styled for dark (evergreen) backgrounds.
+ */
 export function NewsletterForm() {
     const [email, setEmail] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -33,10 +35,8 @@ export function NewsletterForm() {
             setIsSuccess(true);
             localStorage.setItem("nv_email_captured", "true");
 
-            trackEvent("lead_captured", {
-                source: "newsletter",
-                is_new: data.isNew,
-            });
+            trackGenerateLead("newsletter", "email");
+            trackSignUp("newsletter");
             trackFBPixel("Lead", { content_name: "newsletter" });
         } catch (err) {
             setError(err instanceof Error ? err.message : "Something went wrong");
@@ -47,40 +47,34 @@ export function NewsletterForm() {
 
     if (isSuccess) {
         return (
-            <div className="mt-8 flex items-center justify-center gap-2 text-sunshine font-bold text-lg">
-                <CheckCircle className="w-6 h-6" />
-                You&apos;re in! Welcome to Miko&apos;s Club.
+            <div className="mt-6 flex items-center gap-2 text-marigold font-semibold">
+                <CheckCircle className="w-5 h-5" />
+                You&apos;re in. Welcome to Miko&apos;s Club.
             </div>
         );
     }
 
     return (
         <>
-            <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-3 sm:flex-row max-w-md mx-auto">
+            <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-3 sm:flex-row max-w-md">
                 <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
-                    className="flex-1 rounded-full border-2 border-white/20 px-6 py-4 text-sm focus:border-sunshine focus:ring-sunshine outline-none bg-white/10 text-white placeholder:text-white/50"
+                    placeholder="Your email address"
+                    aria-label="Email address"
+                    className="flex-1 h-12 rounded-full border border-paper/25 px-5 text-sm focus:border-marigold focus:ring-2 focus:ring-marigold/30 outline-none bg-paper/10 text-paper placeholder:text-paper/50"
                     required
                 />
-                <Button
+                <button
                     type="submit"
-                    size="lg"
                     disabled={isLoading}
-                    className="rounded-full bg-sunshine hover:bg-[var(--sunshine-hover)] text-ink font-extrabold px-8 shadow-golden btn-bounce"
+                    className="h-12 px-7 rounded-full bg-marigold text-evergreen-deep font-bold text-sm hover:bg-marigold-deep hover:text-paper transition-colors disabled:opacity-50 inline-flex items-center justify-center"
                 >
-                    {isLoading ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                        "Subscribe"
-                    )}
-                </Button>
+                    {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Subscribe"}
+                </button>
             </form>
-            {error && (
-                <p className="mt-2 text-sm text-coral">{error}</p>
-            )}
+            {error && <p className="mt-2 text-sm text-terracotta-soft">{error}</p>}
         </>
     );
 }

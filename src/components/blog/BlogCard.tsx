@@ -18,7 +18,7 @@ export function BlogCard({ post }: { post: BlogPost }) {
             className="group bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
         >
             {post.coverImage && (
-                <div className="relative h-48 bg-pale-green">
+                <div className="relative h-48 bg-evergreen-soft">
                     <Image
                         src={getStorageUrl(post.coverImage)}
                         alt={post.title}
@@ -34,21 +34,21 @@ export function BlogCard({ post }: { post: BlogPost }) {
                         {post.tags.slice(0, 2).map((tag) => (
                             <span
                                 key={tag}
-                                className="px-2 py-0.5 rounded-full bg-pale-green text-forest text-xs font-semibold"
+                                className="px-2 py-0.5 rounded-full bg-evergreen-soft text-evergreen text-xs font-semibold"
                             >
                                 {tag}
                             </span>
                         ))}
                     </div>
                 )}
-                <h3 className="font-heading text-lg font-bold text-ink group-hover:text-forest transition-colors line-clamp-2">
+                <h3 className="font-heading text-lg font-bold text-ink group-hover:text-evergreen transition-colors line-clamp-2">
                     {post.title}
                 </h3>
-                <p className="text-sm text-ink-secondary line-clamp-2">
+                <p className="text-sm text-ink-soft line-clamp-2">
                     {post.excerpt}
                 </p>
                 {formattedDate && (
-                    <p className="text-xs text-ink-secondary">{formattedDate}</p>
+                    <p className="text-xs text-ink-soft">{formattedDate}</p>
                 )}
             </div>
         </Link>

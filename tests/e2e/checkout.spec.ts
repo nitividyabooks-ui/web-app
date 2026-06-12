@@ -6,7 +6,7 @@ test.describe("Checkout", () => {
     test.beforeEach(async ({ page }) => {
         // Add a product to cart first
         await page.goto(`/books/${PRODUCT_SLUG}`);
-        await page.getByRole("button", { name: /add to cart/i }).click();
+        await page.getByRole("button", { name: /add to (cart|bag)/i }).first().click();
         await page.waitForTimeout(800);
         await page.goto("/checkout");
     });
@@ -43,7 +43,7 @@ test.describe("Checkout", () => {
     });
 
     test("order summary shows product and price", async ({ page }) => {
-        await expect(page.getByText(/₹|INR/)).toBeVisible({ timeout: 8_000 });
+        await expect(page.getByText(/₹\s?\d/).filter({ visible: true }).first()).toBeVisible({ timeout: 8_000 });
     });
 
     // IMPORTANT: We never test actual payment — stop at the payment options step

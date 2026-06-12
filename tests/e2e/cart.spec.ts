@@ -13,7 +13,7 @@ test.describe("Cart", () => {
             .textContent()
             .catch(() => "0");
 
-        await page.getByRole("button", { name: /add to cart/i }).click();
+        await page.getByRole("button", { name: /add to (cart|bag)/i }).first().click();
 
         // Wait briefly for cart state to update
         await page.waitForTimeout(1500);
@@ -28,18 +28,18 @@ test.describe("Cart", () => {
     test("cart page shows added item", async ({ page }) => {
         // Add item via product page
         await page.goto(`/books/${PRODUCT_SLUG}`);
-        await page.getByRole("button", { name: /add to cart/i }).click();
+        await page.getByRole("button", { name: /add to (cart|bag)/i }).first().click();
         await page.waitForTimeout(1000);
 
         // Navigate to checkout (cart is typically shown in checkout)
         await page.goto("/checkout");
         // The item should appear in the order summary
-        await expect(page.getByText(/₹|INR/)).toBeVisible({ timeout: 8_000 });
+        await expect(page.getByText(/₹\s?\d/).filter({ visible: true }).first()).toBeVisible({ timeout: 8_000 });
     });
 
     test("cart persists after page reload", async ({ page }) => {
         await page.goto(`/books/${PRODUCT_SLUG}`);
-        await page.getByRole("button", { name: /add to cart/i }).click();
+        await page.getByRole("button", { name: /add to (cart|bag)/i }).first().click();
         await page.waitForTimeout(800);
 
         // Reload and check cart still has items

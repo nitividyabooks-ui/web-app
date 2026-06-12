@@ -35,11 +35,11 @@ export function BookQualitySection() {
     return (
         <section className="py-12 md:py-16">
             <div className="text-center mb-8 md:mb-10">
-                <h2 className="font-heading text-2xl md:text-3xl font-bold text-charcoal">
+                <h2 className="font-heading text-2xl md:text-3xl font-bold text-ink">
                     Made for Little Hands
                 </h2>
                 <p className="text-slate-500 mt-2 text-sm md:text-base">
-                    Every detail designed with your child's safety in mind
+                    Every detail designed with your child&apos;s safety in mind
                 </p>
             </div>
 
@@ -47,13 +47,13 @@ export function BookQualitySection() {
                 {qualityFeatures.map((feature, index) => (
                     <div
                         key={index}
-                        className="flex items-start gap-4 p-5 md:p-6 bg-gradient-to-br from-emerald-50/80 to-teal-50/50 rounded-2xl border border-emerald-100/60"
+                        className="flex items-start gap-4 p-5 md:p-6 bg-gradient-to-br from-emerald-50/80 to-evergreen-soft/50 rounded-2xl border border-emerald-100/60"
                     >
                         <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-white shadow-sm border border-emerald-100 flex items-center justify-center text-emerald-600">
                             {feature.icon}
                         </div>
                         <div className="min-w-0">
-                            <h3 className="font-bold text-charcoal text-base">
+                            <h3 className="font-bold text-ink text-base">
                                 {feature.title}
                             </h3>
                             <p className="text-slate-600 text-sm mt-0.5 leading-relaxed">

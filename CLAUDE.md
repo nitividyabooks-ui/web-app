@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Memory Rule
+
+**Always save important findings to memory.** Whenever you discover a non-obvious technical fact, a bug root cause, a working pattern, or a constraint about this codebase or its infrastructure, write it to `.claude/memory/` and add a pointer in `.claude/memory/MEMORY.md`. This includes things like: API quirks, Vercel deployment constraints, third-party integration gotchas, env var formatting requirements, and any fix that took significant debugging to reach. Future conversations should not have to rediscover the same things.
+
+---
+
 ## Read These First
 
 **For agent structure and company context**: See [`AGENTS.md`](./AGENTS.md) — covers all 11 agents, memory system, API endpoints, inter-agent data flow, and go-to-market phase.
@@ -30,6 +36,7 @@ Agent files live in `.claude/agents/`. Memory files live in `.claude/memory/`. M
 
 ## Recent Changes (keep until superseded)
 
+- **2026-06-12**: Full consumer-site redesign shipped (Warm Editorial Premium design system, GA4 standard ecommerce events via `src/lib/analytics.ts`, 8 SEO collection pages at `/collections/[slug]`, `/free-printables` lead magnet, no emojis in UI — enforced by `npm run check:emoji`, chained into lint). Master plan: `docs/plans/2026-06-11-website-redesign-master-plan.md`. GA4 dashboard guide: `docs/ga4-funnel-setup.md`. Keyword map: `docs/seo-keyword-map.md`. Do NOT add a root `src/app/loading.tsx` (causes soft-404s — see `.claude/memory/root-loading-tsx-soft-404.md`).
 - **2026-05-09**: GA4 browser tracking fixed. Removed `NEXT_PUBLIC_GTM_ID=GTM-XXXXXX` (placeholder) from Vercel. GA4 Measurement ID `G-1E32RCMV28` now loads directly. Data accumulating from this date. Server-side GA4 API (property `516454398`) was always configured.
 
 ---

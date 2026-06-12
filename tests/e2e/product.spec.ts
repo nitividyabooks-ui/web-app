@@ -8,10 +8,10 @@ test.describe("Product Page", () => {
         // Product image
         await expect(page.locator("img").first()).toBeVisible({ timeout: 10_000 });
         // Price — contains ₹ or INR
-        await expect(page.getByText(/₹|INR/)).toBeVisible();
+        await expect(page.getByText(/₹|INR/).first()).toBeVisible();
         // Add to cart button
         await expect(
-            page.getByRole("button", { name: /add to cart|buy now/i })
+            page.getByRole("button", { name: /add to (cart|bag)|buy now/i }).first()
         ).toBeVisible();
     });
 

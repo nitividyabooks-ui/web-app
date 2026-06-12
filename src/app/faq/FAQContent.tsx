@@ -9,7 +9,17 @@ import {
     AccordionTrigger,
 } from "@/components/ui/Accordion";
 import { trackEvent } from "@/lib/gtm";
-import { Search, MessageCircle, X } from "lucide-react";
+import {
+    Search,
+    MessageCircle,
+    X,
+    BookOpen,
+    ShoppingCart,
+    Truck,
+    RotateCcw,
+    HelpCircle,
+    type LucideIcon,
+} from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 
 interface FAQ {
@@ -26,6 +36,19 @@ interface FAQCategory {
 
 interface FAQContentProps {
     categories: FAQCategory[];
+}
+
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+    books: BookOpen,
+    ordering: ShoppingCart,
+    shipping: Truck,
+    returns: RotateCcw,
+    help: HelpCircle,
+};
+
+function CategoryIcon({ icon, className }: { icon: string; className?: string }) {
+    const Icon = CATEGORY_ICONS[icon] || HelpCircle;
+    return <Icon className={className} />;
 }
 
 export function FAQContent({ categories }: FAQContentProps) {
@@ -80,40 +103,44 @@ export function FAQContent({ categories }: FAQContentProps) {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-soft to-white">
+        <div className="min-h-screen bg-paper">
             {/* Hero Section */}
-            <div className="bg-gradient-to-br from-miko-blue/10 via-white to-miko-yellow/5 py-12 md:py-16">
+            <div className="bg-paper-deep border-b border-hairline py-12 md:py-16">
                 <div className="container mx-auto px-4 md:px-6">
                     <div className="max-w-3xl mx-auto text-center">
-                        <h1 className="font-heading text-4xl md:text-5xl font-extrabold text-charcoal">
+                        <p className="text-sm font-bold uppercase tracking-[0.16em] text-terracotta-deep">
+                            Help centre
+                        </p>
+                        <h1 className="mt-3 font-heading text-display font-semibold text-ink">
                             How can we help?
                         </h1>
-                        <p className="mt-4 text-lg text-slate-600">
+                        <p className="mt-4 text-lg text-ink-soft">
                             Find answers to common questions about our books, ordering, shipping, and more.
                         </p>
 
                         {/* Search Bar */}
                         <div className="mt-8 relative max-w-xl mx-auto">
                             <div className="relative">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-soft/60" />
                                 <input
                                     type="text"
                                     value={searchQuery}
                                     onChange={(e) => handleSearch(e.target.value)}
                                     placeholder="Search for answers..."
-                                    className="w-full pl-12 pr-12 py-4 rounded-2xl border-2 border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:border-miko-blue focus:ring-0 outline-none shadow-sm text-base"
+                                    className="w-full pl-12 pr-12 py-4 rounded-input border border-hairline-strong bg-surface text-ink placeholder:text-ink-soft/60 focus:border-evergreen focus:ring-0 outline-none shadow-card text-base"
                                 />
                                 {searchQuery && (
                                     <button
                                         onClick={() => setSearchQuery("")}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600"
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-ink-soft/60 hover:text-ink"
+                                        aria-label="Clear search"
                                     >
                                         <X className="w-5 h-5" />
                                     </button>
                                 )}
                             </div>
                             {searchQuery && (
-                                <p className="mt-2 text-sm text-slate-500">
+                                <p className="mt-2 text-sm text-ink-soft">
                                     Found {totalResults} {totalResults === 1 ? "result" : "results"}
                                 </p>
                             )}
@@ -130,8 +157,8 @@ export function FAQContent({ categories }: FAQContentProps) {
                             onClick={() => setActiveCategory(null)}
                             className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${
                                 activeCategory === null
-                                    ? "bg-miko-blue text-white"
-                                    : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"
+                                    ? "bg-evergreen text-white"
+                                    : "bg-surface text-ink-soft border border-hairline hover:border-evergreen/40"
                             }`}
                         >
                             All Topics
@@ -140,13 +167,13 @@ export function FAQContent({ categories }: FAQContentProps) {
                             <button
                                 key={category.id}
                                 onClick={() => handleCategoryClick(category.id)}
-                                className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${
+                                className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold transition-colors ${
                                     activeCategory === category.id
-                                        ? "bg-miko-blue text-white"
-                                        : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"
+                                        ? "bg-evergreen text-white"
+                                        : "bg-surface text-ink-soft border border-hairline hover:border-evergreen/40"
                                 }`}
                             >
-                                <span className="mr-1.5">{category.icon}</span>
+                                <CategoryIcon icon={category.icon} className="w-4 h-4" />
                                 {category.title}
                             </button>
                         ))}
@@ -159,18 +186,18 @@ export function FAQContent({ categories }: FAQContentProps) {
                 <div className="max-w-3xl mx-auto">
                     {filteredCategories.length === 0 ? (
                         <div className="text-center py-12">
-                            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Search className="w-8 h-8 text-slate-400" />
+                            <div className="w-16 h-16 bg-paper-deep rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Search className="w-8 h-8 text-ink-soft/60" />
                             </div>
-                            <h3 className="font-heading text-xl font-bold text-slate-900 mb-2">
+                            <h3 className="font-heading text-xl font-semibold text-ink mb-2">
                                 No results found
                             </h3>
-                            <p className="text-slate-500 mb-4">
+                            <p className="text-ink-soft mb-4">
                                 Try a different search term or browse by category.
                             </p>
                             <button
                                 onClick={() => setSearchQuery("")}
-                                className="text-miko-blue font-semibold hover:underline"
+                                className="text-evergreen font-semibold hover:underline"
                             >
                                 Clear search
                             </button>
@@ -182,8 +209,13 @@ export function FAQContent({ categories }: FAQContentProps) {
                                     {/* Category Header */}
                                     {!searchQuery && (
                                         <div className="flex items-center gap-3 mb-4">
-                                            <span className="text-2xl">{category.icon}</span>
-                                            <h2 className="font-heading text-xl md:text-2xl font-bold text-charcoal">
+                                            <span className="w-9 h-9 rounded-full bg-marigold-soft flex items-center justify-center">
+                                                <CategoryIcon
+                                                    icon={category.icon}
+                                                    className="w-4.5 h-4.5 text-terracotta"
+                                                />
+                                            </span>
+                                            <h2 className="font-heading text-xl md:text-2xl font-semibold text-ink">
                                                 {category.title}
                                             </h2>
                                         </div>
@@ -195,15 +227,15 @@ export function FAQContent({ categories }: FAQContentProps) {
                                             <AccordionItem
                                                 key={`${category.id}-${index}`}
                                                 value={`${category.id}-${index}`}
-                                                className="border border-slate-200 rounded-xl px-4 bg-white data-[state=open]:bg-blue-50/30 data-[state=open]:border-miko-blue/30 transition-colors shadow-sm"
+                                                className="border border-hairline rounded-card px-4 bg-surface data-[state=open]:border-evergreen/30 transition-colors shadow-card"
                                             >
                                                 <AccordionTrigger
-                                                    className="font-heading font-bold text-charcoal text-left hover:text-miko-blue hover:no-underline py-4 text-base"
+                                                    className="font-heading font-semibold text-ink text-left hover:text-evergreen hover:no-underline py-4 text-base"
                                                     onClick={() => handleFAQOpen(faq.question, category.id)}
                                                 >
                                                     {faq.question}
                                                 </AccordionTrigger>
-                                                <AccordionContent className="text-slate-600 pb-4 text-sm leading-relaxed">
+                                                <AccordionContent className="text-ink-soft pb-4 text-sm leading-relaxed">
                                                     {faq.answer}
                                                 </AccordionContent>
                                             </AccordionItem>
@@ -217,24 +249,24 @@ export function FAQContent({ categories }: FAQContentProps) {
             </div>
 
             {/* Still Need Help CTA */}
-            <div className="bg-slate-900 py-12 md:py-16">
+            <div className="bg-evergreen-deep py-12 md:py-16">
                 <div className="container mx-auto px-4 md:px-6">
                     <div className="max-w-2xl mx-auto text-center">
-                        <div className="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <MessageCircle className="w-7 h-7 text-white" />
+                        <div className="w-14 h-14 bg-paper/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <MessageCircle className="w-7 h-7 text-marigold" />
                         </div>
-                        <h2 className="font-heading text-2xl md:text-3xl font-bold text-white">
+                        <h2 className="font-heading text-2xl md:text-3xl font-semibold text-paper">
                             Still have questions?
                         </h2>
-                        <p className="mt-3 text-slate-300">
-                            Can&apos;t find what you&apos;re looking for? Our team is here to help!
+                        <p className="mt-3 text-paper/70">
+                            Can&apos;t find what you&apos;re looking for? Our team is here to help.
                         </p>
                         <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
                             <a
                                 href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "919315383801"}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-green-500 text-white font-bold rounded-xl hover:bg-green-600 transition-colors"
+                                className="inline-flex items-center justify-center gap-2 h-12 px-6 bg-[#1FAF5E] text-white font-bold rounded-btn hover:bg-[#179850] transition-colors"
                                 onClick={() => trackEvent("faq_whatsapp_click", {})}
                             >
                                 <SiWhatsapp className="w-5 h-5" />
@@ -242,7 +274,7 @@ export function FAQContent({ categories }: FAQContentProps) {
                             </a>
                             <Link
                                 href="/contact"
-                                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-slate-900 font-bold rounded-xl hover:bg-slate-100 transition-colors"
+                                className="inline-flex items-center justify-center gap-2 h-12 px-6 bg-paper text-ink font-bold rounded-btn hover:bg-paper-deep transition-colors"
                             >
                                 Contact Us
                             </Link>
@@ -253,4 +285,3 @@ export function FAQContent({ categories }: FAQContentProps) {
         </div>
     );
 }
-

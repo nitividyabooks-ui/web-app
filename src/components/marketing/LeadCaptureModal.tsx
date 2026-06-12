@@ -1,17 +1,17 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { X, Gift, Phone, Sparkles, CheckCircle } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { X, Gift, CheckCircle, Loader2 } from "lucide-react";
+import { PhoneInput } from "@/components/ui/PhoneInput";
 import { getVisitorId } from "@/lib/visitor-id";
-import { trackEvent } from "@/lib/gtm";
-import { useIdentifyUser } from "@/context/UserContext";
+import { trackGenerateLead, trackViewPromotion } from "@/lib/analytics";
+import { trackFBPixel } from "@/lib/fbpixel";
 
-const MODAL_DELAY_MS = 10000; // Show after 10 seconds
-const DISMISSED_KEY = "nv_lead_modal_dismissed";
+const MODAL_DELAY_MS = 20000; // show after 20 seconds on first visit
+const SNOOZE_KEY = "nv_lead_modal_snooze_until";
+const SNOOZE_DAYS = 14;
 
 export function LeadCaptureModal() {
-    const { identifyUser } = useIdentifyUser();
     const [isOpen, setIsOpen] = useState(false);
     const [phone, setPhone] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -19,23 +19,28 @@ export function LeadCaptureModal() {
     const [isSuccess, setIsSuccess] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
 
-    // Wait for client-side mount
     useEffect(() => {
         setIsMounted(true);
     }, []);
 
-    // Check if we should show the modal
+    const snooze = useCallback(() => {
+        try {
+            localStorage.setItem(
+                SNOOZE_KEY,
+                String(Date.now() + SNOOZE_DAYS * 24 * 60 * 60 * 1000)
+            );
+        } catch {
+            // ignore
+        }
+    }, []);
+
     const checkAndShowModal = useCallback(async () => {
-        // Only run on client
         if (typeof window === "undefined") return;
 
-        // Don't show if already dismissed in this session
         try {
-            if (sessionStorage.getItem(DISMISSED_KEY)) {
-                return;
-            }
+            const until = Number(localStorage.getItem(SNOOZE_KEY) || 0);
+            if (until > Date.now()) return;
         } catch {
-            // sessionStorage might not be available
             return;
         }
 
@@ -47,12 +52,9 @@ export function LeadCaptureModal() {
             const data = await response.json();
 
             if (!data.hasSubmitted) {
-                // Wait before showing
                 setTimeout(() => {
                     setIsOpen(true);
-                    trackEvent("lead_modal_shown", {
-                        visitor_id: visitorId,
-                    });
+                    trackViewPromotion("welcome_offer", "welcome_modal");
                 }, MODAL_DELAY_MS);
             }
         } catch (error) {
@@ -68,37 +70,40 @@ export function LeadCaptureModal() {
 
     const handleClose = () => {
         setIsOpen(false);
-        try {
-            sessionStorage.setItem(DISMISSED_KEY, "true");
-        } catch {
-            // sessionStorage might not be available
-        }
-        trackEvent("lead_modal_dismissed", {
-            visitor_id: getVisitorId(),
-        });
+        snooze();
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
-        setIsLoading(true);
 
+        if (phone.length !== 10) {
+            setError("Enter a valid 10-digit number");
+            return;
+        }
+
+        setIsLoading(true);
         try {
-            await identifyUser({
-                mobile: phone,
-                source: "modal",
+            const res = await fetch("/api/leads", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    visitorId: getVisitorId(),
+                    phone,
+                    source: "welcome_modal",
+                }),
             });
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error || "Something went wrong — please try again");
+            }
 
             setIsSuccess(true);
-            trackEvent("lead_captured", {
-                source: "welcome_modal",
-                user_phone: phone,
-            });
+            snooze();
+            trackGenerateLead("welcome_modal", "phone");
+            trackFBPixel("Lead", { content_name: "welcome_modal" });
 
-            // Auto-close after success
-            setTimeout(() => {
-                setIsOpen(false);
-            }, 3000);
+            setTimeout(() => setIsOpen(false), 3000);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Something went wrong");
         } finally {
@@ -106,117 +111,79 @@ export function LeadCaptureModal() {
         }
     };
 
-    // Don't render anything during SSR
-    if (!isMounted) return null;
-    if (!isOpen) return null;
+    if (!isMounted || !isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                className="absolute inset-0 bg-ink/55 backdrop-blur-sm animate-in fade-in duration-200"
                 onClick={handleClose}
             />
 
-            {/* Modal */}
-            <div className="relative bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-in zoom-in-95 duration-300">
-                {/* Close Button */}
+            <div className="relative bg-surface rounded-card-lg shadow-lift max-w-md w-full overflow-hidden animate-in zoom-in-95 duration-300">
                 <button
                     onClick={handleClose}
-                    className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors z-10"
+                    className="absolute top-4 right-4 p-2 text-white/80 hover:text-white rounded-full hover:bg-white/10 transition-colors z-10"
                     aria-label="Close"
                 >
                     <X className="w-5 h-5" />
                 </button>
 
-                {/* Success State */}
                 {isSuccess ? (
                     <div className="p-8 text-center">
-                        <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-                            <CheckCircle className="w-10 h-10 text-green-600" />
+                        <div className="w-20 h-20 rounded-full bg-evergreen-soft flex items-center justify-center mx-auto mb-4">
+                            <CheckCircle className="w-10 h-10 text-evergreen" />
                         </div>
-                        <h2 className="text-2xl font-bold text-slate-900 mb-2">
-                            You're all set! 🎉
+                        <h2 className="font-heading text-2xl font-semibold text-ink mb-2">
+                            Welcome to Miko&apos;s Club
                         </h2>
-                        <p className="text-slate-600">
-                            Your 20% discount is already applied to all books.
-                            Happy shopping!
+                        <p className="text-ink-soft">
+                            We&apos;ll send your free printables and the launch offer on WhatsApp.
                         </p>
                     </div>
                 ) : (
                     <>
-                        {/* Header with gradient */}
-                        <div className="bg-gradient-to-br from-blue-500 to-purple-600 px-8 pt-10 pb-8 text-white text-center">
-                            <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-4">
-                                <Gift className="w-8 h-8" />
+                        <div className="bg-evergreen-deep px-8 pt-10 pb-8 text-center">
+                            <div className="w-16 h-16 rounded-full bg-marigold flex items-center justify-center mx-auto mb-4">
+                                <Gift className="w-8 h-8 text-evergreen-deep" />
                             </div>
-                            <h2 className="text-2xl font-bold mb-2">
-                                Special Welcome Gift! 🎁
+                            <h2 className="font-heading text-2xl font-semibold text-paper mb-2">
+                                A little welcome gift
                             </h2>
-                            <p className="text-blue-100 text-sm">
-                                Just for you, as a new visitor
+                            <p className="text-paper/75 text-sm">
+                                Free printable worksheets plus the launch offer — up to 60% off
+                                the complete Miko set
                             </p>
                         </div>
 
-                        {/* Content */}
-                        <div className="p-8">
-                            <div className="text-center mb-6">
-                                <div className="inline-flex items-center gap-2 bg-amber-50 text-amber-800 px-4 py-2 rounded-full text-sm font-semibold mb-3">
-                                    <Sparkles className="w-4 h-4" />
-                                    Get 20% OFF on all books!
-                                </div>
-                                <p className="text-slate-600 text-sm leading-relaxed">
-                                    Drop your WhatsApp number and we'll keep you posted
-                                    about new book launches and exclusive deals.
-                                </p>
-                            </div>
-
+                        <div className="p-7">
                             <form onSubmit={handleSubmit} className="space-y-4">
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                                        <span className="text-slate-400 font-medium">+91</span>
-                                    </div>
-                                    <input
-                                        type="tel"
-                                        value={phone}
-                                        onChange={(e) => {
-                                            const value = e.target.value.replace(/\D/g, "").slice(0, 10);
-                                            setPhone(value);
-                                        }}
-                                        placeholder="Enter WhatsApp number"
-                                        className="w-full pl-14 pr-4 py-4 border-2 border-slate-200 rounded-xl text-lg font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
-                                        required
-                                        pattern="[0-9]{10}"
-                                        maxLength={10}
-                                    />
-                                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-                                        <Phone className="w-5 h-5 text-slate-300" />
-                                    </div>
-                                </div>
+                                <PhoneInput
+                                    name="welcome-phone"
+                                    label="WhatsApp number"
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
+                                    error={error || undefined}
+                                />
 
-                                {error && (
-                                    <p className="text-red-600 text-sm text-center">{error}</p>
-                                )}
-
-                                <Button
+                                <button
                                     type="submit"
-                                    className="w-full py-4 text-lg"
-                                    size="lg"
                                     disabled={isLoading || phone.length !== 10}
+                                    className="w-full h-13 rounded-btn bg-evergreen hover:bg-evergreen-deep disabled:opacity-50 text-white font-bold transition-colors"
                                 >
                                     {isLoading ? (
-                                        <span className="flex items-center gap-2">
-                                            <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                        <span className="inline-flex items-center gap-2">
+                                            <Loader2 className="w-5 h-5 animate-spin" />
                                             Please wait...
                                         </span>
                                     ) : (
-                                        "Claim My 20% Discount"
+                                        "Join Miko's Club — free"
                                     )}
-                                </Button>
+                                </button>
                             </form>
 
-                            <p className="text-center text-xs text-slate-400 mt-4">
-                                🔒 No spam, ever. Only book updates & exclusive deals.
+                            <p className="text-center text-xs text-ink-soft mt-4">
+                                No spam, ever. Only printables, book news, and offers.
                             </p>
                         </div>
                     </>

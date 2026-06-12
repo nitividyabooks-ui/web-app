@@ -1,14 +1,22 @@
 import { MetadataRoute } from "next";
 import { getAllProducts } from "@/lib/products";
 import { getAllBlogPosts } from "@/lib/blog";
+import { COLLECTIONS } from "@/lib/collections";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = "https://nitividya.com"; // Replace with actual domain
+    const baseUrl = "https://www.nitividyabooks.com";
     const products = await getAllProducts();
     const blogPosts = await getAllBlogPosts();
 
     const productUrls = products.map((product) => ({
         url: `${baseUrl}/books/${product.slug}`,
+        lastModified: new Date(),
+        changeFrequency: "weekly" as const,
+        priority: 0.8,
+    }));
+
+    const collectionUrls = COLLECTIONS.map((c) => ({
+        url: `${baseUrl}/collections/${c.slug}`,
         lastModified: new Date(),
         changeFrequency: "weekly" as const,
         priority: 0.8,
@@ -35,7 +43,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             priority: 0.9,
         },
         {
-            url: `${baseUrl}/free-activity-kit`,
+            url: `${baseUrl}/free-printables`,
             lastModified: new Date(),
             changeFrequency: "monthly",
             priority: 0.8,
@@ -95,6 +103,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             priority: 0.4,
         },
         ...productUrls,
+        ...collectionUrls,
         ...blogUrls,
     ];
 }

@@ -1,26 +1,29 @@
 import React from "react";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: "primary" | "secondary" | "outline";
+    variant?: "primary" | "secondary" | "outline" | "ghost" | "whatsapp";
     size?: "sm" | "md" | "lg" | "xl" | "icon";
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ({ className = "", variant = "primary", size = "md", ...props }, ref) => {
-        const baseStyles = "inline-flex items-center justify-center rounded-full font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
+        const baseStyles =
+            "inline-flex items-center justify-center gap-2 rounded-btn font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-evergreen disabled:opacity-50 disabled:pointer-events-none btn-bounce";
 
         const variants = {
-            primary: "bg-forest text-white hover:bg-[var(--forest-hover)] focus:ring-forest",
-            secondary: "bg-sunshine text-ink hover:bg-[var(--sunshine-hover)] focus:ring-sunshine",
-            outline: "border-2 border-forest text-forest hover:bg-pale-green focus:ring-forest",
+            primary: "bg-evergreen text-white hover:bg-evergreen-deep",
+            secondary: "bg-marigold-soft text-evergreen-deep hover:bg-marigold/40",
+            outline: "border border-evergreen text-evergreen hover:bg-evergreen-soft",
+            ghost: "text-evergreen hover:bg-evergreen-soft",
+            whatsapp: "bg-[#1FAF5E] text-white hover:bg-[#178F4D]",
         };
 
         const sizes = {
-            sm: "h-11 rounded-md px-3 min-w-11",
-            md: "h-11 px-6 text-base min-w-11",
-            lg: "h-11 rounded-md px-8 min-w-11",
-            xl: "h-14 rounded-btn px-10 text-lg min-w-14",
-            icon: "h-11 w-11",
+            sm: "h-11 px-4 text-sm min-w-11",
+            md: "h-12 px-6 text-base min-w-12",
+            lg: "h-12 px-8 text-base min-w-12",
+            xl: "h-14 px-10 text-lg min-w-14",
+            icon: "h-12 w-12",
         };
 
         return (

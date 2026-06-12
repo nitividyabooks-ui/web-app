@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight, Play } from "lucide-react";
+import { SiYoutube } from "react-icons/si";
+import { trackVideoStart } from "@/lib/analytics";
 
 const CHANNEL_URL = "https://www.youtube.com/channel/UCHuY7vX820c3N1T9iBOsn6g";
 const SUBSCRIBE_URL = "https://www.youtube.com/channel/UCHuY7vX820c3N1T9iBOsn6g?sub_confirmation=1";
@@ -12,35 +16,38 @@ const FEATURED_VIDEOS = [
     { id: "hZuE4QOa8ho", label: "The Magic Button" },
 ];
 
+/**
+ * Lite YouTube embeds — thumbnail until tapped, then the iframe
+ * loads. Keeps the home page free of YouTube JS on initial paint.
+ */
 export function YouTubeChannelSection() {
     const [playingId, setPlayingId] = useState<string | null>(null);
 
+    const handlePlay = (id: string, label: string) => {
+        setPlayingId(id);
+        trackVideoStart(label, "home_youtube_section");
+    };
+
     return (
-        <section className="py-16 lg:py-20 bg-forest text-white">
+        <section className="py-14 lg:py-20 bg-evergreen-deep">
             <div className="container mx-auto px-4 md:px-6">
-                {/* Header */}
                 <div className="text-center mb-10">
-                    <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-sunshine text-sm font-bold mb-4">
-                        <svg className="w-4 h-4 text-red-400" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-                        </svg>
-                        Free Story Time
-                    </span>
-                    <h2 className="font-heading text-3xl sm:text-4xl font-bold text-sunshine">
-                        Watch Our Stories on YouTube
+                    <p className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-marigold">
+                        <SiYoutube className="w-4 h-4" />
+                        Free story time
+                    </p>
+                    <h2 className="mt-3 font-heading text-headline font-semibold text-paper">
+                        Watch the stories come alive
                     </h2>
-                    <p className="mt-3 text-white/70 text-lg max-w-xl mx-auto">
-                        Our characters come to life — free read-aloud stories for your little one, anytime.
+                    <p className="mt-3 text-paper/70 text-lg max-w-xl mx-auto">
+                        Free read-aloud stories on our YouTube channel — perfect for
+                        winding down before bed.
                     </p>
                 </div>
 
-                {/* Video thumbnails */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl mx-auto">
                     {FEATURED_VIDEOS.map(({ id, label }) => (
-                        <div
-                            key={id}
-                            className="rounded-2xl overflow-hidden shadow-lg"
-                        >
+                        <div key={id} className="rounded-card overflow-hidden bg-paper/5 border border-paper/10">
                             {playingId === id ? (
                                 <div className="aspect-video">
                                     <iframe
@@ -53,58 +60,45 @@ export function YouTubeChannelSection() {
                                 </div>
                             ) : (
                                 <button
-                                    onClick={() => setPlayingId(id)}
-                                    className="relative w-full aspect-video group"
+                                    onClick={() => handlePlay(id, label)}
+                                    className="relative w-full aspect-video group block"
                                     aria-label={`Play ${label}`}
                                 >
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img
+                                    <Image
                                         src={`https://img.youtube.com/vi/${id}/hqdefault.jpg`}
                                         alt={label}
-                                        className="w-full h-full object-cover"
+                                        fill
+                                        sizes="(max-width: 640px) 100vw, 33vw"
+                                        className="object-cover"
                                     />
-                                    <div className="absolute inset-0 bg-black/25 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                                        <div className="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-                                            <svg className="w-6 h-6 text-white ml-1" viewBox="0 0 24 24" fill="currentColor">
-                                                <path d="M8 5v14l11-7z" />
-                                            </svg>
-                                        </div>
-                                    </div>
+                                    <span className="absolute inset-0 bg-ink/25 group-hover:bg-ink/40 transition-colors flex items-center justify-center">
+                                        <span className="w-14 h-14 bg-paper rounded-full flex items-center justify-center shadow-lift group-hover:scale-110 transition-transform">
+                                            <Play className="w-6 h-6 text-evergreen-deep ml-0.5 fill-current" />
+                                        </span>
+                                    </span>
                                 </button>
                             )}
-                            <div className="px-3 py-2.5 bg-white/10">
-                                <p className="text-sm font-semibold text-white text-center">{label}</p>
-                            </div>
+                            <p className="px-4 py-3 text-sm font-semibold text-paper text-center">{label}</p>
                         </div>
                     ))}
                 </div>
 
-                {/* CTAs */}
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-10">
-                    <a
-                        href={CHANNEL_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 bg-red-600 text-white font-bold px-6 py-3 rounded-full hover:bg-red-700 transition-colors shadow-lg"
-                    >
-                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-                        </svg>
-                        Watch on YouTube
-                    </a>
                     <a
                         href={SUBSCRIBE_URL}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 bg-white/10 border border-white/25 text-white font-bold px-6 py-3 rounded-full hover:bg-white/20 transition-colors"
+                        className="inline-flex items-center gap-2 h-12 px-7 rounded-btn bg-marigold text-evergreen-deep font-bold hover:bg-marigold-deep hover:text-paper transition-colors"
                     >
-                        Subscribe Free
+                        <SiYoutube className="w-5 h-5" />
+                        Subscribe free
                     </a>
                     <Link
                         href="/story-time"
-                        className="inline-flex items-center gap-2 text-sunshine font-bold hover:underline"
+                        className="inline-flex items-center gap-1.5 h-12 px-5 text-paper font-semibold hover:text-marigold transition-colors"
                     >
-                        See all stories →
+                        See all stories
+                        <ArrowRight className="w-4 h-4" />
                     </Link>
                 </div>
             </div>

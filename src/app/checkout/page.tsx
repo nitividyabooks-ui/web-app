@@ -9,6 +9,14 @@ import { DeliveryForm, DeliveryFormData } from "@/components/checkout/DeliveryFo
 import { PaymentOptions } from "@/components/checkout/PaymentOptions";
 import { PaymentSuccessModal } from "@/components/checkout/PaymentSuccessModal";
 import { trackEvent } from "@/lib/gtm";
+import {
+    cartItemsToItems,
+    trackBeginCheckout,
+    trackAddShippingInfo,
+    trackAddPaymentInfo,
+    trackPurchase,
+    trackPaymentFailure,
+} from "@/lib/analytics";
 import { trackFBPixel } from "@/lib/fbpixel";
 import { getSalePaiseFromMrpPaise } from "@/lib/pricing";
 import { buildWhatsAppMessage, buildWhatsAppUrl, getWhatsAppNumber } from "@/lib/whatsapp";
@@ -48,19 +56,7 @@ export default function CheckoutPage() {
     useEffect(() => {
         if (isHydrated && items.length > 0 && !hasTrackedCheckout.current) {
             hasTrackedCheckout.current = true;
-            trackEvent("begin_checkout", {
-                currency: "INR",
-                value: totalAmount / 100,
-                discount_percent: discountPercent,
-                items: items.map((item) => ({
-                    item_id: item.productId,
-                    item_name: item.title,
-                    price: getSalePaiseFromMrpPaise(item.price, discountPercent) / 100,
-                    currency: "INR",
-                    item_category: "Books",
-                    quantity: item.quantity,
-                })),
-            });
+            trackBeginCheckout(cartItemsToItems(items, discountPercent), totalAmount / 100);
 
             trackFBPixel("InitiateCheckout", {
                 content_ids: items.map((item) => item.productId),
@@ -98,20 +94,11 @@ export default function CheckoutPage() {
             setStep("payment");
 
             // Track address completed
-            trackEvent("add_shipping_info", {
-                currency: "INR",
-                value: totalAmount / 100,
-                shipping_tier: "standard",
-                user_id: userResult.userId,
-                items: items.map((item) => ({
-                    item_id: item.productId,
-                    item_name: item.title,
-                    price: getSalePaiseFromMrpPaise(item.price, discountPercent) / 100,
-                    currency: "INR",
-                    item_category: "Books",
-                    quantity: item.quantity,
-                })),
-            });
+            trackAddShippingInfo(
+                cartItemsToItems(items, discountPercent),
+                totalAmount / 100,
+                data.pincode
+            );
 
         } catch (error) {
             console.error("Error identifying user:", error);
@@ -131,11 +118,7 @@ export default function CheckoutPage() {
         setIsLoading(true);
         setError(null);
 
-        trackEvent("add_payment_info", {
-            currency: "INR",
-            value: totalAmount / 100,
-            payment_type: "Razorpay",
-        });
+        trackAddPaymentInfo(cartItemsToItems(items, discountPercent), totalAmount / 100, "Razorpay");
 
         try {
             // First create order in DB
@@ -196,7 +179,7 @@ export default function CheckoutPage() {
                 order_id: paymentData.razorpayOrderId,
                 prefill: paymentData.prefill,
                 theme: {
-                    color: "#2563eb", // Blue-600
+                    color: "#1E4D3B", // brand evergreen
                 },
                 modal: {
                     ondismiss: () => {
@@ -226,13 +209,12 @@ export default function CheckoutPage() {
                         const verifyData = await verifyResponse.json();
 
                         if (verifyData.success) {
-                            trackEvent("purchase", {
-                                transaction_id: response.razorpay_payment_id,
-                                currency: "INR",
-                                value: totalAmount / 100,
-                                payment_type: "Razorpay",
-                                order_id: orderData.orderId,
-                            });
+                            trackPurchase(
+                                cartItemsToItems(items, discountPercent),
+                                totalAmount / 100,
+                                response.razorpay_payment_id,
+                                "Razorpay"
+                            );
                             clearCart();
                             setShowSuccessModal(true);
                         } else {
@@ -271,13 +253,7 @@ export default function CheckoutPage() {
             razorpay.on("payment.failed", (response: RazorpayErrorResponse) => {
                 setIsLoading(false);
                 setError(response.error.description || "Payment failed. Please try again.");
-                trackEvent("payment_failed", {
-                    currency: "INR",
-                    value: totalAmount / 100,
-                    payment_type: "Razorpay",
-                    error: response.error.description,
-                    order_id: orderData.orderId,
-                });
+                trackPaymentFailure(totalAmount / 100, orderData.orderId, response.error.description);
             });
 
             razorpay.open();
@@ -287,14 +263,13 @@ export default function CheckoutPage() {
             setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
             setIsLoading(false);
 
-            trackEvent("payment_failed", {
-                currency: "INR",
-                value: totalAmount / 100,
-                payment_type: "Razorpay",
-                error: err instanceof Error ? err.message : "Unknown error",
-            });
+            trackPaymentFailure(
+                totalAmount / 100,
+                currentOrderId.current || "unknown",
+                err instanceof Error ? err.message : "Unknown error"
+            );
         }
-    }, [deliveryData, items, totalAmount, razorpayLoaded, clearCart, router]);
+    }, [deliveryData, items, totalAmount, discountPercent, razorpayLoaded, clearCart, router]);
 
     const handleWhatsAppOrder = useCallback(async () => {
         if (!deliveryData) return;
@@ -302,6 +277,7 @@ export default function CheckoutPage() {
         setIsLoading(true);
         setError(null);
 
+        trackAddPaymentInfo(cartItemsToItems(items, discountPercent), totalAmount / 100, "WhatsApp");
         trackEvent("whatsapp_order_initiated", {
             currency: "INR",
             value: totalAmount / 100,
@@ -376,8 +352,8 @@ export default function CheckoutPage() {
     // Loading state
     if (!isHydrated) {
         return (
-            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-                <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+            <div className="min-h-screen bg-paper flex items-center justify-center">
+                <div className="w-8 h-8 border-4 border-evergreen border-t-transparent rounded-full animate-spin" />
             </div>
         );
     }
@@ -397,20 +373,20 @@ export default function CheckoutPage() {
                 onError={() => console.error("Failed to load Razorpay script")}
             />
 
-            <div className="min-h-screen bg-slate-50">
+            <div className="min-h-screen bg-paper">
                 {/* Header */}
-                <header className="sticky top-0 z-40 bg-white border-b border-slate-200">
+                <header className="sticky top-0 z-40 bg-paper/95 backdrop-blur-md border-b border-hairline">
                     <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
                         <Link
                             href="/books"
-                            className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
+                            className="flex items-center gap-2 text-ink-soft hover:text-ink transition-colors"
                         >
                             <ArrowLeft className="w-5 h-5" />
-                            <span className="hidden sm:inline font-medium">Continue Shopping</span>
+                            <span className="hidden sm:inline font-semibold">Continue shopping</span>
                         </Link>
-                        <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                            <ShieldCheck className="w-4 h-4 text-green-600" />
-                            <span>Secure Checkout</span>
+                        <div className="flex items-center gap-2 text-sm font-bold text-ink">
+                            <ShieldCheck className="w-4 h-4 text-evergreen" />
+                            <span>Secure checkout</span>
                         </div>
                     </div>
                 </header>
@@ -426,8 +402,8 @@ export default function CheckoutPage() {
                                     onClick={() => step === "payment" && setStep("delivery")}
                                     className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
                                         step === "delivery"
-                                            ? "bg-blue-600 text-white"
-                                            : "bg-slate-200 text-slate-600 hover:bg-slate-300"
+                                            ? "bg-evergreen text-white"
+                                            : "bg-paper-deep text-ink-soft hover:bg-evergreen-soft"
                                     }`}
                                 >
                                     <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-xs">
@@ -435,15 +411,15 @@ export default function CheckoutPage() {
                                     </span>
                                     Delivery
                                 </button>
-                                <div className="h-px flex-1 bg-slate-300" />
+                                <div className="h-px flex-1 bg-hairline-strong" />
                                 <button
                                     disabled={!deliveryData}
                                     className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
                                         step === "payment"
-                                            ? "bg-blue-600 text-white"
+                                            ? "bg-evergreen text-white"
                                             : deliveryData
-                                            ? "bg-slate-200 text-slate-600 hover:bg-slate-300"
-                                            : "bg-slate-100 text-slate-400 cursor-not-allowed"
+                                            ? "bg-paper-deep text-ink-soft hover:bg-evergreen-soft"
+                                            : "bg-paper-deep/60 text-ink-soft/50 cursor-not-allowed"
                                     }`}
                                 >
                                     <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-xs">
@@ -455,7 +431,7 @@ export default function CheckoutPage() {
 
                             {/* Error Message */}
                             {error && (
-                                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+                                <div className="mb-6 p-4 bg-terracotta-soft border border-terracotta/40 rounded-card text-terracotta-deep text-sm">
                                     {error}
                                 </div>
                             )}
@@ -503,18 +479,18 @@ export default function CheckoutPage() {
                 </main>
 
                 {/* Mobile Sticky Footer - Order Summary */}
-                <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-lg z-30">
-                    <div className="px-4 py-3">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm text-slate-600">
+                <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-surface border-t border-hairline shadow-lift z-30">
+                    <div className="px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm text-ink-soft">
                                 {items.length} item{items.length !== 1 ? "s" : ""}
                             </span>
                             <div className="text-right">
-                                <span className="text-lg font-bold text-slate-900">
+                                <span className="font-heading text-lg font-semibold text-ink">
                                     ₹{(totalAmount / 100).toFixed(0)}
                                 </span>
                                 {discountPercent > 0 && (
-                                    <span className="ml-2 text-xs text-green-600 font-semibold">
+                                    <span className="ml-2 text-xs text-evergreen font-bold">
                                         {discountPercent}% off
                                     </span>
                                 )}
@@ -537,35 +513,24 @@ export default function CheckoutPage() {
 }
 
 function TrustBadges() {
+    const items = [
+        { icon: <ShieldCheck className="w-5 h-5" />, title: "Secure payments", sub: "via Razorpay — 100% safe" },
+        { icon: <Truck className="w-5 h-5" />, title: "Free shipping", sub: "On orders above ₹499" },
+        { icon: <Clock className="w-5 h-5" />, title: "Fast dispatch", sub: "Ships within 24-48 hours" },
+    ];
     return (
-        <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-3">
-            <div className="flex items-center gap-3 text-sm">
-                <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
-                    <ShieldCheck className="w-5 h-5 text-green-600" />
+        <div className="bg-surface rounded-card border border-hairline shadow-card p-4 space-y-3">
+            {items.map((item) => (
+                <div key={item.title} className="flex items-center gap-3 text-sm">
+                    <span className="w-10 h-10 rounded-full bg-evergreen-soft text-evergreen flex items-center justify-center flex-shrink-0">
+                        {item.icon}
+                    </span>
+                    <span>
+                        <span className="block font-bold text-ink">{item.title}</span>
+                        <span className="block text-ink-soft text-xs">{item.sub}</span>
+                    </span>
                 </div>
-                <div>
-                    <div className="font-semibold text-slate-900">Secure Payments</div>
-                    <div className="text-slate-500 text-xs">via Razorpay • 100% Safe</div>
-                </div>
-            </div>
-            <div className="flex items-center gap-3 text-sm">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                    <Truck className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                    <div className="font-semibold text-slate-900">Free Shipping</div>
-                    <div className="text-slate-500 text-xs">On orders above ₹499</div>
-                </div>
-            </div>
-            <div className="flex items-center gap-3 text-sm">
-                <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
-                    <Clock className="w-5 h-5 text-amber-600" />
-                </div>
-                <div>
-                    <div className="font-semibold text-slate-900">Fast Dispatch</div>
-                    <div className="text-slate-500 text-xs">Ships within 24-48 hours</div>
-                </div>
-            </div>
+            ))}
         </div>
     );
 }
