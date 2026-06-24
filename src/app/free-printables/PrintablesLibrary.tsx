@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
-import { Download, Lock, CheckCircle, Loader2, Palette, Type, Hash, Sparkles, CalendarDays, Puzzle } from "lucide-react";
+import { Download, Lock, CheckCircle, Loader2, Palette, Type, Hash, Sparkles, Puzzle } from "lucide-react";
 import { PhoneInput } from "@/components/ui/PhoneInput";
 import { getVisitorId } from "@/lib/visitor-id";
 import { trackGenerateLead, trackFileDownload } from "@/lib/analytics";
@@ -19,60 +19,60 @@ interface Worksheet {
 
 const WORKSHEETS: Worksheet[] = [
     {
-        title: "Miko Coloring Pages",
-        description: "Five scenes with Miko the elephant to color in",
+        title: "Color Miko",
+        description: "Color your favourite elephant Miko in fun scenes",
         age: "1-5 yrs",
-        file: "miko-coloring-pages.pdf",
+        file: "color-miko.pdf",
         icon: Palette,
     },
     {
-        title: "English Alphabet Tracing",
-        description: "A to Z uppercase tracing with picture cues",
+        title: "Bugs Tracing Activity",
+        description: "Trace along dotted lines with fun bug characters",
         age: "2-5 yrs",
-        file: "english-alphabet-tracing.pdf",
+        file: "bugs-tracing-activity.pdf",
         icon: Type,
     },
     {
-        title: "Hindi Varnamala Tracing",
-        description: "Trace the Hindi vowels and consonants",
-        age: "3-5 yrs",
-        file: "hindi-varnamala-tracing.pdf",
-        icon: Type,
-    },
-    {
-        title: "Numbers 1 to 10",
-        description: "Count, trace, and color numbers with Miko",
+        title: "Trace the Numbers",
+        description: "Trace numbers 1 to 10 and build early numeracy",
         age: "2-4 yrs",
-        file: "numbers-1-to-10.pdf",
+        file: "trace-the-numbers.pdf",
         icon: Hash,
     },
     {
-        title: "Match the Pair: Animals",
-        description: "Cut-out matching cards with Indian animals",
-        age: "1-3 yrs",
-        file: "match-the-pair-animals.pdf",
-        icon: Puzzle,
-    },
-    {
-        title: "Festival Fun: Diwali",
-        description: "Diya coloring, rangoli dots, and a mini story",
+        title: "Trace the Shapes",
+        description: "Trace basic shapes to build fine motor skills",
         age: "2-5 yrs",
-        file: "festival-fun-diwali.pdf",
-        icon: Sparkles,
+        file: "trace-the-shapes.pdf",
+        icon: Type,
     },
     {
-        title: "Shapes and Colors",
-        description: "First shapes with everyday Indian objects",
-        age: "1-3 yrs",
-        file: "shapes-and-colors.pdf",
+        title: "Matching Colors",
+        description: "Match objects by their colors — great for toddlers",
+        age: "1-4 yrs",
+        file: "matching-color.pdf",
         icon: Palette,
     },
     {
-        title: "5-Day Activity Calendar",
-        description: "A week of screen-free activities for parents",
-        age: "Parents",
-        file: "5-day-activity-calendar.pdf",
-        icon: CalendarDays,
+        title: "Matching Festivals",
+        description: "Match Indian festival items and traditions",
+        age: "2-5 yrs",
+        file: "matching-festivals.pdf",
+        icon: Sparkles,
+    },
+    {
+        title: "Shadow Matching",
+        description: "Match each animal or object to its silhouette",
+        age: "2-5 yrs",
+        file: "shadow-matching.pdf",
+        icon: Puzzle,
+    },
+    {
+        title: "Easter Maze Game",
+        description: "Help find the way through fun maze puzzles",
+        age: "3-5 yrs",
+        file: "easter-maze-game.pdf",
+        icon: Puzzle,
     },
 ];
 
