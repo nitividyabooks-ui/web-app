@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getAllProducts } from "@/lib/products";
+import { getStorefrontProducts } from "@/lib/products";
 import { getActiveTestimonials } from "@/lib/testimonials";
 import { Hero } from "@/components/home/Hero";
 import { TrustStrip } from "@/components/ui/TrustStrip";
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-    const allProducts = await getAllProducts();
+    const allProducts = await getStorefrontProducts();
     const testimonials = await getActiveTestimonials();
     const mikoSeriesProducts = allProducts
         .filter((p) => p.collections?.includes("miko-series"))

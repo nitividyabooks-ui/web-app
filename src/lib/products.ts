@@ -1,5 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { Product as PrismaProduct } from "@prisma/client";
+import {
+    storefrontProductSelect,
+    toStorefrontProduct,
+    type StorefrontProduct,
+} from "@/lib/storefront-products";
 
 // Define a type that matches the JSON structure we expect for JSON fields
 export interface Product extends Omit<PrismaProduct, "images" | "dimensionsCm" | "meta"> {
@@ -22,6 +27,14 @@ export async function getAllProducts(): Promise<Product[]> {
         orderBy: { heroPriority: "asc" },
     });
     return products as unknown as Product[];
+}
+
+export async function getStorefrontProducts(): Promise<StorefrontProduct[]> {
+    const products = await prisma.product.findMany({
+        select: storefrontProductSelect,
+        orderBy: { heroPriority: "asc" },
+    });
+    return products.map(toStorefrontProduct);
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {

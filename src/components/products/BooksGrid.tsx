@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useMemo, useState } from "react";
-import { Product } from "@/lib/products";
+import type { StorefrontProduct } from "@/lib/storefront-products";
 import { ProductCard } from "./ProductCard";
 import { MikoBundles } from "./MikoBundles";
 
@@ -58,8 +58,8 @@ function FilterPill({
 }
 
 interface BooksGridProps {
-    products: Product[];
-    mikoSeriesProducts: Product[];
+    products: StorefrontProduct[];
+    mikoSeriesProducts: StorefrontProduct[];
 }
 
 export function BooksGrid({ products, mikoSeriesProducts }: BooksGridProps) {

@@ -1,11 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Star } from "lucide-react";
-import { Product } from "@/lib/products";
+import type { StorefrontProduct } from "@/lib/storefront-products";
 import { getStorageUrl } from "@/lib/storage";
 
 interface HeroProps {
-    products: Product[];
+    products: StorefrontProduct[];
 }
 
 /**

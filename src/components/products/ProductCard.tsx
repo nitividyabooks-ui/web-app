@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus } from "lucide-react";
 import type { MouseEvent } from "react";
-import { Product } from "@/lib/products";
+import type { StorefrontProduct } from "@/lib/storefront-products";
 import { getStorageUrl } from "@/lib/storage";
 import { useCart } from "@/context/CartContext";
 import { Badge } from "@/components/ui/Badge";
@@ -18,7 +18,7 @@ import {
 import { bilingualLabelHindiEnglish, isBilingualHindiEnglish } from "@/lib/productFlags";
 
 interface ProductCardProps {
-    product: Product;
+    product: StorefrontProduct;
     /** GA4 item_list_name for select_item attribution */
     listName?: string;
 }
@@ -28,7 +28,7 @@ export function ProductCard({ product, listName = "All Books" }: ProductCardProp
     const cartItem = items.find((i) => i.productId === product.id);
     const qty = cartItem?.quantity ?? 0;
 
-    const cover = getStorageUrl(product.coverPath || product.images?.[0]?.path || "");
+    const cover = getStorageUrl(product.coverPath);
     const isBilingual = isBilingualHindiEnglish(product);
     const isBestseller = product.tags?.includes("bestseller");
 

@@ -39,6 +39,7 @@ import { BookReadAloudSection } from "@/components/products/BookReadAloudSection
 import { ProductCard } from "@/components/products/ProductCard";
 import { Badge } from "@/components/ui/Badge";
 import { StickyBar } from "@/components/ui/StickyBar";
+import { toStorefrontProduct } from "@/lib/storefront-products";
 
 const BASE_URL = "https://www.nitividyabooks.com";
 
@@ -365,7 +366,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                         </h2>
                         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                             {relatedProducts.map((p) => (
-                                <ProductCard key={p.id} product={p} listName="PDP — Related" />
+                                <ProductCard
+                                    key={p.id}
+                                    product={toStorefrontProduct(p)}
+                                    listName="PDP — Related"
+                                />
                             ))}
                         </div>
                     </section>

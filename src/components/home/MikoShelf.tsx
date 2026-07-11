@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { Product } from "@/lib/products";
+import type { StorefrontProduct } from "@/lib/storefront-products";
 import { ProductCard } from "@/components/products/ProductCard";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { ItemListTracker } from "@/components/analytics/ItemListTracker";
@@ -10,7 +10,7 @@ import { SINGLE_BOOK_DISCOUNT_PERCENT } from "@/lib/pricing";
 const LIST_NAME = "Home — Miko Series";
 
 interface MikoShelfProps {
-    products: Product[];
+    products: StorefrontProduct[];
 }
 
 /**

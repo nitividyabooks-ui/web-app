@@ -1,11 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Product } from "@/lib/products";
+import type { StorefrontProduct } from "@/lib/storefront-products";
 import { getStorageUrl } from "@/lib/storage";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 
 interface LookInsideProps {
-    products: Product[];
+    products: StorefrontProduct[];
 }
 
 interface Spread {
@@ -22,14 +22,12 @@ interface Spread {
 export function LookInside({ products }: LookInsideProps) {
     const spreads: Spread[] = products
         .flatMap((p) =>
-            (Array.isArray(p.images) ? p.images : [])
-                .filter((img: { role?: string }) => img?.role === "inside")
-                .map((img: { path: string; alt?: string }) => ({
-                    productSlug: p.slug,
-                    productTitle: p.title,
-                    src: getStorageUrl(img.path),
-                    alt: img.alt || `Inside pages of ${p.title}`,
-                }))
+            p.insideImages.map((img) => ({
+                productSlug: p.slug,
+                productTitle: p.title,
+                src: getStorageUrl(img.path),
+                alt: img.alt || `Inside pages of ${p.title}`,
+            }))
         )
         .slice(0, 6);
 

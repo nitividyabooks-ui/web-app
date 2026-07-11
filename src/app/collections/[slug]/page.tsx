@@ -20,6 +20,7 @@ import {
     faqPageJsonLd,
 } from "@/components/seo/JsonLd";
 import { ArrowRight, FileText } from "lucide-react";
+import { toStorefrontProduct } from "@/lib/storefront-products";
 
 interface PageProps {
     params: Promise<{ slug: string }>;
@@ -128,7 +129,7 @@ export default async function CollectionPage({ params }: PageProps) {
                             {products.map((product) => (
                                 <ProductCard
                                     key={product.id}
-                                    product={product}
+                                    product={toStorefrontProduct(product)}
                                     listName={listName}
                                 />
                             ))}

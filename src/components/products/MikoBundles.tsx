@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useMemo, useEffect, useRef } from "react";
 import { Check, Gift } from "lucide-react";
-import { Product } from "@/lib/products";
+import type { StorefrontProduct } from "@/lib/storefront-products";
 import { useCart } from "@/context/CartContext";
 import { getStorageUrl } from "@/lib/storage";
 import {
@@ -21,7 +21,7 @@ import {
 const PROMOTION_NAME = "complete_miko_set";
 
 interface MikoBundlesProps {
-    products: Product[];
+    products: StorefrontProduct[];
     /** GA4 creative_slot, e.g. "home_bundle" or "books_page_bundle" */
     location?: string;
 }
@@ -64,7 +64,7 @@ export function MikoBundles({ products, location = "home_bundle" }: MikoBundlesP
                     title: p.title,
                     price: p.price,
                     quantity: 1,
-                    image: getStorageUrl(p.coverPath || p.images?.[0]?.path || ""),
+                    image: getStorageUrl(p.coverPath),
                 },
                 { openCart: false }
             );
@@ -138,7 +138,7 @@ export function MikoBundles({ products, location = "home_bundle" }: MikoBundlesP
                                 title={p.title}
                             >
                                 <Image
-                                    src={getStorageUrl(p.coverPath || p.images?.[0]?.path || "")}
+                                    src={getStorageUrl(p.coverPath)}
                                     alt={p.title}
                                     fill
                                     sizes="112px"

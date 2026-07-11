@@ -1,10 +1,14 @@
-import type { Product } from "@/lib/products";
+interface BilingualProductLike {
+  language?: string | null;
+  tags?: string[] | null;
+  collections?: string[] | null;
+}
 
 function normalize(s: string) {
   return s.toLowerCase().replace(/\s+/g, " ").trim();
 }
 
-export function isBilingualHindiEnglish(product: Product): boolean {
+export function isBilingualHindiEnglish(product: BilingualProductLike): boolean {
   // Primary: explicit language field
   const lang = normalize(product.language ?? "");
   const hasHindi = lang.includes("hindi");
@@ -25,5 +29,4 @@ export function isBilingualHindiEnglish(product: Product): boolean {
 export function bilingualLabelHindiEnglish() {
   return "Hindi + English";
 }
-
 

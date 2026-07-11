@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getAllProducts } from "@/lib/products";
+import { getStorefrontProducts } from "@/lib/products";
 import { BooksGrid } from "@/components/products/BooksGrid";
 import { ItemListTracker } from "@/components/analytics/ItemListTracker";
 import { productToItem } from "@/lib/analytics";
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function BooksPage() {
-    const products = await getAllProducts();
+    const products = await getStorefrontProducts();
     const mikoSeriesProducts = products
         .filter((p) => p.collections?.includes("miko-series"))
         .sort((a, b) => a.heroPriority - b.heroPriority);
