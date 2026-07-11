@@ -4,7 +4,6 @@ import { Fragment, useMemo, useState } from "react";
 import { Product } from "@/lib/products";
 import { ProductCard } from "./ProductCard";
 import { MikoBundles } from "./MikoBundles";
-import { Reveal } from "@/components/motion/Reveal";
 
 const LIST_NAME = "All Books";
 
@@ -117,16 +116,16 @@ export function BooksGrid({ products, mikoSeriesProducts }: BooksGridProps) {
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                     {filtered.map((product, i) => (
                         <Fragment key={product.id}>
-                            <Reveal delay={(i % 2) * 0.07} className="h-full">
+                            <div className="h-full">
                                 <ProductCard product={product} listName={LIST_NAME} />
-                            </Reveal>
+                            </div>
                             {i === 2 && mikoSeriesProducts.length > 0 && age === "all" && !theme && (
-                                <Reveal className="col-span-2 lg:col-span-3">
+                                <div className="col-span-2 lg:col-span-3">
                                     <MikoBundles
                                         products={mikoSeriesProducts}
                                         location="books_page_bundle"
                                     />
-                                </Reveal>
+                                </div>
                             )}
                         </Fragment>
                     ))}

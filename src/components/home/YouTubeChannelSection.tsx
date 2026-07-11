@@ -6,9 +6,7 @@ import Link from "next/link";
 import { ArrowRight, Play } from "lucide-react";
 import { SiYoutube } from "react-icons/si";
 import { trackVideoStart } from "@/lib/analytics";
-import { Reveal } from "@/components/motion/Reveal";
 
-const CHANNEL_URL = "https://www.youtube.com/channel/UCHuY7vX820c3N1T9iBOsn6g";
 const SUBSCRIBE_URL = "https://www.youtube.com/channel/UCHuY7vX820c3N1T9iBOsn6g?sub_confirmation=1";
 
 const FEATURED_VIDEOS = [
@@ -32,7 +30,7 @@ export function YouTubeChannelSection() {
     return (
         <section className="py-14 lg:py-20 bg-evergreen-deep">
             <div className="container mx-auto px-4 md:px-6">
-                <Reveal className="text-center mb-10">
+                <div className="text-center mb-10">
                     <p className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-marigold">
                         <SiYoutube className="w-4 h-4" />
                         Free story time
@@ -44,13 +42,12 @@ export function YouTubeChannelSection() {
                         Free read-aloud stories on our YouTube channel — perfect for
                         winding down before bed.
                     </p>
-                </Reveal>
+                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl mx-auto">
-                    {FEATURED_VIDEOS.map(({ id, label }, i) => (
-                        <Reveal
+                    {FEATURED_VIDEOS.map(({ id, label }) => (
+                        <div
                             key={id}
-                            delay={i * 0.1}
                             className="rounded-card overflow-hidden bg-paper/5 border border-paper/10"
                         >
                             {playingId === id ? (
@@ -84,7 +81,7 @@ export function YouTubeChannelSection() {
                                 </button>
                             )}
                             <p className="px-4 py-3 text-sm font-semibold text-paper text-center">{label}</p>
-                        </Reveal>
+                        </div>
                     ))}
                 </div>
 

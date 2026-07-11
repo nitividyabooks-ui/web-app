@@ -11,7 +11,6 @@ import { LookInside } from "@/components/home/LookInside";
 import { PrintablesHook } from "@/components/home/PrintablesHook";
 import { YouTubeChannelSection } from "@/components/home/YouTubeChannelSection";
 import { LeadCaptureBand } from "@/components/home/LeadCaptureBand";
-import { Reveal } from "@/components/motion/Reveal";
 
 export const metadata: Metadata = {
     title: "NitiVidya Books - Indian Story Books for Kids Ages 0-5",
@@ -31,18 +30,14 @@ export default async function Home() {
         <div className="flex flex-col min-h-screen font-body">
             <Hero products={mikoSeriesProducts.length > 0 ? mikoSeriesProducts : allProducts} />
 
-            <Reveal delay={0.15}>
-                <TrustStrip />
-            </Reveal>
+            <TrustStrip />
 
             <MikoShelf products={mikoSeriesProducts} />
 
             {mikoSeriesProducts.length > 0 && (
                 <section className="pb-14 lg:pb-20 bg-paper">
                     <div className="container mx-auto px-4 md:px-6">
-                        <Reveal>
-                            <MikoBundles products={mikoSeriesProducts} location="home_bundle" />
-                        </Reveal>
+                        <MikoBundles products={mikoSeriesProducts} location="home_bundle" />
                     </div>
                 </section>
             )}

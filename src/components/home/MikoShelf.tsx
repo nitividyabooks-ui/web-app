@@ -4,7 +4,6 @@ import { Product } from "@/lib/products";
 import { ProductCard } from "@/components/products/ProductCard";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { ItemListTracker } from "@/components/analytics/ItemListTracker";
-import { Reveal } from "@/components/motion/Reveal";
 import { productToItem } from "@/lib/analytics";
 import { SINGLE_BOOK_DISCOUNT_PERCENT } from "@/lib/pricing";
 
@@ -29,7 +28,7 @@ export function MikoShelf({ products }: MikoShelfProps) {
         <section className="py-14 lg:py-20 bg-paper">
             <ItemListTracker items={analyticsItems} listName={LIST_NAME} />
             <div className="container mx-auto px-4 md:px-6">
-                <Reveal className="flex items-end justify-between gap-4 mb-8">
+                <div className="flex items-end justify-between gap-4 mb-8">
                     <SectionHeading
                         eyebrow="The Miko Series"
                         title="Five first books, one little elephant"
@@ -43,18 +42,17 @@ export function MikoShelf({ products }: MikoShelfProps) {
                         View all books
                         <ArrowRight className="w-4 h-4" />
                     </Link>
-                </Reveal>
+                </div>
 
                 {/* Mobile: snap scroll; desktop: grid */}
                 <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-4 px-4 pb-2 md:grid md:grid-cols-3 lg:grid-cols-5 md:mx-0 md:px-0 md:overflow-visible">
-                    {products.map((product, i) => (
-                        <Reveal
+                    {products.map((product) => (
+                        <div
                             key={product.id}
-                            delay={i * 0.07}
                             className="snap-start flex-shrink-0 w-[72%] sm:w-[46%] md:w-auto"
                         >
                             <ProductCard product={product} listName={LIST_NAME} />
-                        </Reveal>
+                        </div>
                     ))}
                 </div>
 

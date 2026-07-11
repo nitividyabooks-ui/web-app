@@ -9,7 +9,6 @@ import GoogleTagManager from "@/components/analytics/GoogleTagManager";
 import FacebookPixel from "@/components/analytics/FacebookPixel";
 import { ConditionalComponents } from "@/components/layout/ConditionalComponents";
 import VisitorTracker from "@/components/analytics/VisitorTracker";
-import { SmoothScrollProvider } from "@/components/layout/SmoothScrollProvider";
 import { JsonLd, organizationJsonLd, webSiteJsonLd } from "@/components/seo/JsonLd";
 
 const fraunces = Fraunces({
@@ -50,18 +49,16 @@ export default function RootLayout({
         <GoogleTagManager />
         <FacebookPixel />
         <VisitorTracker />
-        <SmoothScrollProvider>
-          <UserProvider>
-            <CartProvider>
-              <Header />
-              <main className="flex-1">
-                {children}
-              </main>
-              <Footer />
-              <ConditionalComponents />
-            </CartProvider>
-          </UserProvider>
-        </SmoothScrollProvider>
+        <UserProvider>
+          <CartProvider>
+            <Header />
+            <main className="flex-1">
+              {children}
+            </main>
+            <Footer />
+            <ConditionalComponents />
+          </CartProvider>
+        </UserProvider>
       </body>
     </html>
   );

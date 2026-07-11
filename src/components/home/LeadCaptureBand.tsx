@@ -4,7 +4,6 @@ import { useState } from "react";
 import { CheckCircle, Loader2, BadgePercent } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import { PhoneInput } from "@/components/ui/PhoneInput";
-import { Parallax } from "@/components/motion/Parallax";
 import { getVisitorId } from "@/lib/visitor-id";
 import { trackGenerateLead } from "@/lib/analytics";
 import { trackFBPixel } from "@/lib/fbpixel";
@@ -55,7 +54,7 @@ export function LeadCaptureBand() {
     return (
         <section className="py-14 lg:py-20 bg-evergreen">
             <div className="container mx-auto px-4 md:px-6">
-                <Parallax drift={16} className="max-w-xl mx-auto text-center">
+                <div className="max-w-xl mx-auto text-center">
                     <p className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-marigold">
                         <BadgePercent className="w-4 h-4" />
                         Members save more
@@ -108,7 +107,7 @@ export function LeadCaptureBand() {
                             </p>
                         </>
                     )}
-                </Parallax>
+                </div>
             </div>
         </section>
     );

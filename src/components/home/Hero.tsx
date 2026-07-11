@@ -3,7 +3,6 @@ import Link from "next/link";
 import { ArrowRight, Star } from "lucide-react";
 import { Product } from "@/lib/products";
 import { getStorageUrl } from "@/lib/storage";
-import { Parallax } from "@/components/motion/Parallax";
 
 interface HeroProps {
     products: Product[];
@@ -24,17 +23,17 @@ export function Hero({ products }: HeroProps) {
                 <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
                     {/* Copy */}
                     <div className="max-w-xl min-w-0">
-                        <p className="anim-fade-up text-sm font-bold uppercase tracking-[0.16em] text-terracotta-deep">
+                        <p className="text-sm font-bold uppercase tracking-[0.16em] text-terracotta-deep">
                             Indian stories for ages 0–5
                         </p>
-                        <h1 className="anim-fade-up anim-delay-1 mt-4 font-heading text-display font-semibold text-ink">
+                        <h1 className="mt-4 font-heading text-display font-semibold text-ink">
                             Stories that feel like home.
                         </h1>
-                        <p className="anim-fade-up anim-delay-2 mt-5 text-lg text-ink-soft leading-relaxed">
+                        <p className="mt-5 text-lg text-ink-soft leading-relaxed">
                             Bilingual Hindi-English picture books that bring Indian festivals,
                             values, and first words to your child&apos;s bookshelf.
                         </p>
-                        <div className="anim-fade-up anim-delay-3 mt-8 flex flex-col sm:flex-row gap-3">
+                        <div className="mt-8 flex flex-col sm:flex-row gap-3">
                             <Link
                                 href="/books"
                                 className="inline-flex items-center justify-center gap-2 h-13 px-8 rounded-btn bg-evergreen text-white font-semibold text-base hover:bg-evergreen-deep transition-colors btn-bounce"
@@ -49,7 +48,7 @@ export function Hero({ products }: HeroProps) {
                                 See inside the books
                             </Link>
                         </div>
-                        <div className="anim-fade-up anim-delay-4 mt-7 flex items-center gap-2 text-sm text-ink-soft">
+                        <div className="mt-7 flex items-center gap-2 text-sm text-ink-soft">
                             <span className="flex text-marigold">
                                 {[...Array(5)].map((_, i) => (
                                     <Star key={i} className="w-4 h-4 fill-current" />
@@ -59,16 +58,13 @@ export function Hero({ products }: HeroProps) {
                         </div>
                     </div>
 
-                    {/* Fanned book stack — Parallax nested inside the CSS load
-                        animation; the two can't share an element (animation
-                        fill-mode overrides framer's inline transform) */}
-                    <div className="anim-fade-up anim-delay-2 min-w-0">
-                        <Parallax drift={18} className="relative flex justify-center lg:justify-end">
-                            <div
-                                className="absolute inset-x-4 top-1/2 -translate-y-1/2 h-[78%] rounded-[40%] bg-paper-deep"
-                                aria-hidden="true"
-                            />
-                            <div className="relative flex items-center -space-x-8 sm:-space-x-12 py-8 pr-2">
+                    {/* Fanned book stack */}
+                    <div className="relative flex min-w-0 justify-center lg:justify-end">
+                        <div
+                            className="absolute inset-x-4 top-1/2 -translate-y-1/2 h-[78%] rounded-[40%] bg-paper-deep"
+                            aria-hidden="true"
+                        />
+                        <div className="relative flex items-center -space-x-8 sm:-space-x-12 py-8 pr-2">
                             {covers.map((p, i) => (
                                 <Link
                                     key={p.id}
@@ -87,8 +83,7 @@ export function Hero({ products }: HeroProps) {
                                     />
                                 </Link>
                             ))}
-                            </div>
-                        </Parallax>
+                        </div>
                     </div>
                 </div>
             </div>
