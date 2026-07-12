@@ -3,14 +3,15 @@ import { getVisitorId } from "./visitor-id";
 
 export const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
 export const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+const MAX_PENDING_ANALYTICS_COMMANDS = 100;
 
 type DataLayerEvent = Record<string, unknown> | unknown[];
 declare global {
     interface Window {
         dataLayer: DataLayerEvent[];
         gtag?: (...args: unknown[]) => void;
-        nvGaQueue: unknown[][];
-        nvGaReady: boolean;
+        nvGaQueue?: unknown[][];
+        nvGaReady?: boolean;
     }
 }
 
@@ -29,6 +30,9 @@ function sendDirectGaCommand(command: unknown[]) {
     }
 
     window.nvGaQueue = window.nvGaQueue || [];
+    if (window.nvGaQueue.length >= MAX_PENDING_ANALYTICS_COMMANDS) {
+        window.nvGaQueue.shift();
+    }
     window.nvGaQueue.push(command);
 }
 

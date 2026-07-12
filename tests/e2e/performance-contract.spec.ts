@@ -47,8 +47,12 @@ test.describe("Storefront performance contracts", () => {
         const readyIndex = googleTagManager.indexOf("window.nvGaReady = true");
         const drainIndex = googleTagManager.indexOf("window.nvGaQueue");
 
-        expect(gtm).toContain("nvGaQueue: unknown[][]");
-        expect(gtm).toContain("nvGaReady: boolean");
+        expect(gtm).toContain("nvGaQueue?: unknown[][]");
+        expect(gtm).toContain("nvGaReady?: boolean");
+        expect(gtm).toContain("MAX_PENDING_ANALYTICS_COMMANDS = 100");
+        expect(gtm).toContain("window.nvGaQueue.shift()");
+        expect(gtm.indexOf("window.nvGaQueue.shift()"))
+            .toBeLessThan(gtm.indexOf("window.nvGaQueue.push(command)"));
         expect(gtm).toContain("window.nvGaQueue.push(command)");
         expect(gtm).not.toContain('window.gtag("config", GA_ID');
         expect(configIndex).toBeGreaterThanOrEqual(0);
@@ -63,7 +67,11 @@ test.describe("Storefront performance contracts", () => {
         const initIndex = facebookPixel.indexOf("fbq('init'");
         const drainIndex = facebookPixel.indexOf("window.nvFbQueue");
 
-        expect(fbPixel).toContain("nvFbQueue: unknown[][]");
+        expect(fbPixel).toContain("nvFbQueue?: unknown[][]");
+        expect(fbPixel).toContain("MAX_PENDING_ANALYTICS_COMMANDS = 100");
+        expect(fbPixel).toContain("window.nvFbQueue.shift()");
+        expect(fbPixel.indexOf("window.nvFbQueue.shift()"))
+            .toBeLessThan(fbPixel.indexOf("window.nvFbQueue.push(command)"));
         expect(fbPixel).toContain("window.nvFbQueue.push(command)");
         expect(facebookPixel).toContain('trackFBPixel("PageView")');
         expect(facebookPixel).not.toContain("fbq('track', 'PageView')");
@@ -76,6 +84,27 @@ test.describe("Storefront performance contracts", () => {
         const layout = readProjectFile("src/app/layout.tsx");
 
         expect(layout).not.toContain("VisitorTracker");
+    });
+
+    test("defers a session-deduplicated visitor notification through the tracking API", () => {
+        const tracker = readProjectFile("src/components/analytics/VisitorTracker.tsx");
+        const conditional = readProjectFile(
+            "src/components/layout/ConditionalComponents.tsx"
+        );
+        const sessionMarkIndex = tracker.indexOf("sessionStorage.setItem");
+        const requestIndex = tracker.indexOf('fetch("/api/track"');
+        const marketingBlock = conditional.match(/\{marketingReady\s*&&\s*\(([\s\S]*?)\)\}/)?.[1];
+
+        expect(tracker).not.toContain("whatsapp-notifications");
+        expect(tracker).not.toContain("console.");
+        expect(tracker).toContain('event: "new_visitor"');
+        expect(tracker).toContain("getVisitorId()");
+        expect(tracker).toContain("sessionStorage.getItem");
+        expect(sessionMarkIndex).toBeGreaterThanOrEqual(0);
+        expect(requestIndex).toBeGreaterThan(sessionMarkIndex);
+        expect(tracker).toContain("keepalive: true");
+        expect(conditional).toContain("const VisitorTracker = dynamic(");
+        expect(marketingBlock).toContain("<VisitorTracker />");
     });
 
     test("uses opaque mobile sticky surfaces and reserves backdrop blur for desktop", () => {

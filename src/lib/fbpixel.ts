@@ -1,4 +1,5 @@
 export const FB_PIXEL_ID = process.env.NEXT_PUBLIC_FB_PIXEL_ID;
+const MAX_PENDING_ANALYTICS_COMMANDS = 100;
 
 type FBPixelEvent =
     | "PageView"
@@ -11,7 +12,7 @@ type FBPixelEvent =
 declare global {
     interface Window {
         fbq?: (...args: unknown[]) => void;
-        nvFbQueue: unknown[][];
+        nvFbQueue?: unknown[][];
     }
 }
 
@@ -25,5 +26,8 @@ export function trackFBPixel(event: FBPixelEvent, params: Record<string, unknown
     }
 
     window.nvFbQueue = window.nvFbQueue || [];
+    if (window.nvFbQueue.length >= MAX_PENDING_ANALYTICS_COMMANDS) {
+        window.nvFbQueue.shift();
+    }
     window.nvFbQueue.push(command);
 }

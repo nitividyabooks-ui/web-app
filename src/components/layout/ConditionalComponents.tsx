@@ -31,6 +31,9 @@ const LeadCaptureModal = dynamic(() =>
 const ExitIntentPopup = dynamic(() =>
     import("@/components/marketing/ExitIntentPopup").then((module) => module.ExitIntentPopup)
 );
+const VisitorTracker = dynamic(() =>
+    import("@/components/analytics/VisitorTracker").then((module) => module.VisitorTracker)
+);
 
 /**
  * ConditionalComponents
@@ -82,6 +85,7 @@ export function ConditionalComponents() {
             {isCartOpen && <CartDrawer />}
             {marketingReady && (
                 <>
+                    <VisitorTracker />
                     <LeadCaptureModal />
                     <ExitIntentPopup />
                 </>
