@@ -88,9 +88,27 @@ test.describe("Storefront performance contracts", () => {
         }
     });
 
+    test("disables automatic prefetching for decorative and repeated product links", () => {
+        const hero = readProjectFile("src/components/home/Hero.tsx");
+        const heroCoverLink = hero.match(
+            /<Link\s+key=\{p\.id\}[\s\S]*?href=\{`\/books\/\$\{p\.slug\}`\}[\s\S]*?>/
+        )?.[0];
+        const lookInside = readProjectFile("src/components/home/LookInside.tsx");
+        const lookInsideLink = lookInside.match(
+            /<Link\s+href=\{`\/books\/\$\{spread\.productSlug\}`\}[^>]*>/
+        )?.[0];
+
+        expect(heroCoverLink, "hero cover should link to its product").toBeDefined();
+        expect(heroCoverLink).toContain("prefetch={false}");
+        expect(lookInsideLink, "inside spread should link to its product").toBeDefined();
+        expect(lookInsideLink).toContain("prefetch={false}");
+    });
+
     test("ships a local SVG book placeholder", () => {
         const placeholder = join(projectRoot, "public/images/placeholder-book.svg");
+        const storage = readProjectFile("src/lib/storage.ts");
 
         expect(existsSync(placeholder)).toBe(true);
+        expect(storage).toContain('return "/images/placeholder-book.svg"');
     });
 });

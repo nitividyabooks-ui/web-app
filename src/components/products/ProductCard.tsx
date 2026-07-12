@@ -81,7 +81,7 @@ export function ProductCard({ product, listName = "All Books" }: ProductCardProp
                         src={cover}
                         alt={`${product.title} — children's book cover`}
                         fill
-                        sizes="(max-width: 768px) 50vw, 33vw"
+                        sizes="(max-width: 639px) 72vw, (max-width: 767px) 46vw, (max-width: 1023px) 33vw, (min-width: 1024px) 240px"
                         className="object-cover group-hover:scale-[1.03] transition-transform duration-300"
                     />
                     {isBestseller && (

@@ -49,7 +49,11 @@ export function LookInside({ products }: LookInsideProps) {
                             key={spread.src}
                             className="snap-start flex-shrink-0 w-[80%] sm:w-[55%] lg:w-auto"
                         >
-                            <Link href={`/books/${spread.productSlug}`} className="group block">
+                            <Link
+                                href={`/books/${spread.productSlug}`}
+                                prefetch={false}
+                                className="group block"
+                            >
                                 <div className="relative aspect-[4/3] rounded-card overflow-hidden border border-hairline shadow-card group-hover:shadow-lift transition-shadow">
                                     <Image
                                         src={spread.src}

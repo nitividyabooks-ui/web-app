@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450" role="img" aria-labelledby="title description">
+  <title id="title">Book image placeholder</title>
+  <desc id="description">A simple open book illustration</desc>
+  <rect width="600" height="450" fill="#f5efe3"/>
+  <path d="M88 92c77-17 142-3 212 40v251c-67-42-134-56-212-39z" fill="#fffdf8" stroke="#315b4b" stroke-width="12" stroke-linejoin="round"/>
+  <path d="M512 92c-77-17-142-3-212 40v251c67-42 134-56 212-39z" fill="#fffdf8" stroke="#315b4b" stroke-width="12" stroke-linejoin="round"/>
+  <path d="M300 132v251" fill="none" stroke="#315b4b" stroke-width="12" stroke-linecap="round"/>
+  <path d="M128 155c45-5 84 2 124 21M128 202c45-5 84 2 124 21M348 176c40-19 79-26 124-21M348 223c40-19 79-26 124-21" fill="none" stroke="#d49435" stroke-width="10" stroke-linecap="round"/>
+</svg>

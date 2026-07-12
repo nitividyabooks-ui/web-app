@@ -40,7 +40,7 @@ export async function uploadToSupabase(
 export function getStorageUrl(path: string | null | undefined): string {
     // Handle null, undefined, empty string, or invalid values
     if (!path || typeof path !== "string" || path.trim() === "") {
-        return "/images/placeholder-book.jpg"; // Fallback image
+        return "/images/placeholder-book.svg"; // Fallback image
     }
     
     const pathString = path.trim();

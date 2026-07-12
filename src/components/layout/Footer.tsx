@@ -78,7 +78,7 @@ export function Footer() {
                         <ul className="space-y-2.5 text-sm">
                             {SHOP_LINKS.map((l) => (
                                 <li key={l.href}>
-                                    <Link href={l.href} className="hover:text-paper transition-colors">{l.name}</Link>
+                                    <Link href={l.href} prefetch={false} className="hover:text-paper transition-colors">{l.name}</Link>
                                 </li>
                             ))}
                         </ul>
@@ -88,7 +88,7 @@ export function Footer() {
                         <ul className="space-y-2.5 text-sm">
                             {LEARN_LINKS.map((l) => (
                                 <li key={l.href}>
-                                    <Link href={l.href} className="hover:text-paper transition-colors">{l.name}</Link>
+                                    <Link href={l.href} prefetch={false} className="hover:text-paper transition-colors">{l.name}</Link>
                                 </li>
                             ))}
                         </ul>
@@ -98,7 +98,7 @@ export function Footer() {
                         <ul className="space-y-2.5 text-sm">
                             {HELP_LINKS.map((l) => (
                                 <li key={l.href}>
-                                    <Link href={l.href} className="hover:text-paper transition-colors">{l.name}</Link>
+                                    <Link href={l.href} prefetch={false} className="hover:text-paper transition-colors">{l.name}</Link>
                                 </li>
                             ))}
                         </ul>

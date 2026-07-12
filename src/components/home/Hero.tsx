@@ -69,6 +69,7 @@ export function Hero({ products }: HeroProps) {
                                 <Link
                                     key={p.id}
                                     href={`/books/${p.slug}`}
+                                    prefetch={false}
                                     className={`relative block w-21 sm:w-36 lg:w-40 aspect-[3/4] rounded-lg overflow-hidden shadow-lift ${rotations[i]} transition-transform duration-300 hover:-translate-y-3 hover:rotate-0 hover:z-20`}
                                     style={{ zIndex: 10 - Math.abs(i - 2) }}
                                     aria-label={p.title}
