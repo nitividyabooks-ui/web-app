@@ -53,7 +53,7 @@ export function OrderSummary({
                             <div key={item.productId} className="flex gap-3">
                                 <div className="relative w-16 h-16 bg-paper-deep rounded-lg overflow-hidden flex-shrink-0">
                                     <Image
-                                        src={item.image || "/images/placeholder-book.jpg"}
+                                        src={item.image || "/images/placeholder-book.svg"}
                                         alt={item.title}
                                         fill
                                         sizes="64px"

@@ -51,7 +51,11 @@ export function MikoShelf({ products }: MikoShelfProps) {
                             key={product.id}
                             className="snap-start flex-shrink-0 w-[72%] sm:w-[46%] md:w-auto"
                         >
-                            <ProductCard product={product} listName={LIST_NAME} />
+                            <ProductCard
+                                product={product}
+                                listName={LIST_NAME}
+                                imageSizes="(max-width: 639px) 72vw, (max-width: 767px) 46vw, (max-width: 1023px) 33vw, (min-width: 1024px) 240px"
+                            />
                         </div>
                     ))}
                 </div>

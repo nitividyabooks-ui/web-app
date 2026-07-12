@@ -298,6 +298,15 @@ git add src public next.config.ts tests/e2e
 git commit -m "perf: optimize storefront image delivery"
 ```
 
+#### Task 5 execution record
+
+Completed 2026-07-12 20:13 IST.
+
+- Uploaded the new versioned Supabase object `covers/nitividya-the-one-where-miko-meets-animal-inside-pages-v2.webp` and verified its public response at 1,600×804 and 48,742 bytes with an origin cache lifetime of 31,536,000 seconds.
+- Retained the original `covers/nitividya-the-one-where-miko-meets-animal-inside-pages.webp` object unchanged. It measured 14,320×7,192 and 645,378 bytes.
+- Updated production product ID `miko-meets-animals`, slug `the-one-where-miko-meets-the-animals`, from the original path to the versioned path using Prisma. A database read-back confirmed the new path and that all 4 image entries were preserved.
+- Updated `data/products.json` to the same versioned path after the uploaded object was verified.
+
 ### Task 6: Move tracking and paint work out of the critical path
 
 **Files:**

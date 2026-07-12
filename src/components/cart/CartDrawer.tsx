@@ -204,7 +204,7 @@ export function CartDrawer() {
                                 >
                                     <div className="relative h-20 w-16 bg-surface rounded-lg overflow-hidden border border-hairline flex-shrink-0">
                                         <Image
-                                            src={item.image || "/images/placeholder-book.jpg"}
+                                            src={item.image || "/images/placeholder-book.svg"}
                                             alt={item.title}
                                             fill
                                             sizes="64px"

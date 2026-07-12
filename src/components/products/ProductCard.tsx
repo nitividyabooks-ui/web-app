@@ -21,9 +21,15 @@ interface ProductCardProps {
     product: StorefrontProduct;
     /** GA4 item_list_name for select_item attribution */
     listName?: string;
+    /** Responsive source-size hint for the card's containing grid. */
+    imageSizes?: string;
 }
 
-export function ProductCard({ product, listName = "All Books" }: ProductCardProps) {
+export function ProductCard({
+    product,
+    listName = "All Books",
+    imageSizes = "(max-width: 1023px) 50vw, 33vw",
+}: ProductCardProps) {
     const { items, addItem, updateQuantity, discountPercent } = useCart();
     const cartItem = items.find((i) => i.productId === product.id);
     const qty = cartItem?.quantity ?? 0;
@@ -81,7 +87,7 @@ export function ProductCard({ product, listName = "All Books" }: ProductCardProp
                         src={cover}
                         alt={`${product.title} — children's book cover`}
                         fill
-                        sizes="(max-width: 639px) 72vw, (max-width: 767px) 46vw, (max-width: 1023px) 33vw, (min-width: 1024px) 240px"
+                        sizes={imageSizes}
                         className="object-cover group-hover:scale-[1.03] transition-transform duration-300"
                     />
                     {isBestseller && (

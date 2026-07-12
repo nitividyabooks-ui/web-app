@@ -58,17 +58,22 @@ test.describe("Storefront performance contracts", () => {
         expect(description?.[1]).not.toContain("anim-delay");
     });
 
-    test("requests truthful desktop product-card image widths", () => {
+    test("uses conservative product-card sizes with a homepage-specific override", () => {
         const productCard = readProjectFile("src/components/products/ProductCard.tsx");
+        const mikoShelf = readProjectFile("src/components/home/MikoShelf.tsx");
+        const homepageSizes = "(max-width: 639px) 72vw, (max-width: 767px) 46vw, (max-width: 1023px) 33vw, (min-width: 1024px) 240px";
 
-        expect(productCard).toContain("(min-width: 1024px) 240px");
+        expect(productCard).toContain("imageSizes?: string");
+        expect(productCard).toContain('imageSizes = "(max-width: 1023px) 50vw, 33vw"');
+        expect(productCard).toContain("sizes={imageSizes}");
+        expect(mikoShelf).toContain(`imageSizes="${homepageSizes}"`);
     });
 
     test("sets a persistent optimized-image cache TTL", () => {
         const minimumCacheTTL = nextConfig.images?.minimumCacheTTL;
 
         expect(typeof minimumCacheTTL).toBe("number");
-        expect(minimumCacheTTL ?? 0).toBeGreaterThanOrEqual(86_400);
+        expect(minimumCacheTTL).toBe(86_400);
     });
 
     test("disables automatic prefetching for footer link collections", () => {
@@ -110,5 +115,26 @@ test.describe("Storefront performance contracts", () => {
 
         expect(existsSync(placeholder)).toBe(true);
         expect(storage).toContain('return "/images/placeholder-book.svg"');
+    });
+
+    test("does not reference the retired JPG book placeholder", () => {
+        const staleReferences = listSourceFiles("src").filter((file) =>
+            readProjectFile(file).includes("/images/placeholder-book.jpg")
+        );
+
+        expect(staleReferences).toEqual([]);
+    });
+
+    test("records the completed versioned production image migration", () => {
+        const implementationPlan = readProjectFile(
+            "docs/plans/2026-07-12-web-vitals-performance-implementation.md"
+        );
+
+        expect(implementationPlan).toContain("Task 5 execution record");
+        expect(implementationPlan).toContain(
+            "covers/nitividya-the-one-where-miko-meets-animal-inside-pages-v2.webp"
+        );
+        expect(implementationPlan).toContain("miko-meets-animals");
+        expect(implementationPlan).toContain("4 image entries");
     });
 });

@@ -11,7 +11,7 @@ interface ProductImageGalleryProps {
 }
 
 export function ProductImageGallery({ images, title }: ProductImageGalleryProps) {
-    const displayImages = images.length > 0 ? images : ["/images/placeholder-book.jpg"];
+    const displayImages = images.length > 0 ? images : ["/images/placeholder-book.svg"];
     const [activeIndex, setActiveIndex] = useState(0);
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
     const [isZoomed, setIsZoomed] = useState(false);
