@@ -1,9 +1,15 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { getDiscountPercentForQuantity, getSalePaiseFromMrpPaise } from "@/lib/pricing";
 import { getVisitorId } from "@/lib/visitor-id";
 import { trackFBPixel } from "@/lib/fbpixel";
+import { getStorageUrl } from "@/lib/storage";
+import {
+    parseCartStorage,
+    serializeCart,
+    type StoredCartItem,
+} from "@/lib/cart-storage";
 
 // Track event helper
 function trackEvent(event: string, data: Record<string, unknown>) {
@@ -14,13 +20,7 @@ function trackEvent(event: string, data: Record<string, unknown>) {
     }).catch(console.error);
 }
 
-export interface CartItem {
-    productId: string;
-    title: string;
-    price: number;
-    quantity: number;
-    image?: string;
-}
+export type CartItem = StoredCartItem;
 
 interface CartContextType {
     items: CartItem[];
@@ -39,54 +39,80 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-function asRecord(value: unknown): Record<string, unknown> | null {
-    return value && typeof value === "object" ? (value as Record<string, unknown>) : null;
+interface RefreshedProduct {
+    id: string;
+    title: string;
+    price: number;
+    coverPath: string;
 }
 
-function loadCartFromLocalStorage(): CartItem[] {
-    try {
-        const savedCart = localStorage.getItem("nitividya-cart");
-        if (!savedCart) return [];
-        const parsed: unknown = JSON.parse(savedCart);
-        const asArray = Array.isArray(parsed) ? parsed : [];
-
-        return asArray
-            .map((raw): CartItem | null => {
-                const r = asRecord(raw);
-                if (!r) return null;
-                const productId = String(r.productId ?? "");
-                const title = String(r.title ?? "");
-                const price = Number(r.price);
-                const quantity = Number(r.quantity);
-                const image = typeof r.image === "string" ? r.image : undefined;
-                if (!productId) return null;
-                if (!Number.isFinite(price) || !Number.isFinite(quantity) || quantity <= 0) return null;
-                return { productId, title, price, quantity, image };
-            })
-            .filter((i): i is CartItem => Boolean(i));
-    } catch {
-        return [];
-    }
+function isRefreshedProduct(value: unknown): value is RefreshedProduct {
+    if (!value || typeof value !== "object") return false;
+    const product = value as Record<string, unknown>;
+    return (
+        typeof product.id === "string" &&
+        typeof product.title === "string" &&
+        typeof product.price === "number" &&
+        Number.isFinite(product.price) &&
+        typeof product.coverPath === "string"
+    );
 }
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
     const [items, setItems] = useState<CartItem[]>([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isHydrated, setIsHydrated] = useState(false);
+    const hydrationStarted = useRef(false);
 
     // Load cart from localStorage after hydration (client-side only)
     useEffect(() => {
-        const savedItems = loadCartFromLocalStorage();
+        if (hydrationStarted.current) return;
+        hydrationStarted.current = true;
+
+        const parsed = parseCartStorage(localStorage.getItem("nitividya-cart"));
         // This effect intentionally hydrates state from the browser-only storage boundary.
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setItems(savedItems);
+        setItems(parsed.items);
         setIsHydrated(true);
+
+        if (!parsed.needsRefresh) return;
+
+        const ids = encodeURIComponent(parsed.items.map((item) => item.productId).join(","));
+        fetch(`/api/products?ids=${ids}`)
+            .then((response) => {
+                if (!response.ok) throw new Error(`Cart refresh failed: ${response.status}`);
+                return response.json() as Promise<unknown>;
+            })
+            .then((response) => {
+                if (!Array.isArray(response)) return;
+                const refreshedProducts = response.filter(isRefreshedProduct);
+                if (refreshedProducts.length === 0) return;
+
+                const productsById = new Map(
+                    refreshedProducts.map((product) => [product.id, product])
+                );
+                setItems((currentItems) =>
+                    currentItems.map((item) => {
+                        const product = productsById.get(item.productId);
+                        if (!product) return item;
+                        return {
+                            ...item,
+                            title: product.title,
+                            price: product.price,
+                            image: getStorageUrl(product.coverPath),
+                        };
+                    })
+                );
+            })
+            .catch((error: unknown) => {
+                console.error("Unable to refresh legacy cart product details", error);
+            });
     }, []);
 
     // Save to localStorage (only after hydration to prevent overwriting with empty array)
     useEffect(() => {
         if (!isHydrated) return;
-        localStorage.setItem("nitividya-cart", JSON.stringify(items));
+        localStorage.setItem("nitividya-cart", serializeCart(items));
     }, [items, isHydrated]);
 
     const addItem = useCallback((newItem: CartItem, options?: { openCart?: boolean }) => {
