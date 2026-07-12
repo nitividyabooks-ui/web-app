@@ -1,7 +1,7 @@
 # Web Vitals Performance Design
 
-**Date:** 2026-07-12  
-**Status:** Approved  
+**Date:** 2026-07-12
+**Status:** Approved
 **Scope:** Public storefront, starting with the homepage and product-detail experience
 
 ## Objective
