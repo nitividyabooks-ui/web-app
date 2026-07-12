@@ -32,7 +32,7 @@ export default function GoogleTagManager() {
                     </noscript>
                     <Script
                         id="gtm-script"
-                        strategy="afterInteractive"
+                        strategy="lazyOnload"
                         dangerouslySetInnerHTML={{
                             __html: `
                                 (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -51,11 +51,11 @@ export default function GoogleTagManager() {
                 <>
                     <Script
                         src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-                        strategy="afterInteractive"
+                        strategy="lazyOnload"
                     />
                     <Script
                         id="ga4-script"
-                        strategy="afterInteractive"
+                        strategy="lazyOnload"
                         dangerouslySetInnerHTML={{
                             __html: `
                                 window.dataLayer = window.dataLayer || [];
@@ -63,6 +63,7 @@ export default function GoogleTagManager() {
                                 gtag('js', new Date());
                                 gtag('config', '${GA_ID}', {
                                     page_path: window.location.pathname,
+                                    send_page_view: false,
                                 });
                                 window.gtag = gtag;
                             `,

@@ -23,7 +23,7 @@ export function TestimonialSection({ testimonials }: TestimonialSectionProps) {
     const shown = testimonials.slice(0, 3);
 
     return (
-        <section className="py-14 lg:py-20 bg-paper-deep">
+        <section className="below-fold-render py-14 lg:py-20 bg-paper-deep">
             <div className="container mx-auto px-4 md:px-6">
                 <SectionHeading
                     eyebrow="From real homes"

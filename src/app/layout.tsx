@@ -8,7 +8,6 @@ import { UserProvider } from "@/context/UserContext";
 import GoogleTagManager from "@/components/analytics/GoogleTagManager";
 import FacebookPixel from "@/components/analytics/FacebookPixel";
 import { ConditionalComponents } from "@/components/layout/ConditionalComponents";
-import VisitorTracker from "@/components/analytics/VisitorTracker";
 import { JsonLd, organizationJsonLd, webSiteJsonLd } from "@/components/seo/JsonLd";
 
 const fraunces = Fraunces({
@@ -48,7 +47,6 @@ export default function RootLayout({
         <JsonLd data={webSiteJsonLd()} />
         <GoogleTagManager />
         <FacebookPixel />
-        <VisitorTracker />
         <UserProvider>
           <CartProvider>
             <Header />

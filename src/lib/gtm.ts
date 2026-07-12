@@ -4,7 +4,7 @@ import { getVisitorId } from "./visitor-id";
 export const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
 export const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
-type DataLayerEvent = Record<string, unknown>;
+type DataLayerEvent = Record<string, unknown> | unknown[];
 type WindowWithDataLayer = Window & {
     dataLayer: DataLayerEvent[];
     gtag?: (...args: unknown[]) => void;
@@ -25,18 +25,20 @@ export const pageview = (url: string) => {
 
     const userId = getAnalyticsUserId();
 
-    // GTM/gtag queue — create if missing so events fired before the
-    // GA script loads are processed once it arrives
     window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
-        event: "page_view",
-        page: url,
-        ...(userId && { user_id: userId }),
-    });
 
-    // GA4 direct
-    if (window.gtag) {
-        window.gtag("config", GA_ID, {
+    if (GTM_ID) {
+        window.dataLayer.push({
+            event: "page_view",
+            page: url,
+            ...(userId && { user_id: userId }),
+        });
+    } else if (GA_ID) {
+        // Queue direct GA events even before the lazy script has loaded.
+        window.gtag ||= (...args: unknown[]) => {
+            window.dataLayer.push(args);
+        };
+        window.gtag("event", "page_view", {
             page_path: url,
             ...(userId && { user_id: userId }),
         });
@@ -53,14 +55,15 @@ export const trackEvent = (eventName: string, params: Record<string, unknown> = 
     };
 
     window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
-        event: eventName,
-        ...enhancedParams,
-    });
-
-    // GA4 direct
-    if (window.gtag) {
+    if (GTM_ID) {
+        window.dataLayer.push({
+            event: eventName,
+            ...enhancedParams,
+        });
+    } else if (GA_ID) {
+        window.gtag ||= (...args: unknown[]) => {
+            window.dataLayer.push(args);
+        };
         window.gtag("event", eventName, enhancedParams);
     }
 };
-

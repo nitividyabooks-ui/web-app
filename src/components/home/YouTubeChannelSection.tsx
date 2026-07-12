@@ -28,7 +28,7 @@ export function YouTubeChannelSection() {
     };
 
     return (
-        <section className="py-14 lg:py-20 bg-evergreen-deep">
+        <section className="below-fold-render py-14 lg:py-20 bg-evergreen-deep">
             <div className="container mx-auto px-4 md:px-6">
                 <div className="text-center mb-10">
                     <p className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-marigold">

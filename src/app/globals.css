@@ -366,3 +366,9 @@ footer {
   border-top: 1px solid var(--hairline);
   margin: 2rem 0;
 }
+
+/* Skip layout and paint work for substantial homepage sections until needed. */
+.below-fold-render {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 800px;
+}

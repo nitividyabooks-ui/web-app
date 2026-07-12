@@ -82,7 +82,7 @@ export function BooksGrid({ products, mikoSeriesProducts }: BooksGridProps) {
     return (
         <div>
             {/* Filters */}
-            <div className="sticky top-16 md:top-[4.5rem] z-10 bg-paper/95 backdrop-blur-md border-b border-hairline">
+            <div className="sticky top-16 md:top-[4.5rem] z-10 bg-paper md:bg-paper/95 md:backdrop-blur-md border-b border-hairline">
                 <div className="container mx-auto px-4 md:px-6 py-3 space-y-2.5">
                     <div className="flex gap-2 overflow-x-auto scrollbar-hide">
                         {AGE_BUCKETS.map((b) => (

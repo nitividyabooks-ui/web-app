@@ -24,6 +24,72 @@ function listSourceFiles(relativeDirectory: string): string[] {
 }
 
 test.describe("Storefront performance contracts", () => {
+    test("defers Google and Facebook tracking scripts until after page load", () => {
+        const googleTagManager = readProjectFile(
+            "src/components/analytics/GoogleTagManager.tsx"
+        );
+        const facebookPixel = readProjectFile("src/components/analytics/FacebookPixel.tsx");
+
+        expect(googleTagManager).not.toContain('strategy="afterInteractive"');
+        expect(googleTagManager.match(/strategy="lazyOnload"/g)).toHaveLength(3);
+        expect(googleTagManager).toContain("send_page_view: false");
+        expect(facebookPixel).not.toContain('strategy="afterInteractive"');
+        expect(facebookPixel).toContain('strategy="lazyOnload"');
+        expect(facebookPixel).toContain("<noscript>");
+    });
+
+    test("queues one explicit GA page view instead of reconfiguring GA on every route", () => {
+        const gtm = readProjectFile("src/lib/gtm.ts");
+
+        expect(gtm).toContain('window.gtag("event", "page_view"');
+        expect(gtm).not.toContain('window.gtag("config", GA_ID');
+    });
+
+    test("does not mount the redundant visitor tracker in the root layout", () => {
+        const layout = readProjectFile("src/app/layout.tsx");
+
+        expect(layout).not.toContain("VisitorTracker");
+    });
+
+    test("uses opaque mobile sticky surfaces and reserves backdrop blur for desktop", () => {
+        for (const file of [
+            "src/components/layout/Header.tsx",
+            "src/components/products/BooksGrid.tsx",
+        ]) {
+            const source = readProjectFile(file);
+
+            expect(source).toContain("bg-paper md:bg-paper/95 md:backdrop-blur-md");
+            expect(source).not.toMatch(/(?<!md:)backdrop-blur-md/);
+        }
+    });
+
+    test("contains below-the-fold sections until they approach the viewport", () => {
+        const globals = readProjectFile("src/app/globals.css");
+        const belowFoldRule = globals.match(/\.below-fold-render\s*\{([^}]*)\}/)?.[1] ?? "";
+
+        expect(belowFoldRule).toContain("content-visibility: auto");
+        expect(belowFoldRule).toContain("contain-intrinsic-size: auto 800px");
+
+        for (const file of [
+            "src/components/home/BrandStory.tsx",
+            "src/components/home/TestimonialSection.tsx",
+            "src/components/home/LookInside.tsx",
+            "src/components/home/PrintablesHook.tsx",
+            "src/components/home/YouTubeChannelSection.tsx",
+            "src/components/home/LeadCaptureBand.tsx",
+        ]) {
+            const source = readProjectFile(file);
+            const rootSection = source.match(/<section\b[^>]*className="([^"]*)"/)?.[1];
+
+            expect(rootSection, `${file} should render a root section`).toBeDefined();
+            expect(rootSection).toContain("below-fold-render");
+        }
+
+        expect(readProjectFile("src/components/home/LookInside.tsx")).toContain(
+            '<section id="look-inside"'
+        );
+    });
+
     test("does not reference the Lenis smooth-scroll provider from application source", () => {
         const providerFile = "src/components/layout/SmoothScrollProvider.tsx";
         const providerReferences = listSourceFiles("src")

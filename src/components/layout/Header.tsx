@@ -66,7 +66,7 @@ export function Header() {
                 </Link>
             </div>
 
-            <header className="sticky top-0 z-50 w-full border-b border-hairline bg-paper/95 backdrop-blur-md">
+            <header className="sticky top-0 z-50 w-full border-b border-hairline bg-paper md:bg-paper/95 md:backdrop-blur-md">
                 <div className="container mx-auto flex h-16 md:h-[4.5rem] items-center justify-between px-4 md:px-6 gap-3">
                     {/* Mobile menu button */}
                     <button
