@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { getDiscountPercentForQuantity, getSalePaiseFromMrpPaise } from "@/lib/pricing";
-import { getStorageUrl } from "@/lib/storage";
 import { getVisitorId } from "@/lib/visitor-id";
 import { trackFBPixel } from "@/lib/fbpixel";
 
@@ -78,57 +77,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     // Load cart from localStorage after hydration (client-side only)
     useEffect(() => {
         const savedItems = loadCartFromLocalStorage();
+        // This effect intentionally hydrates state from the browser-only storage boundary.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setItems(savedItems);
         setIsHydrated(true);
-    }, []);
-
-    // Migrate: ensure cart items store MRP (price from current product table), not old discounted values.
-    useEffect(() => {
-        if (!isHydrated || items.length === 0) return;
-        (async () => {
-            try {
-                const res = await fetch("/api/products");
-                if (!res.ok) return;
-                const products: unknown = await res.json();
-                if (!Array.isArray(products)) return;
-
-                const byId = new Map<string, Record<string, unknown>>();
-                for (const raw of products) {
-                    const r = asRecord(raw);
-                    const id = r ? String(r.id ?? "") : "";
-                    if (r && id) byId.set(id, r);
-                }
-
-                setItems((prev) =>
-                    prev.map((it) => {
-                        const p = byId.get(it.productId);
-                        if (!p) return it;
-
-                        const mrp = Number(p.price);
-                        const title = typeof p.title === "string" ? p.title : it.title;
-                        const coverPath =
-                            typeof p.coverPath === "string"
-                                ? p.coverPath
-                                : (() => {
-                                      const images = p.images;
-                                      if (!Array.isArray(images)) return undefined;
-                                      const first = asRecord(images[0]);
-                                      return first && typeof first.path === "string" ? first.path : undefined;
-                                  })();
-
-                        return {
-                            ...it,
-                            title,
-                            price: Number.isFinite(mrp) ? mrp : it.price,
-                            image: coverPath ? getStorageUrl(coverPath) : it.image,
-                        };
-                    })
-                );
-            } catch {
-                // Ignore migration errors; sanitation above still prevents NaN explosions.
-            }
-        })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Save to localStorage (only after hydration to prevent overwriting with empty array)
