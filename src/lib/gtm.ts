@@ -5,12 +5,14 @@ export const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
 export const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 type DataLayerEvent = Record<string, unknown> | unknown[];
-type WindowWithDataLayer = Window & {
-    dataLayer: DataLayerEvent[];
-    gtag?: (...args: unknown[]) => void;
-};
-
-declare const window: WindowWithDataLayer;
+declare global {
+    interface Window {
+        dataLayer: DataLayerEvent[];
+        gtag?: (...args: unknown[]) => void;
+        nvGaQueue: unknown[][];
+        nvGaReady: boolean;
+    }
+}
 
 /**
  * Get the current visitor ID for analytics
@@ -18,6 +20,16 @@ declare const window: WindowWithDataLayer;
 function getAnalyticsUserId(): string | undefined {
     const visitorId = getVisitorId();
     return visitorId || undefined;
+}
+
+function sendDirectGaCommand(command: unknown[]) {
+    if (window.nvGaReady && window.gtag) {
+        window.gtag(...command);
+        return;
+    }
+
+    window.nvGaQueue = window.nvGaQueue || [];
+    window.nvGaQueue.push(command);
 }
 
 export const pageview = (url: string) => {
@@ -34,14 +46,10 @@ export const pageview = (url: string) => {
             ...(userId && { user_id: userId }),
         });
     } else if (GA_ID) {
-        // Queue direct GA events even before the lazy script has loaded.
-        window.gtag ||= (...args: unknown[]) => {
-            window.dataLayer.push(args);
-        };
-        window.gtag("event", "page_view", {
+        sendDirectGaCommand(["event", "page_view", {
             page_path: url,
             ...(userId && { user_id: userId }),
-        });
+        }]);
     }
 };
 
@@ -61,9 +69,6 @@ export const trackEvent = (eventName: string, params: Record<string, unknown> = 
             ...enhancedParams,
         });
     } else if (GA_ID) {
-        window.gtag ||= (...args: unknown[]) => {
-            window.dataLayer.push(args);
-        };
-        window.gtag("event", eventName, enhancedParams);
+        sendDirectGaCommand(["event", eventName, enhancedParams]);
     }
 };

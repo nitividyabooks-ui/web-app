@@ -2,15 +2,15 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { FB_PIXEL_ID } from "@/lib/fbpixel";
+import { FB_PIXEL_ID, trackFBPixel } from "@/lib/fbpixel";
 import Script from "next/script";
 
 export default function FacebookPixel() {
     const pathname = usePathname();
 
     useEffect(() => {
-        if (typeof window !== "undefined" && window.fbq && pathname) {
-            window.fbq("track", "PageView");
+        if (pathname) {
+            trackFBPixel("PageView");
         }
     }, [pathname]);
 
@@ -32,7 +32,11 @@ export default function FacebookPixel() {
                         s.parentNode.insertBefore(t,s)}(window, document,'script',
                         'https://connect.facebook.net/en_US/fbevents.js');
                         fbq('init', '${FB_PIXEL_ID}');
-                        fbq('track', 'PageView');
+                        var pendingCommands = window.nvFbQueue || [];
+                        window.nvFbQueue = [];
+                        pendingCommands.forEach(function(command) {
+                            fbq.apply(null, command);
+                        });
                     `,
                 }}
             />

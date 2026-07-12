@@ -11,10 +11,19 @@ type FBPixelEvent =
 declare global {
     interface Window {
         fbq?: (...args: unknown[]) => void;
+        nvFbQueue: unknown[][];
     }
 }
 
 export function trackFBPixel(event: FBPixelEvent, params: Record<string, unknown> = {}) {
-    if (typeof window === "undefined" || !window.fbq) return;
-    window.fbq("track", event, params);
+    if (typeof window === "undefined" || !FB_PIXEL_ID) return;
+
+    const command = ["track", event, params];
+    if (window.fbq) {
+        window.fbq(...command);
+        return;
+    }
+
+    window.nvFbQueue = window.nvFbQueue || [];
+    window.nvFbQueue.push(command);
 }

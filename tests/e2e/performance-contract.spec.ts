@@ -38,11 +38,38 @@ test.describe("Storefront performance contracts", () => {
         expect(facebookPixel).toContain("<noscript>");
     });
 
-    test("queues one explicit GA page view instead of reconfiguring GA on every route", () => {
+    test("holds direct GA commands until configuration and then drains them in order", () => {
         const gtm = readProjectFile("src/lib/gtm.ts");
+        const googleTagManager = readProjectFile(
+            "src/components/analytics/GoogleTagManager.tsx"
+        );
+        const configIndex = googleTagManager.indexOf("gtag('config'");
+        const readyIndex = googleTagManager.indexOf("window.nvGaReady = true");
+        const drainIndex = googleTagManager.indexOf("window.nvGaQueue");
 
-        expect(gtm).toContain('window.gtag("event", "page_view"');
+        expect(gtm).toContain("nvGaQueue: unknown[][]");
+        expect(gtm).toContain("nvGaReady: boolean");
+        expect(gtm).toContain("window.nvGaQueue.push(command)");
         expect(gtm).not.toContain('window.gtag("config", GA_ID');
+        expect(configIndex).toBeGreaterThanOrEqual(0);
+        expect(readyIndex).toBeGreaterThan(configIndex);
+        expect(drainIndex).toBeGreaterThan(readyIndex);
+        expect(googleTagManager).toContain("window.nvGaQueue = []");
+    });
+
+    test("holds Facebook events until pixel initialization without duplicating PageView", () => {
+        const fbPixel = readProjectFile("src/lib/fbpixel.ts");
+        const facebookPixel = readProjectFile("src/components/analytics/FacebookPixel.tsx");
+        const initIndex = facebookPixel.indexOf("fbq('init'");
+        const drainIndex = facebookPixel.indexOf("window.nvFbQueue");
+
+        expect(fbPixel).toContain("nvFbQueue: unknown[][]");
+        expect(fbPixel).toContain("window.nvFbQueue.push(command)");
+        expect(facebookPixel).toContain('trackFBPixel("PageView")');
+        expect(facebookPixel).not.toContain("fbq('track', 'PageView')");
+        expect(initIndex).toBeGreaterThanOrEqual(0);
+        expect(drainIndex).toBeGreaterThan(initIndex);
+        expect(facebookPixel).toContain("window.nvFbQueue = []");
     });
 
     test("does not mount the redundant visitor tracker in the root layout", () => {

@@ -66,6 +66,12 @@ export default function GoogleTagManager() {
                                     send_page_view: false,
                                 });
                                 window.gtag = gtag;
+                                window.nvGaReady = true;
+                                var pendingCommands = window.nvGaQueue || [];
+                                window.nvGaQueue = [];
+                                pendingCommands.forEach(function(command) {
+                                    gtag.apply(null, command);
+                                });
                             `,
                         }}
                     />
