@@ -47,6 +47,8 @@ export function buildWhatsAppMessage(data: WhatsAppOrderData): string {
         ? `\n🎉 *Discount Applied:* ${discountPercent}% off` 
         : '';
 
+    const shipping = Math.max(0, totalAmount - items.reduce((sum, item) => sum + item.price * item.quantity, 0));
+    const shippingLine = `\n*Shipping:* ${shipping > 0 ? `₹${(shipping / 100).toFixed(0)}` : 'Free'}`;
     const message = `Hi NitiVidya Books 👋
 
 I'd like to place an order:
@@ -55,7 +57,7 @@ I'd like to place an order:
 
 📚 *Items:*
 ${itemsList}
-${discountLine}
+${discountLine}${shippingLine}
 💰 *Total Amount:* ₹${(totalAmount / 100).toFixed(0)}
 
 🚚 *Delivery Address:*

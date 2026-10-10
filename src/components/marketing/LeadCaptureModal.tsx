@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import { X, Gift, CheckCircle, Loader2 } from "lucide-react";
 import { PhoneInput } from "@/components/ui/PhoneInput";
 import { getVisitorId } from "@/lib/visitor-id";
@@ -23,7 +24,7 @@ export function LeadCaptureModal() {
         setIsMounted(true);
     }, []);
 
-    const snooze = useCallback(() => {
+    const snooze = (() => {
         try {
             localStorage.setItem(
                 SNOOZE_KEY,
@@ -32,41 +33,40 @@ export function LeadCaptureModal() {
         } catch {
             // ignore
         }
-    }, []);
-
-    const checkAndShowModal = useCallback(async () => {
-        if (typeof window === "undefined") return;
-
-        try {
-            const until = Number(localStorage.getItem(SNOOZE_KEY) || 0);
-            if (until > Date.now()) return;
-        } catch {
-            return;
-        }
-
-        const visitorId = getVisitorId();
-        if (!visitorId) return;
-
-        try {
-            const response = await fetch(`/api/leads?visitorId=${visitorId}`);
-            const data = await response.json();
-
-            if (!data.hasSubmitted) {
-                setTimeout(() => {
-                    setIsOpen(true);
-                    trackViewPromotion("welcome_offer", "welcome_modal");
-                }, MODAL_DELAY_MS);
-            }
-        } catch (error) {
-            console.error("Error checking lead status:", error);
-        }
-    }, []);
+    });
 
     useEffect(() => {
-        if (isMounted) {
-            checkAndShowModal();
-        }
-    }, [isMounted, checkAndShowModal]);
+        if (!isMounted) return;
+        let cancelled = false;
+        let timeout: ReturnType<typeof setTimeout> | undefined;
+        const controller = new AbortController();
+
+        const checkAndShow = async () => {
+            try {
+                if (Number(localStorage.getItem(SNOOZE_KEY) || 0) > Date.now()) return;
+                const visitorId = getVisitorId();
+                if (!visitorId) return;
+                const response = await fetch(`/api/leads?visitorId=${visitorId}`, { signal: controller.signal });
+                if (!response.ok) return;
+                const data = await response.json();
+                if (!cancelled && !data.hasSubmitted) {
+                    timeout = setTimeout(() => {
+                        if (cancelled) return;
+                        setIsOpen(true);
+                        trackViewPromotion("printables_offer", "welcome_modal");
+                    }, MODAL_DELAY_MS);
+                }
+            } catch {
+                // Optional marketing should not interrupt shopping.
+            }
+        };
+        void checkAndShow();
+        return () => {
+            cancelled = true;
+            controller.abort();
+            if (timeout) clearTimeout(timeout);
+        };
+    }, [isMounted]);
 
     const handleClose = () => {
         setIsOpen(false);
@@ -98,12 +98,12 @@ export function LeadCaptureModal() {
                 throw new Error(data.error || "Something went wrong — please try again");
             }
 
+            try { localStorage.setItem("nv_printables_unlocked", "true"); } catch { /* Storage is optional. */ }
             setIsSuccess(true);
             snooze();
             trackGenerateLead("welcome_modal", "phone");
             trackFBPixel("Lead", { content_name: "welcome_modal" });
 
-            setTimeout(() => setIsOpen(false), 3000);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Something went wrong");
         } finally {
@@ -138,8 +138,9 @@ export function LeadCaptureModal() {
                             Welcome to Miko&apos;s Club
                         </h2>
                         <p className="text-ink-soft">
-                            We&apos;ll send your free printables and the launch offer on WhatsApp.
+                            Your free printables are ready to download below.
                         </p>
+                        <Link href="/free-printables" onClick={handleClose} className="inline-flex mt-5 h-12 items-center px-6 rounded-btn bg-evergreen text-white font-bold">Download free printables</Link>
                     </div>
                 ) : (
                     <>
@@ -151,8 +152,8 @@ export function LeadCaptureModal() {
                                 A little welcome gift
                             </h2>
                             <p className="text-paper/75 text-sm">
-                                Free printable worksheets plus the launch offer — up to 60% off
-                                the complete Miko set
+                                Free print-at-home activities today. Join our WhatsApp list
+                                for book news and reading ideas.
                             </p>
                         </div>
 

@@ -7,10 +7,12 @@ import type { MouseEvent } from "react";
 import type { StorefrontProduct } from "@/lib/storefront-products";
 import { getStorageUrl } from "@/lib/storage";
 import { useCart } from "@/context/CartContext";
+import { getProductDiscountPercent, hasCompleteMikoSet, MIKO_BUNDLE_PRODUCT_IDS, BUNDLE_5_DISCOUNT_PERCENT } from "@/lib/pricing";
 import { Badge } from "@/components/ui/Badge";
 import { Price } from "@/components/ui/Price";
 import {
     productToItem,
+    cartItemsToItems,
     trackSelectItem,
     trackAddToCart,
     trackRemoveFromCart,
@@ -30,15 +32,26 @@ export function ProductCard({
     listName = "All Books",
     imageSizes = "(max-width: 1023px) 50vw, 33vw",
 }: ProductCardProps) {
-    const { items, addItem, updateQuantity, discountPercent } = useCart();
+    const { items, addItem, updateQuantity } = useCart();
+    const baseDiscount = getProductDiscountPercent(product);
     const cartItem = items.find((i) => i.productId === product.id);
     const qty = cartItem?.quantity ?? 0;
+    const discountPercent = cartItem && hasCompleteMikoSet(items) && MIKO_BUNDLE_PRODUCT_IDS.some((id) => id === product.id)
+        ? BUNDLE_5_DISCOUNT_PERCENT : baseDiscount;
 
     const cover = getStorageUrl(product.coverPath);
     const isBilingual = isBilingualHindiEnglish(product);
     const isBestseller = product.tags?.includes("bestseller");
 
     const analyticsItem = () => productToItem(product, { discountPercent, listName });
+
+    const trackAddition = () => {
+        const added = { productId: product.id, title: product.title, price: product.price, format: product.format, quantity: 1 };
+        const prospectiveItems = cartItem
+            ? items.map((item) => item.productId === product.id ? { ...item, quantity: item.quantity + 1 } : item)
+            : [...items, added];
+        trackAddToCart(cartItemsToItems([added], discountPercent, prospectiveItems));
+    };
 
     const handleProductClick = () => {
         trackSelectItem(analyticsItem(), listName);
@@ -52,12 +65,13 @@ export function ProductCard({
                 productId: product.id,
                 title: product.title,
                 price: product.price,
+                format: product.format,
                 quantity: 1,
                 image: cover,
             },
             { openCart: false }
         );
-        trackAddToCart([analyticsItem()]);
+        trackAddition();
     };
 
     const handleMinus = (e: MouseEvent) => {
@@ -71,7 +85,7 @@ export function ProductCard({
         e.preventDefault();
         e.stopPropagation();
         updateQuantity(product.id, qty + 1);
-        trackAddToCart([analyticsItem()]);
+        trackAddition();
     };
 
     return (

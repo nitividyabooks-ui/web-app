@@ -18,8 +18,6 @@ import {
     trackPaymentFailure,
 } from "@/lib/analytics";
 import { trackFBPixel } from "@/lib/fbpixel";
-import { getSalePaiseFromMrpPaise } from "@/lib/pricing";
-import { buildWhatsAppMessage, buildWhatsAppUrl, getWhatsAppNumber } from "@/lib/whatsapp";
 import { ArrowLeft, ShieldCheck, Truck, Clock } from "lucide-react";
 import Link from "next/link";
 import Script from "next/script";
@@ -33,24 +31,25 @@ type CheckoutStep = "delivery" | "payment";
 
 export default function CheckoutPage() {
     const router = useRouter();
-    const { items, totalAmount, totalMrpAmount, discountPercent, clearCart, isHydrated } = useCart();
-    const { user, identifyUser } = useUser();
+    const { items, totalAmount, totalMrpAmount, discountPercent, shippingAmount, payableAmount, clearCart, isHydrated } = useCart();
+    const { identifyUser } = useUser();
     const [step, setStep] = useState<CheckoutStep>("delivery");
     const [deliveryData, setDeliveryData] = useState<DeliveryFormData | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [razorpayLoaded, setRazorpayLoaded] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [whatsappHandoff, setWhatsappHandoff] = useState<{ orderId: string; url: string } | null>(null);
     const hasTrackedCheckout = useRef(false);
     const currentOrderId = useRef<string | null>(null);
     const currentUserId = useRef<string | null>(null);
 
     // Redirect to home if cart is empty (after hydration)
     useEffect(() => {
-        if (isHydrated && items.length === 0) {
+        if (isHydrated && items.length === 0 && !showSuccessModal) {
             router.push("/books");
         }
-    }, [isHydrated, items.length, router]);
+    }, [isHydrated, items.length, showSuccessModal, router]);
 
     // Track checkout started
     useEffect(() => {
@@ -157,7 +156,6 @@ export default function CheckoutPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     orderId: orderData.orderId,
-                    amount: totalAmount, // in paise
                     customerPhone: deliveryData.phone,
                     customerName: deliveryData.name,
                 }),
@@ -209,14 +207,20 @@ export default function CheckoutPage() {
                         const verifyData = await verifyResponse.json();
 
                         if (verifyData.success) {
-                            trackPurchase(
-                                cartItemsToItems(items, discountPercent),
-                                totalAmount / 100,
-                                response.razorpay_payment_id,
-                                "Razorpay"
+                            const tracked = trackPurchase(
+                                orderData.items.map((item: { productId: string; title: string; price: number; quantity: number }) => ({ item_id: item.productId, item_name: item.title, price: item.price / 100, quantity: item.quantity })),
+                                orderData.subtotal / 100,
+                                orderData.orderId,
+                                "Razorpay",
+                                orderData.shippingAmount / 100
                             );
-                            clearCart();
+                            if (tracked) trackFBPixel("Purchase", { content_ids: items.map(item => item.productId), content_type: "product", value: orderData.subtotal / 100, currency: "INR" });
+                            try {
+                                sessionStorage.setItem(`nitividya-receipt:${orderData.orderId}`, JSON.stringify({ method: "razorpay", confirmed: true }));
+                            } catch { /* Payment confirmation remains visible when browser storage is unavailable. */ }
                             setShowSuccessModal(true);
+                            clearCart();
+                            setIsLoading(false);
                         } else {
                             throw new Error(verifyData.error || "Payment verification failed");
                         }
@@ -269,7 +273,7 @@ export default function CheckoutPage() {
                 err instanceof Error ? err.message : "Unknown error"
             );
         }
-    }, [deliveryData, items, totalAmount, discountPercent, razorpayLoaded, clearCart, router]);
+    }, [deliveryData, items, totalAmount, discountPercent, clearCart, router]);
 
     const handleWhatsAppOrder = useCallback(async () => {
         if (!deliveryData) return;
@@ -312,42 +316,26 @@ export default function CheckoutPage() {
                 throw new Error(data.error || "Failed to create order");
             }
 
-            // Build WhatsApp message
-            const message = buildWhatsAppMessage({
-                orderId: data.orderId,
-                customerName: deliveryData.name,
-                customerPhone: deliveryData.phone,
-                address: deliveryData.address,
-                pincode: deliveryData.pincode,
-                city: deliveryData.city,
-                state: deliveryData.state,
-                items: items.map((item) => ({
-                    title: item.title,
-                    quantity: item.quantity,
-                    price: getSalePaiseFromMrpPaise(item.price, discountPercent),
-                })),
-                totalAmount,
-                discountPercent,
-            });
-
-            const whatsappUrl = buildWhatsAppUrl(getWhatsAppNumber(), message);
-
             trackEvent("purchase_intent_whatsapp", {
                 order_id: data.orderId,
                 currency: "INR",
-                value: totalAmount / 100,
+                value: data.totalAmount / 100,
                 discount_percent: discountPercent,
             });
 
-            clearCart();
-            window.open(whatsappUrl, "_blank");
-            router.push(`/checkout/success?order=${data.orderId}&method=whatsapp`);
+            setWhatsappHandoff({ orderId: data.orderId, url: data.whatsappUrl });
+            setIsLoading(false);
+            try {
+                sessionStorage.setItem(`nitividya-receipt:${data.orderId}`, JSON.stringify({ method: "whatsapp", confirmed: false, whatsappUrl: data.whatsappUrl }));
+                // A durable link on the next screen avoids popup blocking after async work.
+                router.push(`/checkout/success?order=${data.orderId}&method=whatsapp`);
+            } catch { /* Keep the send link visible on checkout if storage is unavailable. */ }
         } catch (err) {
             console.error("WhatsApp order error:", err);
             setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
             setIsLoading(false);
         }
-    }, [deliveryData, items, totalAmount, discountPercent, clearCart, router]);
+    }, [deliveryData, items, totalAmount, discountPercent, router]);
 
     // Loading state
     if (!isHydrated) {
@@ -359,9 +347,17 @@ export default function CheckoutPage() {
     }
 
     // Empty cart
-    if (items.length === 0) {
-        return null;
+    if (showSuccessModal && currentOrderId.current && deliveryData) {
+        return <PaymentSuccessModal isOpen orderId={currentOrderId.current} customerPhone={deliveryData.phone} />;
     }
+    if (whatsappHandoff) return (
+        <div className="min-h-screen bg-paper px-6 py-12 text-center">
+            <h1 className="font-heading text-2xl mb-4">Complete your WhatsApp order</h1>
+            <p className="mb-6">Your request is saved. Send the message in WhatsApp so we can confirm your order. Your bag is saved.</p>
+            <a href={whatsappHandoff.url} target="_blank" rel="noopener noreferrer" className="inline-flex px-6 py-4 rounded-btn bg-evergreen text-white font-bold">Open WhatsApp to send your order</a>
+        </div>
+    );
+    if (items.length === 0) return null;
 
     return (
         <>
@@ -450,7 +446,7 @@ export default function CheckoutPage() {
                                     onWhatsApp={handleWhatsAppOrder}
                                     onBack={() => setStep("delivery")}
                                     isLoading={isLoading}
-                                    totalAmount={totalAmount}
+                                    totalAmount={payableAmount}
                                     razorpayReady={razorpayLoaded}
                                 />
                             )}
@@ -487,11 +483,11 @@ export default function CheckoutPage() {
                             </span>
                             <div className="text-right">
                                 <span className="font-heading text-lg font-semibold text-ink">
-                                    ₹{(totalAmount / 100).toFixed(0)}
+                                    ₹{(payableAmount / 100).toFixed(0)}
                                 </span>
                                 {discountPercent > 0 && (
                                     <span className="ml-2 text-xs text-evergreen font-bold">
-                                        {discountPercent}% off
+                                        Shipping {shippingAmount === 0 ? "free" : "₹49 included"}
                                     </span>
                                 )}
                             </div>

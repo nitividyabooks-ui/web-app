@@ -1,19 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Truck, ShoppingBag, RotateCcw } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import { Product } from "@/lib/products";
 import { useCart } from "@/context/CartContext";
 import { getStorageUrl } from "@/lib/storage";
 import {
-    BUNDLE_5_DISCOUNT_PERCENT,
     formatRupeesFromPaise,
-    getSalePaiseFromMrpPaise,
+    getCartPricing,
+    hasCompleteMikoSet,
+    MIKO_BUNDLE_PRODUCT_IDS,
 } from "@/lib/pricing";
 import { getWhatsAppNumber } from "@/lib/whatsapp";
 import { AddToCartButton } from "./AddToCartButton";
-import { productToItem, trackAddToCart, trackWhatsAppClick } from "@/lib/analytics";
+import { cartItemsToItems, trackAddToCart, trackWhatsAppClick } from "@/lib/analytics";
 
 interface PurchaseCardProps {
     product: Product;
@@ -29,37 +30,36 @@ export function PurchaseCard({
     mrpPaise,
     salePaise,
     discountPercent,
-    seriesProducts,
+    seriesProducts: catalogSeriesProducts,
     seriesName = "Miko Series",
 }: PurchaseCardProps) {
     const [bundleAll, setBundleAll] = useState(false);
-    const { addItem } = useCart();
+    const { items, addItem, setIsCartOpen } = useCart();
+    const seriesProducts = catalogSeriesProducts.filter((p) => MIKO_BUNDLE_PRODUCT_IDS.some((id) => id === p.id));
+    const missingProducts = seriesProducts.filter((p) => !items.some((item) => item.productId === p.id));
 
-    // Bundle pricing comes from the central knobs (cart applies the
-    // same discount via getDiscountPercentForQuantity), so the promise
-    // here always matches what checkout charges.
-    const bundleMrpPaise = seriesProducts.reduce((s, p) => s + p.price, 0);
-    const bundleSalePaise = seriesProducts.reduce(
-        (s, p) => s + getSalePaiseFromMrpPaise(p.price, BUNDLE_5_DISCOUNT_PERCENT),
-        0
-    );
+    const bundleItems = seriesProducts.map((p) => ({ productId: p.id, price: p.price, format: p.format, quantity: 1 }));
+    const bundlePricing = getCartPricing(bundleItems);
+    const isCompleteSet = hasCompleteMikoSet(bundleItems);
+    const bundleMrpPaise = bundlePricing.totalMrp;
+    const bundleSalePaise = bundlePricing.subtotal;
+    const bundleDiscount = bundlePricing.discountPercent;
     const bundleSavingsPaise = bundleMrpPaise - bundleSalePaise;
 
     const displayMrp = bundleAll ? bundleMrpPaise : mrpPaise;
     const displaySale = bundleAll ? bundleSalePaise : salePaise;
-    const displayDiscount = bundleAll ? BUNDLE_5_DISCOUNT_PERCENT : discountPercent;
+    const displayDiscount = bundleAll ? bundleDiscount : discountPercent;
 
     const handleAddBundle = () => {
-        trackAddToCart(
-            seriesProducts.map((p) => productToItem(p, { discountPercent: BUNDLE_5_DISCOUNT_PERCENT }))
-        );
-        seriesProducts.forEach((p, i) => {
-            const cover = getStorageUrl(p.coverPath || p.images?.[0]?.path || "");
-            addItem(
-                { productId: p.id, title: p.title, price: p.price, quantity: 1, image: cover },
-                { openCart: i === seriesProducts.length - 1 }
-            );
-        });
+        const addedItems = missingProducts.map((p) => ({
+            productId: p.id, title: p.title, price: p.price, format: p.format, quantity: 1,
+            image: getStorageUrl(p.coverPath || p.images?.[0]?.path || ""),
+        }));
+        if (addedItems.length > 0) {
+            trackAddToCart(cartItemsToItems(addedItems, bundleDiscount, [...items, ...addedItems]));
+            addedItems.forEach((item) => addItem(item, { openCart: false }));
+        }
+        setIsCartOpen(true);
     };
 
     return (
@@ -69,10 +69,10 @@ export function PurchaseCard({
                 <span className="font-heading text-[2rem] font-semibold text-ink">
                     {formatRupeesFromPaise(displaySale)}
                 </span>
-                <s className="text-base text-ink-soft/70">{formatRupeesFromPaise(displayMrp)}</s>
-                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-terracotta text-white">
-                    {displayDiscount}% off
-                </span>
+                {displayDiscount > 0 && <>
+                    <s className="text-base text-ink-soft/70">{formatRupeesFromPaise(displayMrp)}</s>
+                    <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-terracotta text-white">{displayDiscount}% off</span>
+                </>}
             </div>
 
             {/* Delivery + returns */}
@@ -88,7 +88,7 @@ export function PurchaseCard({
             </div>
 
             {/* Bundle upsell toggle */}
-            {seriesProducts.length > 1 && (
+            {isCompleteSet && (
                 <label
                     className={`flex items-center gap-3 p-3.5 rounded-input cursor-pointer transition-colors border ${
                         bundleAll
@@ -104,7 +104,7 @@ export function PurchaseCard({
                     />
                     <span className="flex-1">
                         <span className="block text-sm font-bold text-ink">
-                            Complete the {seriesName} — save {BUNDLE_5_DISCOUNT_PERCENT}%
+                            Complete the {seriesName} — save {bundleDiscount}%
                         </span>
                         <span className="block text-xs mt-0.5 text-ink-soft">
                             All {seriesProducts.length} books for {formatRupeesFromPaise(bundleSalePaise)} —
@@ -121,7 +121,7 @@ export function PurchaseCard({
                     className="w-full h-13 rounded-btn bg-evergreen text-white font-bold text-base hover:bg-evergreen-deep transition-colors inline-flex items-center justify-center gap-2 btn-bounce"
                 >
                     <ShoppingBag className="w-5 h-5" />
-                    Add all {seriesProducts.length} books to bag
+                    {missingProducts.length === 0 ? "Set added — view bag" : `Complete the set — add ${missingProducts.length} book${missingProducts.length === 1 ? "" : "s"}`}
                 </button>
             ) : (
                 <AddToCartButton product={product} />
@@ -140,4 +140,12 @@ export function PurchaseCard({
             </a>
         </div>
     );
+}
+
+
+export function WhatsAppLink({ href, location, className, children, ariaLabel }: {
+    href: string; location: string; className?: string; children: ReactNode; ariaLabel?: string;
+}) {
+    return <a href={href} target="_blank" rel="noopener noreferrer" className={className} aria-label={ariaLabel}
+        onClick={() => trackWhatsAppClick(location)}>{children}</a>;
 }

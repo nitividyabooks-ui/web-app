@@ -1,4 +1,4 @@
-import { BetaAnalyticsDataClient, v1alpha } from "@google-analytics/data";
+import { BetaAnalyticsDataClient, v1alpha, protos } from "@google-analytics/data";
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
 // Credentials come from env vars extracted from the service account JSON key.
@@ -47,11 +47,11 @@ export type TrafficOverview = {
 export type FunnelStep = {
     name: string;
     users: number;
-    dropOffRate: number; // % who dropped off vs previous step
-    completionRate: number; // % of step 1 who reached this step
+    dropOffRate: number | null; // null for open funnels with different entry cohorts
+    completionRate: number | null; // % of step 1; null for open funnels
 };
 
-export type PurchaseFunnel = { steps: FunnelStep[]; overallConversion: number };
+export type PurchaseFunnel = { steps: FunnelStep[]; overallConversion: null; isOpen: true };
 export type LeadFunnel = { steps: FunnelStep[]; overallConversion: number };
 
 export type TopPage = {
@@ -93,8 +93,8 @@ export async function getTrafficOverview(): Promise<TrafficOverview> {
             property,
             dateRanges: [
                 { startDate: "today", endDate: "today", name: "today" },
-                { startDate: "7daysAgo", endDate: "today", name: "7d" },
-                { startDate: "30daysAgo", endDate: "today", name: "30d" },
+                { startDate: "6daysAgo", endDate: "today", name: "7d" },
+                { startDate: "29daysAgo", endDate: "today", name: "30d" },
             ],
             metrics: [
                 { name: "sessions" },
@@ -116,7 +116,7 @@ export async function getTrafficOverview(): Promise<TrafficOverview> {
         // Top traffic sources
         client.runReport({
             property,
-            dateRanges: [{ startDate: "30daysAgo", endDate: "today" }],
+            dateRanges: [{ startDate: "29daysAgo", endDate: "today" }],
             dimensions: [{ name: "sessionSource" }, { name: "sessionMedium" }],
             metrics: [{ name: "sessions" }],
             orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
@@ -124,10 +124,13 @@ export async function getTrafficOverview(): Promise<TrafficOverview> {
         }),
     ]);
 
-    // When multiple dateRanges and no dimension, GA returns one row per dateRange
-    const todayRow = overviewRes[0]?.rows?.[0];
-    const sevenRow = overviewRes[0]?.rows?.[1];
-    const thirtyRow = overviewRes[0]?.rows?.[2];
+    // GA4 may order or omit date-range rows. Match the returned dimension, not row positions.
+    const dateRangeIndex = overviewRes[0]?.dimensionHeaders?.findIndex(header => header.name === "dateRange") ?? -1;
+    const rangeRow = (name: string) => dateRangeIndex < 0 ? undefined :
+        overviewRes[0]?.rows?.find(row => val(row, "dim", dateRangeIndex) === name);
+    const todayRow = rangeRow("today");
+    const sevenRow = rangeRow("7d");
+    const thirtyRow = rangeRow("30d");
 
     const dailyTrend = (trendRes[0]?.rows ?? []).map(r => ({
         date: val(r, "dim", 0),
@@ -151,93 +154,57 @@ export async function getTrafficOverview(): Promise<TrafficOverview> {
 }
 
 // ─── Purchase Funnel ─────────────────────────────────────────────────────────
-// Tracks the full journey: Homepage → Product → Cart → Checkout → Payment
+// Product discovery is optional: bundle buttons and returning customers can enter at cart/checkout.
 export async function getPurchaseFunnel(): Promise<PurchaseFunnel> {
     const client = getAlphaClient();
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [res] = await (client.runFunnelReport as any)({
+    const names = ["Added to Cart", "Started Checkout", "Purchased"];
+    const events = ["add_to_cart", "begin_checkout", "purchase"];
+    const [res] = await client.runFunnelReport({
         property: PROPERTY(),
-        dateRanges: [{ startDate: "30daysAgo", endDate: "today" }],
+        dateRanges: [{ startDate: "29daysAgo", endDate: "today" }],
         funnel: {
-            steps: [
-                {
-                    name: "1. Visited Site",
-                    filterExpression: { funnelEventFilter: { eventName: "page_view" } },
-                },
-                {
-                    name: "2. Viewed a Product",
-                    filterExpression: {
-                        funnelEventFilter: {
-                            eventName: "page_view",
-                            funnelParameterFilterExpression: {
-                                funnelParameterFilter: {
-                                    eventParameterName: "page_location",
-                                    stringFilter: { matchType: "CONTAINS", value: "/books/" },
-                                },
-                            },
-                        },
-                    },
-                },
-                {
-                    name: "3. Added to Cart",
-                    filterExpression: { funnelEventFilter: { eventName: "add_to_cart" } },
-                },
-                {
-                    name: "4. Started Checkout",
-                    filterExpression: { funnelEventFilter: { eventName: "checkout_started" } },
-                },
-                {
-                    name: "5. Completed Payment",
-                    filterExpression: { funnelEventFilter: { eventName: "payment_success" } },
-                },
-            ],
+            isOpenFunnel: true,
+            steps: names.map((name, index) => ({
+                name,
+                filterExpression: { funnelEventFilter: { eventName: events[index] } },
+            })),
         },
         funnelVisualizationType: "STANDARD_FUNNEL",
     });
+    const steps = buildFunnelSteps(names, funnelCounts(res, names)).map(step => ({
+        ...step, dropOffRate: null, completionRate: null,
+    }));
+    // Open-funnel steps can contain different entry cohorts. A purchase/cart ratio is not a conversion rate.
+    return { steps, overallConversion: null, isOpen: true };
+}
 
-    const counts = ((res as any).funnelTable?.rows ?? []).map((r: any) =>
-        parseInt(r.metricValues?.[0]?.value ?? "0", 10)
-    );
-
-    const names = ["Visited Site", "Viewed a Product", "Added to Cart", "Started Checkout", "Completed Payment"];
-    const steps = buildFunnelSteps(names, counts.length ? counts : names.map(() => 0));
-    const overallConversion = steps[0]?.users ? Math.round((steps[steps.length - 1].users / steps[0].users) * 100) : 0;
-
-    return { steps, overallConversion };
+function funnelCounts(res: protos.google.analytics.data.v1alpha.IRunFunnelReportResponse, names: string[]) {
+    const stepIndex = res.funnelTable?.dimensionHeaders?.findIndex(header => header.name === "funnelStepName") ?? -1;
+    return names.map((name, index) => {
+        const row = res.funnelTable?.rows?.find(row => val(row, "dim", stepIndex < 0 ? 0 : stepIndex) === `${index + 1}. ${name}`);
+        return num(row, 0);
+    });
 }
 
 // ─── Lead Capture Funnel ─────────────────────────────────────────────────────
+// Every storefront form emits generate_lead with lead_source/lead_type tags.
 export async function getLeadFunnel(): Promise<LeadFunnel> {
     const client = getAlphaClient();
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [res] = await (client.runFunnelReport as any)({
+    const names = ["Visited Site", "Lead Captured"];
+    const events = ["page_view", "generate_lead"];
+    const [res] = await client.runFunnelReport({
         property: PROPERTY(),
-        dateRanges: [{ startDate: "30daysAgo", endDate: "today" }],
+        dateRanges: [{ startDate: "29daysAgo", endDate: "today" }],
         funnel: {
-            steps: [
-                {
-                    name: "1. Modal Shown",
-                    filterExpression: { funnelEventFilter: { eventName: "lead_modal_shown" } },
-                },
-                {
-                    name: "2. Lead Captured",
-                    filterExpression: { funnelEventFilter: { eventName: "lead_captured" } },
-                },
-            ],
+            steps: names.map((name, index) => ({
+                name,
+                filterExpression: { funnelEventFilter: { eventName: events[index] } },
+            })),
         },
         funnelVisualizationType: "STANDARD_FUNNEL",
     });
-
-    const counts = ((res as any).funnelTable?.rows ?? []).map((r: any) =>
-        parseInt(r.metricValues?.[0]?.value ?? "0", 10)
-    );
-
-    const names = ["Modal Shown", "Lead Captured"];
-    const steps = buildFunnelSteps(names, counts.length ? counts : [0, 0]);
+    const steps = buildFunnelSteps(names, funnelCounts(res, names));
     const overallConversion = steps[0]?.users ? Math.round((steps[1].users / steps[0].users) * 100) : 0;
-
     return { steps, overallConversion };
 }
 
@@ -247,8 +214,12 @@ export async function getTopPages(limit = 10): Promise<TopPage[]> {
 
     const [res] = await client.runReport({
         property: PROPERTY(),
-        dateRanges: [{ startDate: "30daysAgo", endDate: "today" }],
+        dateRanges: [{ startDate: "29daysAgo", endDate: "today" }],
         dimensions: [{ name: "pagePath" }, { name: "pageTitle" }],
+        dimensionFilter: { notExpression: { filter: {
+            fieldName: "pagePath",
+            stringFilter: { matchType: "PARTIAL_REGEXP", value: "^/(admin|api|internal)(/|$)" },
+        } } },
         metrics: [{ name: "screenPageViews" }, { name: "sessions" }],
         orderBys: [{ metric: { metricName: "screenPageViews" }, desc: true }],
         limit,

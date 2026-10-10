@@ -5,14 +5,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Play } from "lucide-react";
 import { SiYoutube } from "react-icons/si";
-import { trackVideoStart } from "@/lib/analytics";
+import { trackYouTubeClick } from "@/lib/analytics";
+import { YouTubeLink } from "@/components/products/BookReadAloudSection";
 
 const SUBSCRIBE_URL = "https://www.youtube.com/channel/UCHuY7vX820c3N1T9iBOsn6g?sub_confirmation=1";
 
 const FEATURED_VIDEOS = [
-    { id: "DvLjtTpKcpI", label: "Miko's Park Day" },
-    { id: "7f4HVfY2rOU", label: "Broody the Kind Bear" },
-    { id: "hZuE4QOa8ho", label: "The Magic Button" },
+    { id: "hZuE4QOa8ho", label: "Miko's Park Day Adventure" },
+    { id: "W67LcJEqiw0", label: "Broody the Kind Bear" },
+    { id: "DvLjtTpKcpI", label: "The Magic Button" },
 ];
 
 /**
@@ -24,7 +25,7 @@ export function YouTubeChannelSection() {
 
     const handlePlay = (id: string, label: string) => {
         setPlayingId(id);
-        trackVideoStart(label, "home_youtube_section");
+        trackYouTubeClick(label, "home_youtube_section");
     };
 
     return (
@@ -39,8 +40,8 @@ export function YouTubeChannelSection() {
                         Watch the stories come alive
                     </h2>
                     <p className="mt-3 text-paper/70 text-lg max-w-xl mx-auto">
-                        Free read-aloud stories on our YouTube channel — perfect for
-                        winding down before bed.
+                        English read-aloud stories to watch together, plus free offline
+                        activities to continue the learning.
                     </p>
                 </div>
 
@@ -53,7 +54,7 @@ export function YouTubeChannelSection() {
                             {playingId === id ? (
                                 <div className="aspect-video">
                                     <iframe
-                                        src={`https://www.youtube.com/embed/${id}?autoplay=1`}
+                                        src={`https://www.youtube.com/embed/${id}?autoplay=1&enablejsapi=1`}
                                         title={label}
                                         className="w-full h-full"
                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -86,15 +87,15 @@ export function YouTubeChannelSection() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-10">
-                    <a
+                    <YouTubeLink
                         href={SUBSCRIBE_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        location="home_youtube_section"
+                        subscribe
                         className="inline-flex items-center gap-2 h-12 px-7 rounded-btn bg-marigold text-evergreen-deep font-bold hover:bg-marigold-deep hover:text-paper transition-colors"
                     >
                         <SiYoutube className="w-5 h-5" />
                         Subscribe free
-                    </a>
+                    </YouTubeLink>
                     <Link
                         href="/story-time"
                         className="inline-flex items-center gap-1.5 h-12 px-5 text-paper font-semibold hover:text-marigold transition-colors"

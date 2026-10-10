@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getAllProducts } from "@/lib/products";
-import { getDiscountPercentForQuantity, getSalePaiseFromMrpPaise } from "@/lib/pricing";
+import { getCartPricing } from "@/lib/pricing";
 import { Prisma, OrderStatus } from "@prisma/client";
 import { buildWhatsAppMessage, buildWhatsAppUrl, getWhatsAppNumber } from "@/lib/whatsapp";
 import { notifyOrderPlaced } from "@/lib/whatsapp-notifications";
@@ -21,7 +21,7 @@ const orderSchema = z.object({
     cart: z.array(
         z.object({
             productId: z.string(),
-            quantity: z.number().min(1),
+            quantity: z.number().int().min(1).max(99),
         })
     ).min(1, "Cart cannot be empty"),
     paymentMethod: z.enum(["RAZORPAY", "WHATSAPP", "COD"]).optional().default("WHATSAPP"),
@@ -45,37 +45,22 @@ export async function POST(request: Request) {
 
         // Fetch all products to validate and get prices
         const allProducts = await getAllProducts();
-        let totalAmount = 0;
-        const orderItems = [];
-        const totalQty = cart.reduce((acc, i) => acc + i.quantity, 0);
-        const discountPercent = getDiscountPercentForQuantity(totalQty);
-
-        for (const item of cart) {
-            const product = allProducts.find((p) => p.id === item.productId);
-            if (!product) {
-                return NextResponse.json(
-                    { error: `Product not found: ${item.productId}` },
-                    { status: 400 }
-                );
+        // Merge duplicate rows before checking stock and calculating prices.
+        const quantities = new Map<string, number>();
+        for (const item of cart) quantities.set(item.productId, (quantities.get(item.productId) || 0) + item.quantity);
+        const validatedItems = [];
+        for (const [productId, quantity] of quantities) {
+            const product = allProducts.find(p => p.id === productId);
+            if (!product) return NextResponse.json({ error: `Product not found: ${productId}` }, { status: 400 });
+            if (quantity > 99 || product.inventoryQuantity < quantity) {
+                return NextResponse.json({ error: `Insufficient stock for: ${product.title}` }, { status: 400 });
             }
-
-            // Check inventory
-            if (product.inventoryQuantity < item.quantity) {
-                return NextResponse.json(
-                    { error: `Insufficient stock for: ${product.title}` },
-                    { status: 400 }
-                );
-            }
-
-            const salePaise = getSalePaiseFromMrpPaise(product.price, discountPercent);
-            totalAmount += salePaise * item.quantity;
-            orderItems.push({
-                productId: product.id,
-                title: product.title,
-                price: salePaise,
-                quantity: item.quantity,
-            });
+            validatedItems.push({ productId: product.id, title: product.title, price: product.price, format: product.format, quantity });
         }
+        const pricing = getCartPricing(validatedItems);
+        const totalAmount = pricing.total;
+        const discountPercent = pricing.discountPercent;
+        const orderItems = pricing.items.map(item => ({ productId: item.productId, title: item.title, price: item.salePrice, quantity: item.quantity }));
 
         // Determine order status based on payment method
         const initialStatus: OrderStatus = 
@@ -87,6 +72,9 @@ export async function POST(request: Request) {
             where: {
                 customerPhone: customer.phone,
                 totalAmount,
+                paymentMethod,
+                address: customer.address,
+                pincode: customer.pincode || null,
                 createdAt: { gte: fiveMinutesAgo },
                 status: { in: ["PENDING_PAYMENT", "PENDING_WHATSAPP"] },
             },
@@ -94,7 +82,7 @@ export async function POST(request: Request) {
         });
 
         // If same order exists, return it (idempotent)
-        if (existingOrder) {
+        if (existingOrder && existingOrder.items.length === orderItems.length && orderItems.every(item => existingOrder.items.some(existing => existing.productId === item.productId && existing.quantity === item.quantity && existing.price === item.price))) {
             const whatsappMessage = buildWhatsAppMessage({
                 orderId: existingOrder.id,
                 customerName: existingOrder.customerName,
@@ -115,6 +103,9 @@ export async function POST(request: Request) {
             return NextResponse.json({
                 orderId: existingOrder.id,
                 totalAmount: existingOrder.totalAmount,
+                items: orderItems,
+                subtotal: pricing.subtotal,
+                shippingAmount: pricing.shipping,
                 currency: "INR",
                 status: existingOrder.status,
                 whatsappUrl: buildWhatsAppUrl(getWhatsAppNumber(), whatsappMessage),
@@ -136,7 +127,7 @@ export async function POST(request: Request) {
                 status: initialStatus,
                 paymentMethod,
                 userId: userId || null, // Link to user if provided
-                meta: (meta || {}) satisfies Prisma.InputJsonValue,
+                meta: { ...(meta || {}), subtotal: pricing.subtotal, shippingAmount: pricing.shipping } satisfies Prisma.InputJsonValue,
                 items: {
                     create: orderItems,
                 },
@@ -186,7 +177,10 @@ export async function POST(request: Request) {
 
         return NextResponse.json({
             orderId: order.id,
+            items: orderItems,
             totalAmount,
+            subtotal: pricing.subtotal,
+            shippingAmount: pricing.shipping,
             currency: "INR",
             status: order.status,
             whatsappUrl: buildWhatsAppUrl(getWhatsAppNumber(), whatsappMessage),

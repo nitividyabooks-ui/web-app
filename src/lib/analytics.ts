@@ -10,9 +10,9 @@
  * - items[] follows the GA4 item schema.
  */
 
-import { trackEvent } from "@/lib/gtm";
+import { trackEvent, isInternalAnalyticsRoute } from "@/lib/gtm";
 import type { CartItem } from "@/context/CartContext";
-import { getSalePaiseFromMrpPaise } from "@/lib/pricing";
+import { getSalePaiseFromMrpPaise, getItemSalePaise } from "@/lib/pricing";
 
 export interface AnalyticsItem {
     item_id: string;
@@ -49,12 +49,14 @@ export function productToItem(
     };
 }
 
-export function cartItemsToItems(items: CartItem[], discountPercent: number): AnalyticsItem[] {
+export function cartItemsToItems(items: CartItem[], discountPercent: number, allItems: CartItem[] = items): AnalyticsItem[] {
+    // Keep the argument for existing call sites; mixed carts require per-item pricing.
+    void discountPercent;
     return items.map((item) => ({
         item_id: item.productId,
         item_name: item.title,
         item_category: "Books",
-        price: getSalePaiseFromMrpPaise(item.price, discountPercent) / 100,
+        price: getItemSalePaise(item, allItems) / 100,
         quantity: item.quantity,
     }));
 }
@@ -62,7 +64,7 @@ export function cartItemsToItems(items: CartItem[], discountPercent: number): An
 const CURRENCY = "INR";
 
 function itemsValue(items: AnalyticsItem[]): number {
-    return Math.round(items.reduce((sum, i) => sum + i.price * i.quantity, 0));
+    return Math.round(items.reduce((sum, i) => sum + i.price * i.quantity, 0) * 100) / 100;
 }
 
 /* ============ Funnel: discovery ============ */
@@ -124,17 +126,27 @@ export function trackPurchase(
     items: AnalyticsItem[],
     valueRupees: number,
     transactionId: string,
-    paymentType: PaymentType = "Razorpay"
+    paymentType: PaymentType = "Razorpay",
+    shippingRupees = 0
 ) {
+    if (typeof window === "undefined" || isInternalAnalyticsRoute(window.location.pathname)) return false;
+    try {
+        const key = `nv_purchase_${transactionId}`;
+        if (sessionStorage.getItem(key)) return false;
+        sessionStorage.setItem(key, "true");
+    } catch {
+        // Storage may be unavailable; GA4 also deduplicates by transaction_id.
+    }
     trackEvent("purchase", {
         transaction_id: transactionId,
         currency: CURRENCY,
         value: valueRupees,
-        shipping: 0,
+        shipping: shippingRupees,
         tax: 0,
         payment_type: paymentType,
         items,
     });
+    return true;
 }
 
 /* ============ Leads & engagement ============ */
@@ -170,8 +182,20 @@ export function trackWhatsAppClick(linkLocation: string) {
     trackEvent("whatsapp_click", { link_location: linkLocation });
 }
 
-export function trackVideoStart(videoTitle: string, location: string) {
-    trackEvent("video_start", { video_title: videoTitle, link_location: location });
+export function trackYouTubeClick(videoTitle: string, location: string) {
+    trackEvent("video_click", { video_title: videoTitle, link_location: location });
+}
+
+export function trackYouTubeSubscribeClick(location: string) {
+    trackEvent("youtube_subscribe_click", { link_location: location });
+}
+
+export function trackYouTubeChannelClick(location: string) {
+    trackEvent("youtube_channel_click", { link_location: location });
+}
+
+export function trackAmazonClick(location: string, productId?: string, params: Record<string, unknown> = {}) {
+    trackEvent("amazon_click", { ...params, link_location: location, ...(productId && { item_id: productId }) });
 }
 
 export function trackViewPromotion(promotionName: string, location: string) {

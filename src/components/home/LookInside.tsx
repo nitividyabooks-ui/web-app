@@ -20,7 +20,10 @@ interface Spread {
  * Builds purchase confidence by showing the actual product.
  */
 export function LookInside({ products }: LookInsideProps) {
-    const spreads: Spread[] = products
+    const orderedProducts = [...products].sort((a, b) =>
+        Number(b.collections.includes("miko-series")) - Number(a.collections.includes("miko-series"))
+    );
+    const spreads: Spread[] = orderedProducts
         .flatMap((p) =>
             p.insideImages.map((img) => ({
                 productSlug: p.slug,
@@ -39,7 +42,7 @@ export function LookInside({ products }: LookInsideProps) {
                 <SectionHeading
                     eyebrow="Look inside"
                     title="Open a page before you buy"
-                    subtitle="Real spreads from the books — bold Indian art, one idea per page, Hindi and English side by side."
+                    subtitle="Preview actual pages from our books. Explore the Miko series in Hindi and English before you choose."
                     className="mb-10"
                 />
 

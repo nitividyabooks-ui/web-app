@@ -6,7 +6,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { identifyAndTrack, type IdentifyAndTrackResult } from "@/actions/identifyAndTrack";
 
 export interface UserIdentity {
@@ -28,7 +28,6 @@ export interface CampaignTrackerState {
  * Cleans URL after processing and stores user identity
  */
 export function useCampaignTracker(): CampaignTrackerState {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [state, setState] = useState<CampaignTrackerState>({
     user: null,
@@ -43,6 +42,18 @@ export function useCampaignTracker(): CampaignTrackerState {
       if (typeof window !== "undefined" && window.location.pathname.startsWith("/admin")) {
         return;
       }
+      // Capture identity before cleaning the URL so failed/slow requests cannot expose it to analytics.
+      const userPhone = searchParams.get("user_phone");
+      if (userPhone) {
+        // Preserve supplied UTMs for deferred GA attribution.
+        const newParams = new URLSearchParams(searchParams);
+        newParams.delete("user_phone");
+        const newUrl = newParams.toString()
+          ? `${window.location.pathname}?${newParams.toString()}`
+          : window.location.pathname;
+        window.history.replaceState(window.history.state, "", newUrl + window.location.hash);
+      }
+
       // Check if we already have user identity in session storage
       const storedUser = getStoredUserIdentity();
       if (storedUser) {
@@ -51,13 +62,12 @@ export function useCampaignTracker(): CampaignTrackerState {
       }
 
       // Check for user_phone parameter
-      const userPhone = searchParams.get("user_phone");
       if (!userPhone) return;
 
       // Validate phone number
       const cleanPhone = userPhone.replace(/\D/g, "");
       if (cleanPhone.length < 10 || cleanPhone.length > 15) {
-        console.warn("[useCampaignTracker] Invalid phone number in URL:", userPhone);
+        console.warn("[useCampaignTracker] Invalid phone number in URL");
         return;
       }
 
@@ -90,24 +100,6 @@ export function useCampaignTracker(): CampaignTrackerState {
             error: null,
             isNewUser: result.isNewUser,
           });
-
-          // Clean URL by removing user_phone and UTM params
-          const newParams = new URLSearchParams(searchParams);
-          newParams.delete("user_phone");
-          newParams.delete("utm_source");
-          newParams.delete("utm_medium");
-          newParams.delete("utm_campaign");
-          newParams.delete("utm_term");
-          newParams.delete("utm_content");
-
-          // Replace current URL without triggering navigation
-          const newUrl = newParams.toString()
-            ? `${window.location.pathname}?${newParams.toString()}`
-            : window.location.pathname;
-
-          window.history.replaceState({}, "", newUrl);
-
-          console.log("[useCampaignTracker] User identified and tracked:", result.user.mobile);
         } else {
           throw new Error("Failed to identify user");
         }
@@ -164,6 +156,8 @@ export function useStoredUserIdentity(): UserIdentity | null {
   const [user, setUser] = useState<UserIdentity | null>(null);
 
   useEffect(() => {
+    // Hydrate the browser-only session identity after the server render.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setUser(getStoredUserIdentity());
   }, []);
 

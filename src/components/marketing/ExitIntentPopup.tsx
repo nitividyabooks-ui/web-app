@@ -50,23 +50,10 @@ export function ExitIntentPopup() {
             if (e.clientY <= 0 && !triggered) open();
         };
 
-        // Mobile: back button (popstate)
-        const handlePopState = () => {
-            if (!triggered) {
-                // Push state back so the user doesn't actually navigate
-                window.history.pushState(null, "", window.location.href);
-                open();
-            }
-        };
-
         document.addEventListener("mouseleave", handleMouseLeave);
-        // Push an initial state so we can intercept back
-        window.history.pushState(null, "", window.location.href);
-        window.addEventListener("popstate", handlePopState);
 
         return () => {
             document.removeEventListener("mouseleave", handleMouseLeave);
-            window.removeEventListener("popstate", handlePopState);
         };
     }, [isMounted, shouldShow]);
 
@@ -98,9 +85,11 @@ export function ExitIntentPopup() {
             }
 
             setIsSuccess(true);
-            localStorage.setItem(EMAIL_CAPTURED_KEY, "true");
-            localStorage.setItem(DISMISSED_KEY, "true");
-            localStorage.setItem(PRINTABLES_UNLOCKED_KEY, "true");
+            try {
+                localStorage.setItem(EMAIL_CAPTURED_KEY, "true");
+                localStorage.setItem(DISMISSED_KEY, "true");
+                localStorage.setItem(PRINTABLES_UNLOCKED_KEY, "true");
+            } catch { /* Storage is optional. */ }
 
             trackGenerateLead("exit_intent", "email");
             trackFBPixel("Lead", { content_name: "exit_intent" });
@@ -157,7 +146,7 @@ export function ExitIntentPopup() {
                                 Before you go — free worksheets
                             </h2>
                             <p className="text-ink-soft text-sm">
-                                Coloring pages, alphabet tracing, and Hindi varnamala for ages 0–5.
+                                Coloring pages, tracing, and matching games for young children.
                                 Print at home today.
                             </p>
                         </div>

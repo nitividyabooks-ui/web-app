@@ -9,7 +9,9 @@ import { getStorageUrl } from "@/lib/storage";
 import {
     BUNDLE_5_DISCOUNT_PERCENT,
     formatRupeesFromPaise,
-    getSalePaiseFromMrpPaise,
+    getCartPricing,
+    hasCompleteMikoSet,
+    MIKO_BUNDLE_PRODUCT_IDS,
 } from "@/lib/pricing";
 import {
     productToItem,
@@ -30,39 +32,41 @@ interface MikoBundlesProps {
  * Complete-set bundle offer. The savings math is shown explicitly —
  * MRP sum struck through next to the bundle price.
  */
-export function MikoBundles({ products, location = "home_bundle" }: MikoBundlesProps) {
+export function MikoBundles({ products: catalogProducts, location = "home_bundle" }: MikoBundlesProps) {
+    const products = catalogProducts.filter((p) => MIKO_BUNDLE_PRODUCT_IDS.some((id) => id === p.id));
     const { items, addItem, setIsCartOpen } = useCart();
     const viewTracked = useRef(false);
 
     const inCartIds = useMemo(() => new Set(items.map((i) => i.productId)), [items]);
     const allInCart = products.length > 0 && products.every((p) => inCartIds.has(p.id));
 
-    const totalMrp = useMemo(() => products.reduce((acc, p) => acc + p.price, 0), [products]);
-    const totalSale = useMemo(
-        () => products.reduce((acc, p) => acc + getSalePaiseFromMrpPaise(p.price, BUNDLE_5_DISCOUNT_PERCENT), 0),
-        [products]
-    );
+    const bundleItems = products.map((p) => ({ productId: p.id, price: p.price, format: p.format, quantity: 1 }));
+    const completeSet = hasCompleteMikoSet(bundleItems);
+    const bundlePricing = getCartPricing(bundleItems);
+    const totalMrp = bundlePricing.totalMrp;
+    const totalSale = bundlePricing.subtotal;
     const savings = totalMrp - totalSale;
 
     useEffect(() => {
-        if (viewTracked.current) return;
+        if (!completeSet || viewTracked.current) return;
         viewTracked.current = true;
         trackViewPromotion(PROMOTION_NAME, location);
-    }, [location]);
+    }, [location, completeSet]);
 
     const addFullSet = () => {
         trackSelectPromotion(PROMOTION_NAME, location);
-        trackAddToCart(
-            products.map((p) => productToItem(p, { discountPercent: BUNDLE_5_DISCOUNT_PERCENT }))
-        );
+        const missingProducts = products.filter((p) => !inCartIds.has(p.id));
+        if (missingProducts.length > 0) {
+            trackAddToCart(missingProducts.map((p) => productToItem(p, { discountPercent: BUNDLE_5_DISCOUNT_PERCENT })));
+        }
 
-        for (const p of products) {
-            if (inCartIds.has(p.id)) continue;
+        for (const p of missingProducts) {
             addItem(
                 {
                     productId: p.id,
                     title: p.title,
                     price: p.price,
+                    format: p.format,
                     quantity: 1,
                     image: getStorageUrl(p.coverPath),
                 },
@@ -72,7 +76,7 @@ export function MikoBundles({ products, location = "home_bundle" }: MikoBundlesP
         setIsCartOpen(true);
     };
 
-    if (products.length === 0) return null;
+    if (!completeSet) return null;
 
     return (
         <div className="rounded-card-lg bg-evergreen-deep text-paper overflow-hidden">
@@ -87,8 +91,8 @@ export function MikoBundles({ products, location = "home_bundle" }: MikoBundlesP
                         Give the whole Miko library
                     </h2>
                     <p className="mt-3 text-paper/75 leading-relaxed">
-                        All five bilingual books in one gift-ready set — the favourite
-                        first library for birthdays, baby showers, and festivals.
+                        All five bilingual paperback books together — a first library
+                        for birthdays, baby showers, and festivals.
                     </p>
 
                     <div className="mt-6 flex items-baseline gap-3 flex-wrap">

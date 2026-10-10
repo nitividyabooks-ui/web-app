@@ -4,6 +4,7 @@ export interface StoredCartItem {
     price: number;
     quantity: number;
     image?: string;
+    format?: string;
 }
 
 interface CartStorageEnvelope {
@@ -35,11 +36,12 @@ export function sanitizeCartItems(value: unknown): StoredCartItem[] {
         const quantity = Number(record.quantity);
         const image = typeof record.image === "string" ? record.image : undefined;
 
-        if (!productId || !Number.isFinite(price) || !Number.isFinite(quantity) || quantity <= 0) {
+        if (!productId ||  !Number.isSafeInteger(price) || price < 0 || !Number.isSafeInteger(quantity) || quantity <= 0) {
             return [];
         }
 
-        return [{ productId, title, price, quantity, image }];
+        const format = typeof record.format === "string" ? record.format : undefined;
+        return [{ productId, title, price, quantity, image, ...(format ? { format } : {}) }];
     });
 }
 

@@ -2,10 +2,10 @@
 
 import { CartItem } from "@/context/CartContext";
 import {
-    getSalePaiseFromMrpPaise,
+    getItemSalePaise,
+    getShippingPaise,
     formatRupeesFromPaise,
     FREE_SHIPPING_THRESHOLD_PAISE,
-    SHIPPING_FEE_PAISE,
 } from "@/lib/pricing";
 import Image from "next/image";
 import { Package, Tag, Truck } from "lucide-react";
@@ -22,12 +22,11 @@ export function OrderSummary({
     items,
     totalAmount,
     totalMrpAmount,
-    discountPercent,
     compact = false,
 }: OrderSummaryProps) {
     const savings = totalMrpAmount - totalAmount;
     const isFreeShipping = totalAmount >= FREE_SHIPPING_THRESHOLD_PAISE;
-    const shippingCost = isFreeShipping ? 0 : SHIPPING_FEE_PAISE;
+    const shippingCost = getShippingPaise(totalAmount);
     const finalAmount = totalAmount + shippingCost;
     const amountToFreeShipping = FREE_SHIPPING_THRESHOLD_PAISE - totalAmount;
 
@@ -48,7 +47,7 @@ export function OrderSummary({
             {!compact && (
                 <div className="px-5 py-4 space-y-4 max-h-[300px] overflow-y-auto">
                     {items.map((item) => {
-                        const salePrice = getSalePaiseFromMrpPaise(item.price, discountPercent);
+                        const salePrice = getItemSalePaise(item, items);
                         return (
                             <div key={item.productId} className="flex gap-3">
                                 <div className="relative w-16 h-16 bg-paper-deep rounded-lg overflow-hidden flex-shrink-0">
@@ -91,11 +90,11 @@ export function OrderSummary({
                     </span>
                 </div>
 
-                {discountPercent > 0 && (
+                {savings > 0 && (
                     <div className="flex justify-between text-sm">
                         <span className="text-evergreen flex items-center gap-1.5">
                             <Tag className="w-4 h-4" />
-                            Launch discount ({discountPercent}%)
+                            Book savings
                         </span>
                         <span className="font-semibold text-evergreen">
                             -{formatRupeesFromPaise(savings)}

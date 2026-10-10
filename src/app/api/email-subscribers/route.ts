@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const VALID_SOURCES = [
     "activity_kit",
+    "printables",
     "newsletter",
     "exit_intent",
     "product_page",

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle, Loader2, BadgePercent } from "lucide-react";
+import Link from "next/link";
+import { CheckCircle, Loader2, Gift } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import { PhoneInput } from "@/components/ui/PhoneInput";
 import { getVisitorId } from "@/lib/visitor-id";
@@ -10,7 +11,7 @@ import { trackFBPixel } from "@/lib/fbpixel";
 
 /**
  * Phone-first "Miko's Club" capture band — the home page's
- * primary lead magnet (10% off first order via WhatsApp).
+ * primary lead magnet with immediate access to free printables.
  */
 export function LeadCaptureBand() {
     const [phone, setPhone] = useState("");
@@ -41,6 +42,7 @@ export function LeadCaptureBand() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Something went wrong");
 
+            try { localStorage.setItem("nv_printables_unlocked", "true"); } catch { /* Storage is optional. */ }
             setIsSuccess(true);
             trackGenerateLead("home_band", "phone");
             trackFBPixel("Lead", { content_name: "home_band" });
@@ -56,21 +58,21 @@ export function LeadCaptureBand() {
             <div className="container mx-auto px-4 md:px-6">
                 <div className="max-w-xl mx-auto text-center">
                     <p className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-marigold">
-                        <BadgePercent className="w-4 h-4" />
-                        Members save more
+                        <Gift className="w-4 h-4" />
+                        Free activities for little learners
                     </p>
                     <h2 className="mt-3 font-heading text-headline font-semibold text-paper">
                         Join Miko&apos;s Club on WhatsApp
                     </h2>
                     <p className="mt-3 text-paper/75 text-lg">
-                        Get 10% off your first order, plus free printables and new-book
-                        news — straight to your WhatsApp.
+                        Get free print-at-home activities today and join our WhatsApp list
+                        for book news and reading ideas.
                     </p>
 
                     {isSuccess ? (
-                        <div className="mt-8 inline-flex items-center gap-2 text-marigold font-semibold text-lg">
-                            <CheckCircle className="w-6 h-6" />
-                            Welcome to the club — your code arrives on WhatsApp shortly.
+                        <div className="mt-8 space-y-4 text-marigold font-semibold">
+                            <p className="inline-flex items-center gap-2"><CheckCircle className="w-6 h-6" /> Welcome to Miko&apos;s Club.</p>
+                            <p><Link href="/free-printables" className="inline-flex h-12 items-center px-6 rounded-btn bg-marigold text-evergreen-deep">Download your free printables</Link></p>
                         </div>
                     ) : (
                         <>
@@ -96,7 +98,7 @@ export function LeadCaptureBand() {
                                     ) : (
                                         <>
                                             <SiWhatsapp className="w-4 h-4" />
-                                            Get 10% off
+                                            Join free
                                         </>
                                     )}
                                 </button>

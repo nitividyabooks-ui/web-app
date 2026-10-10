@@ -16,15 +16,15 @@ const FAQ_CATEGORIES = [
         faqs: [
             {
                 question: "What age group are your books suitable for?",
-                answer: "Our books are designed for babies and toddlers aged 0–5 years. Each book displays the recommended age range, but children slightly younger or older can enjoy them too! Our paperback books are designed with durable pages that can handle enthusiastic young readers."
+                answer: "Our books are designed for babies and toddlers aged 0–5 years. Each book displays the recommended age range, but children slightly younger or older can enjoy them too! Our Miko paperback books are intended for reading together with a parent."
             },
             {
-                question: "Are your books safe for babies who put everything in their mouths?",
-                answer: "Absolutely! All NitiVidya books are printed with non-toxic, lead-free inks on child-safe materials. They have rounded corners to prevent injuries and sturdy pages that can withstand rough handling."
+                question: "How should I use these books with my baby?",
+                answer: "Read with an adult, point at the pictures, and name what you see. These are books for supervised reading; keep them out of mouths and use age-appropriate teething products for chewing."
             },
             {
                 question: "What format are your books?",
-                answer: "Our books are high-quality paperbacks with durable pages designed to withstand the enthusiastic handling of young readers. They feature child-safe materials and are perfect for babies and toddlers aged 0-5 years."
+                answer: "The Miko series uses 24-page paperbacks. Other titles may use a different format; check each product page for its format, page count, and recommended age."
             },
             {
                 question: "Are your books bilingual?",
@@ -32,7 +32,7 @@ const FAQ_CATEGORIES = [
             },
             {
                 question: "What makes your books different from other children's books?",
-                answer: "Our books are specifically designed with early childhood development in mind. We focus on: (1) Age-appropriate themes and vocabulary, (2) High-contrast, vibrant illustrations for visual development, (3) Bilingual content for language exposure, (4) Durable, safe materials for hands-on exploration, and (5) Stories that reinforce positive values and cultural connections."
+                answer: "Our books are specifically designed with early childhood development in mind. We focus on: (1) Age-appropriate themes and vocabulary, (2) High-contrast, vibrant illustrations for visual development, (3) Bilingual content for language exposure, (4) Pictures and words for parent-led reading, and (5) Stories that reinforce positive values and cultural connections."
             },
         ]
     },

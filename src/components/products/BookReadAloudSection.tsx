@@ -1,31 +1,49 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Play, ArrowRight } from "lucide-react";
 import { SiYoutube } from "react-icons/si";
-import { trackVideoStart } from "@/lib/analytics";
+import { trackYouTubeClick, trackYouTubeSubscribeClick, trackYouTubeChannelClick } from "@/lib/analytics";
 
 const CHANNEL_URL = "https://www.youtube.com/channel/UCHuY7vX820c3N1T9iBOsn6g";
+
+const KNOWN_VIDEO_TITLES: Record<string, string> = {
+    DvLjtTpKcpI: "The Magic Button",
+    W67LcJEqiw0: "Broody the Kind Bear",
+    "7f4HVfY2rOU": "Minie's Big Heroes",
+    CamMWOppax0: "Ready, Set, Oops!",
+    hZuE4QOa8ho: "Miko's Park Day Adventure",
+};
+
+export function YouTubeLink({ href, location, subscribe = false, className, children }: {
+    href: string; location: string; subscribe?: boolean; className?: string; children: ReactNode;
+}) {
+    return <a href={href} target="_blank" rel="noopener noreferrer" className={className}
+        onClick={() => subscribe ? trackYouTubeSubscribeClick(location) : trackYouTubeChannelClick(location)}>{children}</a>;
+}
 
 interface Props {
     videoIds: string[];
     labels: string[];
     channelUrl?: string;
+    location?: string;
+    featured?: boolean;
 }
 
-export function BookReadAloudSection({ videoIds, labels, channelUrl = CHANNEL_URL }: Props) {
+export function BookReadAloudSection({ videoIds, labels, channelUrl = CHANNEL_URL, location = "read_aloud_section", featured = false }: Props) {
+    const displayLabels = videoIds.map((id, i) => KNOWN_VIDEO_TITLES[id] || labels[i] || `Story ${i + 1}`);
     const [playingId, setPlayingId] = useState<string | null>(null);
 
     if (!videoIds.length) return null;
 
     const handlePlay = (id: string, label: string) => {
         setPlayingId(id);
-        trackVideoStart(label, "read_aloud_section");
+        trackYouTubeClick(label, location);
     };
 
     return (
-        <section className="mt-16 md:mt-24">
-            <div className="text-center mb-8 md:mb-10">
+        <section className={featured ? "max-w-3xl mx-auto" : "mt-16 md:mt-24"}>
+            {!featured && <div className="text-center mb-8 md:mb-10">
                 <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-blush text-terracotta-deep text-sm font-bold mb-3">
                     <Play className="w-3.5 h-3.5 fill-current" />
                     Watch &amp; Listen
@@ -34,11 +52,11 @@ export function BookReadAloudSection({ videoIds, labels, channelUrl = CHANNEL_UR
                     Hear the Stories Read Aloud
                 </h2>
                 <p className="mt-2 text-ink-soft">
-                    All {videoIds.length} stories — free on YouTube
+                    Read aloud with your child — free on YouTube
                 </p>
-            </div>
+            </div>}
 
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+            <div className={featured ? "grid grid-cols-1" : "grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4"}>
                 {videoIds.map((id, i) => (
                     <div
                         key={id}
@@ -47,8 +65,8 @@ export function BookReadAloudSection({ videoIds, labels, channelUrl = CHANNEL_UR
                         {playingId === id ? (
                             <div className="aspect-video">
                                 <iframe
-                                    src={`https://www.youtube.com/embed/${id}?autoplay=1`}
-                                    title={labels[i] || `Story ${i + 1}`}
+                                    src={`https://www.youtube.com/embed/${id}?autoplay=1&enablejsapi=1`}
+                                    title={displayLabels[i]}
                                     className="w-full h-full"
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                     allowFullScreen
@@ -56,14 +74,14 @@ export function BookReadAloudSection({ videoIds, labels, channelUrl = CHANNEL_UR
                             </div>
                         ) : (
                             <button
-                                onClick={() => handlePlay(id, labels[i] || `Story ${i + 1}`)}
+                                onClick={() => handlePlay(id, displayLabels[i])}
                                 className="relative w-full aspect-video group bg-paper-deep"
-                                aria-label={`Play ${labels[i] || `Story ${i + 1}`}`}
+                                aria-label={`Play ${displayLabels[i]}`}
                             >
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     src={`https://img.youtube.com/vi/${id}/hqdefault.jpg`}
-                                    alt={labels[i] || `Story ${i + 1}`}
+                                    alt={displayLabels[i]}
                                     className="w-full h-full object-cover"
                                 />
                                 <div className="absolute inset-0 bg-black/20 group-hover:bg-black/35 transition-colors flex items-center justify-center">
@@ -75,7 +93,7 @@ export function BookReadAloudSection({ videoIds, labels, channelUrl = CHANNEL_UR
                         )}
                         <div className="px-3 py-2.5 bg-surface">
                             <p className="text-xs md:text-sm font-semibold text-ink text-center leading-tight">
-                                {labels[i] || `Story ${i + 1}`}
+                                {displayLabels[i]}
                             </p>
                         </div>
                     </div>
@@ -83,16 +101,16 @@ export function BookReadAloudSection({ videoIds, labels, channelUrl = CHANNEL_UR
             </div>
 
             <div className="text-center mt-6">
-                <a
-                    href={channelUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                <YouTubeLink
+                    href={`${channelUrl}${channelUrl.includes("?") ? "&" : "?"}sub_confirmation=1`}
+                    location={location}
+                    subscribe
                     className="inline-flex items-center gap-2 font-bold text-evergreen hover:underline"
                 >
                     <SiYoutube className="w-5 h-5 text-[#FF0000]" />
-                    See all stories on YouTube
+                    Subscribe on YouTube
                     <ArrowRight className="w-4 h-4" />
-                </a>
+                </YouTubeLink>
             </div>
         </section>
     );

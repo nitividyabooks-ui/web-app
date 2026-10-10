@@ -44,6 +44,7 @@ export function ConditionalComponents() {
     const { isCartOpen } = useCart();
     const [marketingReady, setMarketingReady] = useState(false);
     const isAdminRoute = pathname.startsWith("/admin");
+    const isCheckoutRoute = pathname.startsWith("/checkout") || pathname.startsWith("/order-success") || pathname.startsWith("/payment");
 
     useEffect(() => {
         if (isAdminRoute) {
@@ -86,8 +87,8 @@ export function ConditionalComponents() {
             {marketingReady && (
                 <>
                     <VisitorTracker />
-                    <LeadCaptureModal />
-                    <ExitIntentPopup />
+                    {!isCheckoutRoute && <LeadCaptureModal />}
+                    {!isCheckoutRoute && <ExitIntentPopup />}
                 </>
             )}
         </>

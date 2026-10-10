@@ -7,7 +7,8 @@ import { SiWhatsapp } from "react-icons/si";
 import { useEffect, useRef } from "react";
 import {
     formatRupeesFromPaise,
-    getSalePaiseFromMrpPaise,
+    getItemSalePaise,
+    MIKO_BUNDLE_PRODUCT_IDS,
     BUNDLE_5_DISCOUNT_PERCENT,
     BUNDLE_5_MIN_QTY,
     FREE_SHIPPING_THRESHOLD_PAISE,
@@ -47,7 +48,7 @@ export function CartDrawer() {
     const grandTotal = totalAmount + shippingFee;
 
     const totalQty = items.reduce((a, i) => a + i.quantity, 0);
-    const booksToBundle = BUNDLE_5_MIN_QTY - totalQty;
+    const booksToBundle = BUNDLE_5_MIN_QTY - MIKO_BUNDLE_PRODUCT_IDS.filter(id => items.some(item => item.productId === id)).length;
     const showBundleNudge = totalQty > 0 && booksToBundle > 0 && booksToBundle <= 3;
 
     const wasOpen = useRef(false);
@@ -70,13 +71,13 @@ export function CartDrawer() {
 
     const handleRemove = (item: CartItem) => {
         removeItem(item.productId);
-        trackRemoveFromCart(cartItemsToItems([item], discountPercent));
+        trackRemoveFromCart(cartItemsToItems([item], discountPercent, items));
     };
 
     const handleUpdateQuantity = (item: CartItem, newQty: number) => {
         const diff = newQty - item.quantity;
         updateQuantity(item.productId, newQty);
-        const oneUnit = cartItemsToItems([{ ...item, quantity: 1 }], discountPercent);
+        const oneUnit = cartItemsToItems([{ ...item, quantity: 1 }], discountPercent, items);
         if (diff > 0) trackAddToCart(oneUnit);
         else if (diff < 0) trackRemoveFromCart(oneUnit);
     };
@@ -92,9 +93,9 @@ export function CartDrawer() {
             items.map((i) => ({
                 title: i.title,
                 quantity: i.quantity,
-                price: getSalePaiseFromMrpPaise(i.price, discountPercent),
+                price: getItemSalePaise(i, items),
             })),
-            totalAmount
+            grandTotal
         );
         window.open(buildWhatsAppUrl(getWhatsAppNumber(), message), "_blank");
     };
@@ -164,9 +165,9 @@ export function CartDrawer() {
                     <div className="px-5 py-3 border-b border-hairline bg-paper-deep">
                         <p className="text-sm text-ink">
                             <strong>
-                                Add {booksToBundle} more {booksToBundle === 1 ? "book" : "books"}
+                                Add {booksToBundle} missing Miko {booksToBundle === 1 ? "title" : "titles"}
                             </strong>{" "}
-                            to unlock the complete-set price — {BUNDLE_5_DISCOUNT_PERCENT}% off everything.
+                            to unlock the complete-set price — {BUNDLE_5_DISCOUNT_PERCENT}% off the five Miko books.
                         </p>
                     </div>
                 )}
@@ -196,7 +197,7 @@ export function CartDrawer() {
                         </div>
                     ) : (
                         items.map((item) => {
-                            const salePrice = getSalePaiseFromMrpPaise(item.price, discountPercent);
+                            const salePrice = getItemSalePaise(item, items);
                             return (
                                 <div
                                     key={item.productId}
@@ -269,7 +270,7 @@ export function CartDrawer() {
                                 <div className="flex items-center justify-between text-sm font-semibold text-evergreen">
                                     <span className="flex items-center gap-1.5">
                                         <Tag className="w-3.5 h-3.5" />
-                                        Discount ({discountPercent}%)
+                                        Book savings
                                     </span>
                                     <span>-{formatRupeesFromPaise(savings)}</span>
                                 </div>

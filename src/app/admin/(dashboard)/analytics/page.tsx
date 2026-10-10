@@ -21,9 +21,9 @@ function StatCard({ label, value, sub }: { label: string; value: string | number
     );
 }
 
-function FunnelChart({ steps, title }: { steps: PurchaseFunnel["steps"] | LeadFunnel["steps"]; title: string }) {
+function FunnelChart({ steps, title, isOpen = false }: { steps: PurchaseFunnel["steps"] | LeadFunnel["steps"]; title: string; isOpen?: boolean }) {
     if (!steps.length) return null;
-    const max = steps[0].users;
+    const max = Math.max(...steps.map(step => step.users));
     return (
         <div className="bg-white rounded-xl border border-gray-200 p-5">
             <h3 className="font-semibold text-gray-900 mb-4">{title}</h3>
@@ -36,7 +36,7 @@ function FunnelChart({ steps, title }: { steps: PurchaseFunnel["steps"] | LeadFu
                                 <span className="text-gray-700">{step.name}</span>
                                 <span className="font-medium text-gray-900">
                                     {step.users.toLocaleString()}
-                                    {i > 0 && (
+                                    {i > 0 && !isOpen && (
                                         <span className="ml-2 text-red-500 text-xs">
                                             −{step.dropOffRate}%
                                         </span>
@@ -46,9 +46,9 @@ function FunnelChart({ steps, title }: { steps: PurchaseFunnel["steps"] | LeadFu
                             <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                                 <div
                                     className={`h-full rounded-full transition-all ${
-                                        step.dropOffRate > 70
+                                        (step.dropOffRate ?? 0) > 70
                                             ? "bg-red-400"
-                                            : step.dropOffRate > 40
+                                            : (step.dropOffRate ?? 0) > 40
                                             ? "bg-yellow-400"
                                             : "bg-green-400"
                                     }`}
@@ -60,10 +60,12 @@ function FunnelChart({ steps, title }: { steps: PurchaseFunnel["steps"] | LeadFu
                 })}
             </div>
             <p className="mt-4 text-sm text-gray-500">
-                Overall conversion:{" "}
-                <span className="font-semibold text-gray-900">
-                    {steps[steps.length - 1]?.completionRate ?? 0}%
-                </span>
+                {isOpen ? "Customers can enter at cart, checkout, or purchase. These counts include direct entries; they are not one conversion cohort." : <>
+                    Overall conversion:{" "}
+                    <span className="font-semibold text-gray-900">
+                        {steps[steps.length - 1]?.completionRate ?? 0}%
+                    </span>
+                </>}
             </p>
         </div>
     );
@@ -153,7 +155,7 @@ export default function AnalyticsPage() {
             <section>
                 <h2 className="text-lg font-semibold text-gray-700 mb-3">Conversion Funnels</h2>
                 <div className="grid md:grid-cols-2 gap-4">
-                    <FunnelChart steps={purchaseFunnel.steps} title="Purchase Funnel (30 days)" />
+                    <FunnelChart steps={purchaseFunnel.steps} title="Purchase Funnel (30 days)" isOpen={purchaseFunnel.isOpen} />
                     <FunnelChart steps={leadFunnel.steps} title="Lead Capture Funnel (30 days)" />
                 </div>
             </section>

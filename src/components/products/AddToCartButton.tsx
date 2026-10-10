@@ -4,7 +4,7 @@ import { useCart } from "@/context/CartContext";
 import { Product } from "@/lib/products";
 import { ShoppingBag } from "lucide-react";
 import { useState } from "react";
-import { productToItem, trackAddToCart } from "@/lib/analytics";
+import { cartItemsToItems, trackAddToCart } from "@/lib/analytics";
 import { getStorageUrl } from "@/lib/storage";
 
 interface AddToCartButtonProps {
@@ -13,21 +13,22 @@ interface AddToCartButtonProps {
 }
 
 export function AddToCartButton({ product, className = "" }: AddToCartButtonProps) {
-    const { addItem, setIsCartOpen, discountPercent } = useCart();
+    const { items, addItem, setIsCartOpen } = useCart();
     const [isAdding, setIsAdding] = useState(false);
 
     const handleAddToCart = () => {
         setIsAdding(true);
 
-        addItem({
-            productId: product.id,
-            title: product.title,
-            price: product.price,
-            quantity: 1,
+        const added = {
+            productId: product.id, title: product.title, price: product.price, format: product.format, quantity: 1,
             image: getStorageUrl(product.coverPath || product.images?.[0]?.path),
-        });
-
-        trackAddToCart([productToItem(product, { discountPercent })]);
+        };
+        const existing = items.find((item) => item.productId === product.id);
+        const prospectiveItems = existing
+            ? items.map((item) => item.productId === product.id ? { ...item, quantity: item.quantity + 1 } : item)
+            : [...items, added];
+        addItem(added);
+        trackAddToCart(cartItemsToItems([added], 0, prospectiveItems));
 
         setTimeout(() => {
             setIsAdding(false);

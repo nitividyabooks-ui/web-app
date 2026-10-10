@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect, Suspense } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { trackEvent } from "@/lib/gtm";
-import { trackFBPixel } from "@/lib/fbpixel";
 import { trackShare } from "@/lib/analytics";
 import { CheckCircle, Package, Phone, Share2 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
@@ -18,18 +16,21 @@ function SuccessContent() {
     const orderId = searchParams.get("order");
     const method = searchParams.get("method");
 
+    const [receipt, setReceipt] = useState<{ method: string; confirmed: boolean; whatsappUrl?: string } | null>(null);
     useEffect(() => {
-        if (orderId) {
-            trackEvent("checkout_complete", {
-                order_id: orderId,
-                method: method || "whatsapp",
-            });
-            trackFBPixel("Purchase", {
-                content_type: "product",
-                currency: "INR",
-            });
-        }
+        if (!orderId) return;
+        try {
+            const saved = sessionStorage.getItem(`nitividya-receipt:${orderId}`);
+            const parsed = saved ? JSON.parse(saved) : null;
+            if (parsed && parsed.method === method) {
+                // Hydrate the receipt from the tab in which checkout completed.
+                // eslint-disable-next-line react-hooks/set-state-in-effect
+                setReceipt(parsed);
+            }
+        } catch { /* A receipt may be unavailable in another browser or tab. */ }
     }, [orderId, method]);
+    const confirmed = receipt?.confirmed === true;
+    const whatsappUrl = receipt?.method === "whatsapp" && receipt.whatsappUrl?.startsWith("https://wa.me/") ? receipt.whatsappUrl : null;
 
     const handleShare = async () => {
         trackShare("order_success", orderId || "unknown");
@@ -60,12 +61,14 @@ function SuccessContent() {
                         <CheckCircle className="w-12 h-12 text-evergreen" />
                     </div>
                     <h1 className="font-heading text-2xl font-semibold text-ink mb-2">
-                        Order placed
+                        {confirmed ? "Payment successful" : whatsappUrl ? "Complete your WhatsApp order" : "Check your order"}
                     </h1>
                     <p className="text-ink-soft">
-                        {method === "whatsapp"
-                            ? "Your order has been sent via WhatsApp. Our team will confirm it shortly."
-                            : "Thank you — your order is confirmed and on its way to being packed."}
+                        {confirmed
+                            ? "Thank you — your payment was verified and your order is confirmed."
+                            : whatsappUrl
+                            ? "Your order request is saved. Open WhatsApp and send the message so our team can confirm availability and payment."
+                            : "Contact us with your order number to check its payment and delivery status."}
                     </p>
                     {orderId && (
                         <div className="mt-4 inline-flex items-center gap-2 bg-surface border border-evergreen/30 rounded-xl px-4 py-2">
@@ -76,6 +79,15 @@ function SuccessContent() {
                         </div>
                     )}
                 </div>
+
+                {whatsappUrl && (
+                    <div className="px-6 pt-6">
+                        <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="w-full flex items-center justify-center gap-2 bg-[#1FAF5E] text-white font-bold px-6 py-4 rounded-btn">
+                            <SiWhatsapp className="w-5 h-5" /> Open WhatsApp to send your order
+                        </a>
+                        <p className="mt-3 text-sm text-ink-soft">Keep this page open. You can use this link again if WhatsApp does not open. Your bag is saved until payment is confirmed.</p>
+                    </div>
+                )}
 
                 {/* Next steps */}
                 <div className="px-6 py-6 border-t border-hairline">
@@ -88,7 +100,7 @@ function SuccessContent() {
                             <div>
                                 <p className="font-semibold text-ink">WhatsApp confirmation</p>
                                 <p className="text-sm text-ink-soft">
-                                    You&apos;ll receive a confirmation message within 30 minutes
+                                    Our team will confirm payment and availability in your order conversation
                                 </p>
                             </div>
                         </div>
@@ -99,7 +111,7 @@ function SuccessContent() {
                             <div>
                                 <p className="font-semibold text-ink">Fast dispatch</p>
                                 <p className="text-sm text-ink-soft">
-                                    Your order will be shipped within 24–48 hours
+                                    We aim to dispatch within 24–48 hours after confirmation
                                 </p>
                             </div>
                         </div>

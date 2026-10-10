@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { trackGenerateLead, trackSignUp } from "@/lib/analytics";
 import { trackFBPixel } from "@/lib/fbpixel";
 import { CheckCircle, Loader2 } from "lucide-react";
@@ -33,7 +34,10 @@ export function NewsletterForm() {
             }
 
             setIsSuccess(true);
-            localStorage.setItem("nv_email_captured", "true");
+            try {
+                localStorage.setItem("nv_email_captured", "true");
+                localStorage.setItem("nv_printables_unlocked", "true");
+            } catch { /* Storage is optional. */ }
 
             trackGenerateLead("newsletter", "email");
             trackSignUp("newsletter");
@@ -47,9 +51,9 @@ export function NewsletterForm() {
 
     if (isSuccess) {
         return (
-            <div className="mt-6 flex items-center gap-2 text-marigold font-semibold">
-                <CheckCircle className="w-5 h-5" />
-                You&apos;re in. Welcome to Miko&apos;s Club.
+            <div className="mt-6 space-y-3 text-marigold font-semibold">
+                <p className="flex items-center gap-2"><CheckCircle className="w-5 h-5" /> You&apos;re in. Welcome to Miko&apos;s Club.</p>
+                <Link href="/free-printables" className="inline-block underline">Get your free printables now</Link>
             </div>
         );
     }

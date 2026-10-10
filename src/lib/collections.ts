@@ -36,10 +36,10 @@ export const COLLECTIONS: CollectionDef[] = [
         title: "Books for 1 Year Olds",
         metaTitle: "Best Books for 1 Year Olds in India",
         metaDescription:
-            "Sturdy, colourful first books for 1 year olds. Bilingual Hindi-English board books with animals, actions, and festivals — made in India for Indian homes.",
+            "Colourful picture books for parent-led reading with 1 year olds. Bilingual Hindi-English paperbacks with animals, actions, and festivals — made in India for Indian homes.",
         eyebrow: "Shop by age",
         intro: [
-            "At one, your child is not reading — they are looking, pointing, grabbing, and listening to your voice. The best books for 1 year olds work with that: one big, bright picture per page, a single word or two to name it, and pages that survive being chewed, thrown, and read forty times in a row.",
+            "At one, your child is not reading — they are looking, pointing, grabbing, and listening to your voice. The best books for 1 year olds work with that: one big, bright picture per page, a single word or two to name it, and simple pages you can explore together. Our Miko books are paperbacks for reading with a parent, rather than chewing or independent rough play.",
             "This is also the age when the sounds of language settle in. A one year old who hears both Hindi and English words for the same picture — haathi and elephant, diya and lamp — is building two sound maps at once, effortlessly. That window is wide open now and starts narrowing through the preschool years, which is why every Miko book pairs Hindi and English on the same page instead of treating Hindi as an afterthought.",
             "Start with familiar things. Animals your child sees in books and parks, everyday actions like clapping and waving, the festivals lighting up your home each season. Naming the familiar is how reading begins — long before stories with plots, a one year old wants to point at a picture and hear you say its name. The books below are built exactly for that stage.",
         ],
@@ -252,7 +252,7 @@ export const COLLECTIONS: CollectionDef[] = [
         title: "Baby Shower Gift Books",
         metaTitle: "Baby Shower Gift Books — Start Their First Library",
         metaDescription:
-            "Skip the third baby blanket. Gift books at the baby shower or godh bharai — bilingual Indian board books that start a child's library from day one.",
+            "Skip the third baby blanket. Gift books at the baby shower or godh bharai — bilingual Indian picture books that start a child's library from day one.",
         eyebrow: "Gifting",
         intro: [
             "The new parents will receive five blankets, a mountain of onesies in newborn size, and at least two diaper cakes. What almost nobody brings to a baby shower or godh bharai is the thing the child will use every single day for years: books.",

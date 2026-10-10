@@ -32,15 +32,15 @@ export default async function Home() {
 
             <TrustStrip />
 
-            <MikoShelf products={mikoSeriesProducts} />
-
             {mikoSeriesProducts.length > 0 && (
-                <section className="pb-14 lg:pb-20 bg-paper">
+                <section id="miko-set" className="pt-8 pb-14 lg:pb-20 bg-paper scroll-mt-24">
                     <div className="container mx-auto px-4 md:px-6">
                         <MikoBundles products={mikoSeriesProducts} location="home_bundle" />
                     </div>
                 </section>
             )}
+
+            <MikoShelf products={mikoSeriesProducts} />
 
             <BrandStory />
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, FlaskConical, CircleDot, Ruler } from "lucide-react";
+import { FileText, BookOpen, Languages, Users } from "lucide-react";
 
 interface QualityFeature {
     icon: React.ReactNode;
@@ -9,26 +9,10 @@ interface QualityFeature {
 }
 
 const qualityFeatures: QualityFeature[] = [
-    {
-        icon: <FileText className="w-5 h-5" />,
-        title: "Thick, sturdy pages",
-        description: "Built to survive daily adventures and lots of love"
-    },
-    {
-        icon: <FlaskConical className="w-5 h-5" />,
-        title: "Non-toxic, child-safe inks",
-        description: "Safe even for teething toddlers who explore with their mouths"
-    },
-    {
-        icon: <CircleDot className="w-5 h-5" />,
-        title: "Rounded corners",
-        description: "No sharp edges—gentle on little hands"
-    },
-    {
-        icon: <Ruler className="w-5 h-5" />,
-        title: "Perfect A4 size",
-        description: "Easy for small hands to hold and explore independently"
-    }
+    { icon: <BookOpen className="w-5 h-5" />, title: "Picture-led learning", description: "Explore animals, festivals, actions, and values together" },
+    { icon: <Languages className="w-5 h-5" />, title: "Hindi and English", description: "The Miko series introduces words in both languages" },
+    { icon: <Users className="w-5 h-5" />, title: "Read together", description: "Parent-led reading for babies, toddlers, and preschoolers" },
+    { icon: <FileText className="w-5 h-5" />, title: "Choose your format", description: "Check each book's format and page count above before ordering" },
 ];
 
 export function BookQualitySection() {
@@ -36,10 +20,10 @@ export function BookQualitySection() {
         <section className="py-12 md:py-16">
             <div className="text-center mb-8 md:mb-10">
                 <h2 className="font-heading text-2xl md:text-3xl font-bold text-ink">
-                    Made for Little Hands
+                    Made for Shared Story Time
                 </h2>
                 <p className="text-slate-500 mt-2 text-sm md:text-base">
-                    Every detail designed with your child&apos;s safety in mind
+                    Picture books for reading and learning together
                 </p>
             </div>
 

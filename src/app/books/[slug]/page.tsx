@@ -30,11 +30,11 @@ import { SiWhatsapp } from "react-icons/si";
 import { AmazonButton } from "@/components/products/AmazonButton";
 import Link from "next/link";
 import { getWhatsAppNumber } from "@/lib/whatsapp";
-import { SINGLE_BOOK_DISCOUNT_PERCENT, getSalePaiseFromMrpPaise, formatRupeesFromPaise } from "@/lib/pricing";
+import { getProductDiscountPercent, getSalePaiseFromMrpPaise, formatRupeesFromPaise } from "@/lib/pricing";
 import { ProductViewTracker } from "@/components/products/ProductViewTracker";
 import { ProductEmailCapture } from "@/components/products/ProductEmailCapture";
 import { bilingualLabelHindiEnglish, isBilingualHindiEnglish } from "@/lib/productFlags";
-import { PurchaseCard } from "@/components/products/PurchaseCard";
+import { PurchaseCard, WhatsAppLink } from "@/components/products/PurchaseCard";
 import { BookReadAloudSection } from "@/components/products/BookReadAloudSection";
 import { ProductCard } from "@/components/products/ProductCard";
 import { Badge } from "@/components/ui/Badge";
@@ -150,7 +150,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         : [];
     const relatedProducts = allProducts.filter((p) => p.id !== product.id).slice(0, 3);
     const mrpPaise = product.price;
-    const salePaise = getSalePaiseFromMrpPaise(mrpPaise, SINGLE_BOOK_DISCOUNT_PERCENT);
+    const discountPercent = getProductDiscountPercent(product);
+    const salePaise = getSalePaiseFromMrpPaise(mrpPaise, discountPercent);
     const isBilingual = isBilingualHindiEnglish(product);
     const valueProposition = getValueProposition(product.id);
     const parentBenefits = getParentBenefits(product.id);
@@ -280,7 +281,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                 product={product}
                                 mrpPaise={mrpPaise}
                                 salePaise={salePaise}
-                                discountPercent={SINGLE_BOOK_DISCOUNT_PERCENT}
+                                discountPercent={discountPercent}
                                 seriesProducts={isMikoSeries ? mikoSeriesProducts : []}
                                 seriesName="Miko Series"
                             />
@@ -386,20 +387,19 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                         <span className="font-heading text-lg font-semibold text-ink leading-tight">
                             {formatRupeesFromPaise(salePaise)}
                         </span>
-                        <s className="text-xs text-ink-soft/70">{formatRupeesFromPaise(mrpPaise)}</s>
+                        {discountPercent > 0 && <s className="text-xs text-ink-soft/70">{formatRupeesFromPaise(mrpPaise)}</s>}
                     </div>
                     <div className="flex-1">
                         <AddToCartButton product={product} />
                     </div>
-                    <a
+                    <WhatsAppLink
                         href={`https://wa.me/${getWhatsAppNumber()}?text=${encodeURIComponent(`Hi! I'm interested in ${product.title}`)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        location="pdp_mobile_sticky"
                         className="flex items-center justify-center h-13 w-13 flex-shrink-0 rounded-full border border-hairline-strong text-[#1FAF5E] hover:border-[#1FAF5E] transition-colors"
-                        aria-label="Order on WhatsApp"
+                        ariaLabel="Order on WhatsApp"
                     >
                         <SiWhatsapp className="w-5 h-5" />
-                    </a>
+                    </WhatsAppLink>
                 </div>
             </StickyBar>
         </div>

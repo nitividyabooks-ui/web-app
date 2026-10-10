@@ -7,7 +7,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
     title: "The Miko Reading Journey - NitiVidya",
     description:
-        "Follow Miko the elephant through 5 bilingual Hindi-English board books. The perfect reading order for Indian toddlers aged 0-5.",
+        "Follow Miko the elephant through 5 bilingual Hindi-English paperback picture books. The perfect reading order for Indian toddlers aged 0-5.",
 };
 
 export default async function MikoReadingJourneyPage() {

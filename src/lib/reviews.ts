@@ -1,4 +1,13 @@
 import { prisma } from "@/lib/prisma";
+import sampleFeedback from "@/lib/sample-feedback.json";
+
+// Match complete known seed signatures so genuine feedback from the same author survives.
+function isSampleReview(review: Pick<Review, "productId" | "authorName" | "title" | "content">): boolean {
+    return sampleFeedback.reviews.some((sample) =>
+        sample.productId === review.productId && sample.authorName === review.authorName &&
+        sample.title === review.title && sample.content === review.content
+    );
+}
 
 export interface Review {
     id: string;
@@ -23,22 +32,14 @@ export async function getReviewsByProductId(productId: string): Promise<Review[]
             createdAt: "desc",
         },
     });
-    return reviews;
+    return reviews.filter((review) => !isSampleReview(review));
 }
 
 export async function getReviewStats(productId: string): Promise<{
     averageRating: number;
     reviewCount: number;
 }> {
-    const reviews = await prisma.review.findMany({
-        where: {
-            productId,
-            isApproved: true,
-        },
-        select: {
-            rating: true,
-        },
-    });
+    const reviews = await getReviewsByProductId(productId);
 
     if (reviews.length === 0) {
         return { averageRating: 0, reviewCount: 0 };
@@ -59,12 +60,15 @@ export async function getAllReviewStats(): Promise<Map<string, { averageRating: 
         select: {
             productId: true,
             rating: true,
+            title: true,
+            content: true,
+            authorName: true,
         },
     });
 
     const statsMap = new Map<string, { sum: number; count: number }>();
     
-    for (const review of reviews) {
+    for (const review of reviews.filter((review) => !isSampleReview(review))) {
         const existing = statsMap.get(review.productId) || { sum: 0, count: 0 };
         statsMap.set(review.productId, {
             sum: existing.sum + review.rating,

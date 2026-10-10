@@ -5,7 +5,7 @@ import Razorpay from "razorpay";
 
 const initiateSchema = z.object({
     orderId: z.string().min(1, "Order ID is required"),
-    amount: z.number().positive("Amount must be positive"),
+
     customerPhone: z.string().min(10, "Valid phone number required"),
     customerName: z.string().min(1, "Customer name required"),
     customerEmail: z.string().email().optional(),
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const { orderId, amount, customerPhone, customerName, customerEmail } = parsed.data;
+        const { orderId } = parsed.data;
 
         // Validate environment variables
         const keyId = process.env.RAZORPAY_KEY_ID;
@@ -72,31 +72,44 @@ export async function POST(req: NextRequest) {
             key_secret: keySecret,
         });
 
-        // Create Razorpay order
+        // Reuse an unpaid provider order when a customer retries checkout.
         // Amount should be in paise (smallest currency unit)
-        const razorpayOrder = await razorpay.orders.create({
-            amount: amount, // Already in paise
+        let razorpayOrder = order.razorpayOrderId
+            ? await razorpay.orders.fetch(order.razorpayOrderId)
+            : await razorpay.orders.create({
+            amount: order.totalAmount, // The stored server-calculated total is authoritative
             currency: "INR",
             receipt: orderId,
             notes: {
                 orderId: orderId,
-                customerName: customerName,
-                customerPhone: customerPhone,
+                customerName: order.customerName,
+                customerPhone: order.customerPhone,
             },
         });
 
-        // Update order with Razorpay order ID
-        await prisma.order.update({
-            where: { id: orderId },
-            data: {
-                razorpayOrderId: razorpayOrder.id,
-                meta: {
-                    ...(typeof order.meta === 'object' && order.meta !== null ? order.meta : {}),
+        if (!order.razorpayOrderId) {
+            // A concurrent retry may create another provider order; bind only the first.
+            const result = await prisma.order.updateMany({
+                where: { id: orderId, status: "PENDING_PAYMENT", razorpayOrderId: null },
+                data: {
                     razorpayOrderId: razorpayOrder.id,
-                    paymentInitiatedAt: new Date().toISOString(),
+                    meta: {
+                        ...(typeof order.meta === "object" && order.meta !== null ? order.meta : {}),
+                        paymentInitiatedAt: new Date().toISOString(),
+                    },
                 },
-            },
-        });
+            });
+            if (result.count === 0) {
+                const boundOrder = await prisma.order.findUnique({ where: { id: orderId } });
+                if (boundOrder?.status !== "PENDING_PAYMENT" || !boundOrder.razorpayOrderId) {
+                    return NextResponse.json({ success: false, error: "Order state changed. Please check payment status." }, { status: 409 });
+                }
+                razorpayOrder = await razorpay.orders.fetch(boundOrder.razorpayOrderId);
+            }
+        }
+        if (Number(razorpayOrder.amount) !== order.totalAmount || razorpayOrder.currency !== "INR") {
+            return NextResponse.json({ success: false, error: "Payment order total does not match. Please contact support." }, { status: 409 });
+        }
 
         return NextResponse.json({
             success: true,
@@ -106,9 +119,9 @@ export async function POST(req: NextRequest) {
             currency: razorpayOrder.currency,
             orderId: orderId,
             prefill: {
-                name: customerName,
-                contact: customerPhone,
-                email: customerEmail || "",
+                name: order.customerName,
+                contact: order.customerPhone,
+                email: order.customerEmail || "",
             },
         });
 

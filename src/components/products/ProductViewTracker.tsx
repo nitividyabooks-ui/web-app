@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { productToItem, trackViewItem } from "@/lib/analytics";
 import { trackFBPixel } from "@/lib/fbpixel";
 import { Product } from "@/lib/products";
-import { getSalePaiseFromMrpPaise, SINGLE_BOOK_DISCOUNT_PERCENT } from "@/lib/pricing";
+import { getSalePaiseFromMrpPaise, getProductDiscountPercent } from "@/lib/pricing";
 
 export function ProductViewTracker({ product }: { product: Product }) {
     const trackedId = useRef<string | null>(null);
@@ -12,9 +12,10 @@ export function ProductViewTracker({ product }: { product: Product }) {
     useEffect(() => {
         if (trackedId.current === product.id) return;
         trackedId.current = product.id;
-        trackViewItem(productToItem(product, { discountPercent: SINGLE_BOOK_DISCOUNT_PERCENT }));
+        const discountPercent = getProductDiscountPercent(product);
+        trackViewItem(productToItem(product, { discountPercent }));
 
-        const salePaise = getSalePaiseFromMrpPaise(product.price, SINGLE_BOOK_DISCOUNT_PERCENT);
+        const salePaise = getSalePaiseFromMrpPaise(product.price, discountPercent);
         trackFBPixel("ViewContent", {
             content_name: product.title,
             content_ids: [product.id],

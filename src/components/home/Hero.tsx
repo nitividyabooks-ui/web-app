@@ -1,8 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Star } from "lucide-react";
+import { ArrowRight, Truck } from "lucide-react";
 import type { StorefrontProduct } from "@/lib/storefront-products";
 import { getStorageUrl } from "@/lib/storage";
+import { getCartPricing, hasCompleteMikoSet, formatRupeesFromPaise, MIKO_BUNDLE_PRODUCT_IDS } from "@/lib/pricing";
 
 interface HeroProps {
     products: StorefrontProduct[];
@@ -14,7 +15,11 @@ interface HeroProps {
  * lifestyle hero photo asset is available.
  */
 export function Hero({ products }: HeroProps) {
-    const covers = products.slice(0, 5);
+    const bundleProducts = products.filter((p) => MIKO_BUNDLE_PRODUCT_IDS.some((id) => id === p.id));
+    const covers = (bundleProducts.length > 0 ? bundleProducts : products).slice(0, 5);
+    const setItems = bundleProducts.map((p) => ({ productId: p.id, price: p.price, format: p.format, quantity: 1 }));
+    const hasSet = hasCompleteMikoSet(setItems);
+    const setPrice = getCartPricing(setItems);
     const rotations = ["-rotate-6", "-rotate-2", "rotate-0", "rotate-2", "rotate-6"];
 
     return (
@@ -33,12 +38,13 @@ export function Hero({ products }: HeroProps) {
                             Bilingual Hindi-English picture books that bring Indian festivals,
                             values, and first words to your child&apos;s bookshelf.
                         </p>
+                        {hasSet && <p className="mt-5 text-base font-bold text-evergreen">5 bilingual books · {formatRupeesFromPaise(setPrice.subtotal)} · Free shipping</p>}
                         <div className="mt-8 flex flex-col sm:flex-row gap-3">
                             <Link
-                                href="/books"
+                                href={hasSet ? "#miko-set" : "/books"}
                                 className="inline-flex items-center justify-center gap-2 h-13 px-8 rounded-btn bg-evergreen text-white font-semibold text-base hover:bg-evergreen-deep transition-colors btn-bounce"
                             >
-                                Shop the Miko Series
+                                {hasSet ? "Shop the complete Miko set" : "Shop the Miko Series"}
                                 <ArrowRight className="w-4 h-4" />
                             </Link>
                             <Link
@@ -49,12 +55,8 @@ export function Hero({ products }: HeroProps) {
                             </Link>
                         </div>
                         <div className="mt-7 flex items-center gap-2 text-sm text-ink-soft">
-                            <span className="flex text-marigold">
-                                {[...Array(5)].map((_, i) => (
-                                    <Star key={i} className="w-4 h-4 fill-current" />
-                                ))}
-                            </span>
-                            <span>Loved by parents — ships free across India over ₹499</span>
+                            <Truck className="w-4 h-4 text-evergreen" />
+                            <span>Ships across India · Free shipping on orders ₹499 and above</span>
                         </div>
                     </div>
 

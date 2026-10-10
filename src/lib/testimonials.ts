@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import sampleFeedback from "@/lib/sample-feedback.json";
 
 export interface Testimonial {
     id: string;
@@ -20,6 +21,10 @@ export async function getActiveTestimonials(): Promise<Testimonial[]> {
             sortOrder: "asc",
         },
     });
-    return testimonials;
+    return testimonials.filter((testimonial) => !sampleFeedback.testimonials.some((sample) =>
+        sample.authorName === testimonial.authorName &&
+        sample.authorTitle === testimonial.authorTitle &&
+        sample.content === testimonial.content
+    ));
 }
 

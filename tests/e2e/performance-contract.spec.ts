@@ -45,7 +45,7 @@ test.describe("Storefront performance contracts", () => {
         );
         const configIndex = googleTagManager.indexOf("gtag('config'");
         const readyIndex = googleTagManager.indexOf("window.nvGaReady = true");
-        const drainIndex = googleTagManager.indexOf("window.nvGaQueue");
+        const drainIndex = googleTagManager.indexOf("var pendingCommands");
 
         expect(gtm).toContain("nvGaQueue?: unknown[][]");
         expect(gtm).toContain("nvGaReady?: boolean");
@@ -65,7 +65,7 @@ test.describe("Storefront performance contracts", () => {
         const fbPixel = readProjectFile("src/lib/fbpixel.ts");
         const facebookPixel = readProjectFile("src/components/analytics/FacebookPixel.tsx");
         const initIndex = facebookPixel.indexOf("fbq('init'");
-        const drainIndex = facebookPixel.indexOf("window.nvFbQueue");
+        const drainIndex = facebookPixel.indexOf("var pendingCommands");
 
         expect(fbPixel).toContain("nvFbQueue?: unknown[][]");
         expect(fbPixel).toContain("MAX_PENDING_ANALYTICS_COMMANDS = 100");

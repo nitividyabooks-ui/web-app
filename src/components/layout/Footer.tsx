@@ -5,7 +5,7 @@ import { Instagram, Youtube, ShieldCheck, Truck, RotateCcw } from "lucide-react"
 import { SiWhatsapp } from "react-icons/si";
 import { usePathname } from "next/navigation";
 import { NewsletterForm } from "@/components/home/NewsletterForm";
-import { trackWhatsAppClick } from "@/lib/analytics";
+import { trackWhatsAppClick, trackYouTubeChannelClick } from "@/lib/analytics";
 
 const INSTAGRAM_URL = process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://instagram.com/nitividyabooks";
 const YOUTUBE_URL = "https://www.youtube.com/channel/UCHuY7vX820c3N1T9iBOsn6g";
@@ -117,6 +117,7 @@ export function Footer() {
                             </a>
                             <a
                                 href={YOUTUBE_URL}
+                                onClick={() => trackYouTubeChannelClick("footer")}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 aria-label="NitiVidya on YouTube"

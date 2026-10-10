@@ -3,6 +3,7 @@
 import { CheckCircle, Package, ArrowRight, ShoppingBag } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 
 interface PaymentSuccessModalProps {
     isOpen: boolean;
@@ -57,7 +58,7 @@ export function PaymentSuccessModal({ isOpen, orderId, customerPhone }: PaymentS
         }
     }, [isOpen]);
 
-    if (!isOpen) return null;
+    if (!isOpen || typeof document === "undefined") return null;
 
     const handleViewOrder = () => {
         router.push(`/checkout/success?order=${orderId}&method=razorpay`);
@@ -67,8 +68,8 @@ export function PaymentSuccessModal({ isOpen, orderId, customerPhone }: PaymentS
         router.push("/books");
     };
 
-    return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    return createPortal(
+        <div role="dialog" aria-modal="true" aria-labelledby="payment-success-heading" className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             {/* Backdrop */}
             <div className="absolute inset-0 bg-ink/60 backdrop-blur-md animate-in fade-in duration-300" />
 
@@ -80,7 +81,7 @@ export function PaymentSuccessModal({ isOpen, orderId, customerPhone }: PaymentS
                         <CheckCircle className="w-12 h-12 text-evergreen" />
                     </div>
 
-                    <h2 className="font-heading text-3xl font-semibold text-ink mb-3 tracking-tight">
+                    <h2 id="payment-success-heading" className="font-heading text-3xl font-semibold text-ink mb-3 tracking-tight">
                         Payment successful
                     </h2>
                     <p className="text-ink-soft mb-6 leading-relaxed">
@@ -137,6 +138,7 @@ export function PaymentSuccessModal({ isOpen, orderId, customerPhone }: PaymentS
                     </p>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

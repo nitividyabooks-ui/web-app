@@ -4,7 +4,7 @@ import { PrintablesLibrary } from "./PrintablesLibrary";
 export const metadata: Metadata = {
     title: "Free Printable Worksheets for Toddlers",
     description:
-        "Download free Miko-branded printable worksheets for kids aged 0-5: coloring pages, English alphabet tracing, Hindi varnamala, numbers, and festival activities.",
+        "Download free Miko-branded printable worksheets for young children: coloring pages, tracing activities, numbers, shapes, matching games, and festival activities.",
     alternates: { canonical: "/free-printables" },
 };
 
@@ -20,8 +20,8 @@ export default function FreePrintablesPage() {
                         Free printable worksheets for little learners
                     </h1>
                     <p className="mt-4 text-lg text-ink-soft max-w-xl mx-auto">
-                        Coloring pages, alphabet tracing, Hindi varnamala, numbers, and festival
-                        activities — designed for ages 0–5, ready to print at home.
+                        Coloring pages, tracing, numbers, shapes, matching games, and festival
+                        activities — choose the suggested age and enjoy them with an adult.
                     </p>
                 </div>
             </header>

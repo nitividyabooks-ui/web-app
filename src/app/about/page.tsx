@@ -27,8 +27,8 @@ const VALUES = [
     icon: Shield,
     iconClass: "text-evergreen",
     bgClass: "bg-evergreen-soft",
-    title: "Safety First",
-    description: "Non-toxic materials and rounded corners — safe for babies who love to explore.",
+    title: "Shared Reading",
+    description: "Picture books for parent-led reading with babies, toddlers, and preschoolers.",
   },
   {
     icon: Sparkles,
@@ -53,7 +53,7 @@ const TRUST_POINTS = [
   {
     title: "Durable & Safe",
     description:
-      "High-quality pages, rounded corners, and non-toxic inks mean our books can withstand enthusiastic toddler handling.",
+      "Our Miko paperback books invite children to explore pictures, words, and ideas with a parent.",
   },
   {
     title: "Beautiful Illustrations",
@@ -125,8 +125,8 @@ export default function AboutPage() {
                   <p>
                     When I couldn&apos;t find what I was looking for, I decided to create it myself.
                     Drawing on research in early childhood development and bilingual education, I
-                    designed the Miko Series — books that are as safe and durable as they are
-                    educational and beautiful.
+                    designed the Miko Series — picture books that bring Hindi and English
+                    learning into everyday family reading.
                   </p>
                   <p className="font-semibold text-ink">
                     Every book we create is mom-tested, research-backed, and made with love.

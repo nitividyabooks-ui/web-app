@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { SiYoutube } from "react-icons/si";
-import { BookReadAloudSection } from "@/components/products/BookReadAloudSection";
+import { BookReadAloudSection, YouTubeLink } from "@/components/products/BookReadAloudSection";
 
 export const metadata: Metadata = {
     title: "Free Story Time | NitiVidya Books",
@@ -12,10 +12,9 @@ export const metadata: Metadata = {
 
 const CHANNEL_URL = "https://www.youtube.com/channel/UCHuY7vX820c3N1T9iBOsn6g";
 const SUBSCRIBE_URL = "https://www.youtube.com/channel/UCHuY7vX820c3N1T9iBOsn6g?sub_confirmation=1";
-const FEATURED_VIDEO_EMBED = "https://www.youtube.com/embed/DvLjtTpKcpI";
 
 const NITITALES_VIDEOS = {
-    ids: ["DvLjtTpKcpI", "W67LcJEqiw0", "7f4HVfY2rOU", "CamMWOppax0", "hZuE4QOa8ho"],
+    ids: ["hZuE4QOa8ho", "CamMWOppax0", "W67LcJEqiw0", "7f4HVfY2rOU", "DvLjtTpKcpI"],
     labels: [
         "Miko's Park Day — Resilience",
         "Ready, Set, Oops! — Responsibility",
@@ -39,26 +38,25 @@ export default function StoryTimePage() {
                         Free Story Time
                     </h1>
                     <p className="mt-4 text-paper/75 text-lg max-w-xl mx-auto">
-                        5 stories. 5 big values. All free — read aloud for your little one.
+                        English read-aloud stories for ages 2–5. Watch together, then try an offline activity.
                     </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">
-                        <a
+                        <YouTubeLink
                             href={SUBSCRIBE_URL}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            location="story_time_hero"
+                            subscribe
                             className="inline-flex items-center gap-2 bg-[#FF0000] text-white font-bold h-12 px-6 rounded-btn hover:bg-[#D90000] transition-colors shadow-lg"
                         >
                             <SiYoutube className="w-5 h-5" />
                             Subscribe on YouTube
-                        </a>
-                        <a
+                        </YouTubeLink>
+                        <YouTubeLink
                             href={CHANNEL_URL}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            location="story_time_hero"
                             className="inline-flex items-center gap-2 border border-paper/30 text-paper font-semibold h-12 px-6 rounded-btn hover:bg-paper/10 transition-colors"
                         >
                             Visit Channel
-                        </a>
+                        </YouTubeLink>
                     </div>
                 </div>
             </section>
@@ -72,15 +70,7 @@ export default function StoryTimePage() {
                     <p className="text-center text-ink-soft mb-6">
                         Miko&apos;s Park Day Adventure — a story about resilience
                     </p>
-                    <div className="max-w-3xl mx-auto rounded-card overflow-hidden shadow-lifted aspect-video">
-                        <iframe
-                            src={FEATURED_VIDEO_EMBED}
-                            title="Miko's Park Day Adventure — Nititales"
-                            className="w-full h-full"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                        />
-                    </div>
+                    <BookReadAloudSection videoIds={["hZuE4QOa8ho"]} labels={["Miko's Park Day Adventure"]} location="story_time_featured" featured />
                 </div>
             </section>
 
@@ -98,6 +88,7 @@ export default function StoryTimePage() {
                     <BookReadAloudSection
                         videoIds={NITITALES_VIDEOS.ids}
                         labels={NITITALES_VIDEOS.labels}
+                        location="story_time_library"
                     />
                 </div>
             </section>
@@ -122,6 +113,7 @@ export default function StoryTimePage() {
                             Shop Nititales
                             <ArrowRight className="w-5 h-5" />
                         </Link>
+                        <p className="mt-5"><Link href="/free-printables" className="font-semibold text-evergreen underline">Continue with free print-at-home activities</Link></p>
                     </div>
                 </div>
             </section>

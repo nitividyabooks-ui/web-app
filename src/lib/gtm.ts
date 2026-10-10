@@ -15,6 +15,11 @@ declare global {
     }
 }
 
+export function isInternalAnalyticsRoute(pathname: string): boolean {
+    const path = pathname.split(/[?#]/, 1)[0];
+    return /^\/(admin|api|internal)(?:\/|$)/.test(path);
+}
+
 /**
  * Get the current visitor ID for analytics
  */
@@ -37,7 +42,9 @@ function sendDirectGaCommand(command: unknown[]) {
 }
 
 export const pageview = (url: string) => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || isInternalAnalyticsRoute(window.location.pathname)) return;
+
+    if (isInternalAnalyticsRoute(url)) return;
 
     const userId = getAnalyticsUserId();
 
@@ -58,7 +65,7 @@ export const pageview = (url: string) => {
 };
 
 export const trackEvent = (eventName: string, params: Record<string, unknown> = {}) => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || isInternalAnalyticsRoute(window.location.pathname)) return;
 
     const userId = getAnalyticsUserId();
     const enhancedParams = {

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { isInternalAnalyticsRoute } from "@/lib/gtm";
 import { getVisitorId } from "@/lib/visitor-id";
 
 const VISITOR_NOTIFICATION_KEY = "nv_visitor_notification_sent";
@@ -10,6 +11,7 @@ export function VisitorTracker() {
     const pathname = usePathname();
 
     useEffect(() => {
+        if (isInternalAnalyticsRoute(pathname || "/")) return;
         try {
             if (sessionStorage.getItem(VISITOR_NOTIFICATION_KEY)) return;
 

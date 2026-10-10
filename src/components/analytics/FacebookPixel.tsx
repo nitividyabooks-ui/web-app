@@ -4,17 +4,20 @@ import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { FB_PIXEL_ID, trackFBPixel } from "@/lib/fbpixel";
 import Script from "next/script";
+import { isInternalAnalyticsRoute } from "@/lib/gtm";
 
 export default function FacebookPixel() {
     const pathname = usePathname();
 
     useEffect(() => {
-        if (pathname) {
-            trackFBPixel("PageView");
+        if (isInternalAnalyticsRoute(pathname || "/")) {
+            window.nvFbQueue = [];
+            return;
         }
+        if (pathname) trackFBPixel("PageView");
     }, [pathname]);
 
-    if (!FB_PIXEL_ID) return null;
+    if (isInternalAnalyticsRoute(pathname || "/") || !FB_PIXEL_ID) return null;
 
     return (
         <>
@@ -32,7 +35,7 @@ export default function FacebookPixel() {
                         s.parentNode.insertBefore(t,s)}(window, document,'script',
                         'https://connect.facebook.net/en_US/fbevents.js');
                         fbq('init', '${FB_PIXEL_ID}');
-                        var pendingCommands = window.nvFbQueue || [];
+                        var pendingCommands = ['admin', 'api', 'internal'].indexOf(window.location.pathname.split('/')[1]) !== -1 ? [] : window.nvFbQueue || [];
                         window.nvFbQueue = [];
                         pendingCommands.forEach(function(command) {
                             fbq.apply(null, command);

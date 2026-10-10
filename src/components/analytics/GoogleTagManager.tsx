@@ -2,17 +2,21 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { GTM_ID, GA_ID, pageview } from "@/lib/gtm";
+import { GTM_ID, GA_ID, pageview, isInternalAnalyticsRoute } from "@/lib/gtm";
 import Script from "next/script";
 
 export default function GoogleTagManager() {
     const pathname = usePathname();
 
     useEffect(() => {
-        if (pathname) {
-            pageview(pathname);
+        if (isInternalAnalyticsRoute(pathname || "/")) {
+            window.nvGaQueue = [];
+            return;
         }
+        if (pathname) pageview(pathname);
     }, [pathname]);
+
+    if (isInternalAnalyticsRoute(pathname || "/")) return null;
 
     // No tracking IDs configured
     if (!GTM_ID && !GA_ID) return null;
@@ -67,7 +71,7 @@ export default function GoogleTagManager() {
                                 });
                                 window.gtag = gtag;
                                 window.nvGaReady = true;
-                                var pendingCommands = window.nvGaQueue || [];
+                                var pendingCommands = ['admin', 'api', 'internal'].indexOf(window.location.pathname.split('/')[1]) !== -1 ? [] : window.nvGaQueue || [];
                                 window.nvGaQueue = [];
                                 pendingCommands.forEach(function(command) {
                                     gtag.apply(null, command);

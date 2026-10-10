@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
-import { getDiscountPercentForQuantity, getSalePaiseFromMrpPaise } from "@/lib/pricing";
+import { getCartPricing } from "@/lib/pricing";
 import { getVisitorId } from "@/lib/visitor-id";
 import { trackFBPixel } from "@/lib/fbpixel";
 import { getStorageUrl } from "@/lib/storage";
@@ -32,6 +32,8 @@ interface CartContextType {
     discountPercent: number;
     totalMrpAmount: number;
     totalAmount: number;
+    shippingAmount: number;
+    payableAmount: number;
     isCartOpen: boolean;
     setIsCartOpen: (isOpen: boolean) => void;
     isHydrated: boolean;
@@ -163,17 +165,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         );
     };
 
-    const clearCart = () => {
+    const clearCart = useCallback(() => {
         setItems([]);
-    };
+    }, []);
 
     const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
-    const discountPercent = getDiscountPercentForQuantity(totalItems);
-    const totalMrpAmount = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    const totalAmount = items.reduce(
-        (acc, item) => acc + getSalePaiseFromMrpPaise(item.price, discountPercent) * item.quantity,
-        0
-    );
+    const pricing = getCartPricing(items);
+    const discountPercent = pricing.discountPercent;
+    const totalMrpAmount = pricing.totalMrp;
+    const totalAmount = pricing.subtotal;
+    const shippingAmount = pricing.shipping;
+    const payableAmount = pricing.total;
 
     return (
         <CartContext.Provider
@@ -187,6 +189,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 discountPercent,
                 totalMrpAmount,
                 totalAmount,
+                shippingAmount,
+                payableAmount,
                 isCartOpen,
                 setIsCartOpen,
                 isHydrated,

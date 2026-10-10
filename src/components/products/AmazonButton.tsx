@@ -1,7 +1,7 @@
 "use client";
 
 import { SiAmazon } from "react-icons/si";
-import { trackEvent } from "@/lib/gtm";
+import { trackAmazonClick } from "@/lib/analytics";
 
 interface AmazonButtonProps {
     amazonUrl: string;
@@ -35,13 +35,9 @@ export function AmazonButton({
     className,
 }: AmazonButtonProps) {
     const handleClick = () => {
-        trackEvent("amazon_click", {
-            item_id: productId,
-            item_name: productName,
-            value: productPrice / 100,
-            currency: "INR",
-            location,
-            amazon_url: amazonUrl,
+        trackAmazonClick(location, productId, {
+            item_name: productName, value: productPrice / 100, currency: "INR",
+            location, amazon_url: amazonUrl,
         });
     };
 

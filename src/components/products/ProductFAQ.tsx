@@ -15,12 +15,12 @@ const FAQS = [
         answer: "Our books are designed for babies and toddlers aged 0–5 years, with simple illustrations and age-appropriate themes. Each book shows the recommended age, but it's fine for younger or older kids to enjoy them too!"
     },
     {
-        question: "Are these books safe for babies?",
-        answer: "Absolutely! All NitiVidya paperback books are printed with non-toxic, lead-free inks on child-safe materials. They have rounded corners and sturdy pages—safe even for teething toddlers."
+        question: "How should I read these books with a baby?",
+        answer: "Read together with an adult, point at the pictures, and name what you see. Miko books are paperbacks for supervised reading; keep them out of mouths and use age-appropriate teething products for chewing."
     },
     {
         question: "What format are your books?",
-        answer: "Our books are high-quality paperbacks with durable pages designed for young readers. They feature child-safe materials and are perfect for babies and toddlers aged 0-5 years."
+        answer: "The Miko series uses 24-page paperback picture books. Other titles may use a different format; check the format and page count on each product page before ordering."
     },
     {
         question: "Is this book bilingual (Hindi + English)?",

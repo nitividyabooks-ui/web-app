@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useState, Suspense, useCallback, useRef } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useCart } from "@/context/CartContext";
+import { trackPurchase, trackPaymentFailure, type AnalyticsItem } from "@/lib/analytics";
+import { getCartPricing } from "@/lib/pricing";
+import { trackFBPixel } from "@/lib/fbpixel";
 import { trackEvent } from "@/lib/gtm";
 import { buildQuickCartMessage, buildWhatsAppUrl, getWhatsAppNumber } from "@/lib/whatsapp";
 import {
@@ -26,12 +29,15 @@ interface StatusData {
     orderId?: string;
     message: string;
     paymentId?: string;
+    subtotal?: number;
+    shippingAmount?: number;
+    totalAmount?: number;
+    items?: Array<{ productId: string; title: string; price: number; quantity: number }>;
 }
 
 function PaymentStatusContent() {
     const searchParams = useSearchParams();
-    const router = useRouter();
-    const { items, totalAmount, clearCart } = useCart();
+    const { items, clearCart } = useCart();
 
     const [status, setStatus] = useState<PaymentState>("loading");
     const [statusData, setStatusData] = useState<StatusData | null>(null);
@@ -66,13 +72,18 @@ function PaymentStatusContent() {
                 // Track success and clear cart
                 if (!hasTrackedRef.current) {
                     hasTrackedRef.current = true;
-                    trackEvent("purchase", {
-                        transaction_id: data.paymentId || razorpayOrderId,
-                        currency: "INR",
-                        value: totalAmount / 100,
-                        payment_type: "Razorpay",
-                        order_id: orderId,
-                    });
+                    if (data.orderId && data.paymentId && data.items && typeof data.subtotal === "number" && typeof data.shippingAmount === "number") {
+                        const receiptItems: AnalyticsItem[] = data.items.map(item => ({
+                            item_id: item.productId, item_name: item.title,
+                            item_category: "Books", price: item.price / 100, quantity: item.quantity,
+                        }));
+                        if (trackPurchase(receiptItems, data.subtotal / 100, data.orderId, "Razorpay", data.shippingAmount / 100)) {
+                            trackFBPixel("Purchase", { currency: "INR", value: data.subtotal / 100 });
+                        }
+                    }
+                    try {
+                        if (data.orderId) sessionStorage.setItem(`nitividya-receipt:${data.orderId}`, JSON.stringify({ method: "razorpay", confirmed: true }));
+                    } catch { /* Payment confirmation remains usable when browser storage is unavailable. */ }
                     clearCart();
                 }
             } else if (data.state === "PENDING") {
@@ -82,13 +93,7 @@ function PaymentStatusContent() {
 
                 if (!hasTrackedRef.current) {
                     hasTrackedRef.current = true;
-                    trackEvent("payment_failed", {
-                        currency: "INR",
-                        value: totalAmount / 100,
-                        payment_type: "Razorpay",
-                        error: data.state,
-                        order_id: orderId,
-                    });
+                    trackPaymentFailure((data.totalAmount ?? 0) / 100, data.orderId || orderId || razorpayOrderId || "", data.state);
                 }
             }
         } catch (error) {
@@ -101,7 +106,7 @@ function PaymentStatusContent() {
                 message: "Could not verify payment. Please check your bank statement or contact support.",
             });
         }
-    }, [razorpayOrderId, orderId, totalAmount, clearCart]);
+    }, [razorpayOrderId, orderId, clearCart]);
 
     // Initial check with delay
     useEffect(() => {
@@ -137,10 +142,11 @@ function PaymentStatusContent() {
             razorpay_order_id: razorpayOrderId,
         });
 
+        const pricing = getCartPricing(items);
         const message = items.length > 0
             ? buildQuickCartMessage(
-                items.map((i) => ({ title: i.title, quantity: i.quantity, price: i.price })),
-                totalAmount
+                pricing.items.map(item => ({ title: item.title, quantity: item.quantity, price: item.salePrice })),
+                pricing.total
             )
             : `Hi, I had an issue with my payment (Order: ${orderId || razorpayOrderId}). Please help me complete my order.`;
 
@@ -197,11 +203,11 @@ function PaymentStatusContent() {
                             <p className="text-ink-soft">
                                 {statusData?.message || "Your order has been confirmed."}
                             </p>
-                            {orderId && (
+                            {(statusData?.orderId || orderId) && (
                                 <div className="mt-4 inline-flex items-center gap-2 bg-evergreen-soft/60 border border-evergreen/30 rounded-xl px-4 py-2">
                                     <Package className="w-4 h-4 text-evergreen" />
                                     <span className="text-sm font-medium text-evergreen-deep">
-                                        Order #{orderId.slice(-6).toUpperCase()}
+                                        Order #{(statusData?.orderId || orderId || "").slice(-6).toUpperCase()}
                                     </span>
                                 </div>
                             )}
@@ -236,7 +242,7 @@ function PaymentStatusContent() {
                             </Link>
                             <p className="text-center text-sm text-ink-soft">
                                 <ShieldCheck className="w-4 h-4 inline mr-1 text-evergreen" />
-                                You'll receive order updates on WhatsApp
+                                You&apos;ll receive order updates on WhatsApp
                             </p>
                         </>
                     )}
@@ -269,7 +275,7 @@ function PaymentStatusContent() {
                     {(status === "loading" || status === "pending") && (
                         <div className="text-center">
                             <p className="text-sm text-ink-soft mb-4">
-                                Don't close this page. We'll redirect you automatically.
+                                Keep this page open while we verify your payment.
                             </p>
                             <button
                                 onClick={handleWhatsAppFallback}

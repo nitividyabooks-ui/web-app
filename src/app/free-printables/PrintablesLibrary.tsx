@@ -6,6 +6,7 @@ import { PhoneInput } from "@/components/ui/PhoneInput";
 import { getVisitorId } from "@/lib/visitor-id";
 import { trackGenerateLead, trackFileDownload } from "@/lib/analytics";
 import { trackFBPixel } from "@/lib/fbpixel";
+import { YouTubeLink } from "@/components/products/BookReadAloudSection";
 
 const UNLOCKED_KEY = "nv_printables_unlocked";
 
@@ -156,9 +157,14 @@ export function PrintablesLibrary() {
                 })}
             </div>
 
+            {unlocked && <div className="text-center rounded-card bg-evergreen-soft p-6">
+                <p className="font-semibold text-ink">Your worksheets are ready. Enjoy an activity together!</p>
+                <p className="mt-2 text-sm text-ink-soft">For English read-aloud stories, you can also visit our YouTube channel.</p>
+                <YouTubeLink href="https://www.youtube.com/channel/UCHuY7vX820c3N1T9iBOsn6g?sub_confirmation=1" location="printables_unlocked" subscribe className="inline-flex mt-3 text-evergreen font-bold underline">Subscribe on YouTube — optional</YouTubeLink>
+            </div>}
+
             <p className="text-center text-sm text-ink-soft">
-                All worksheets are A4, print-at-home PDFs. New sheets added every month for
-                Miko&apos;s Club members.
+                All worksheets are A4, print-at-home PDFs. Read and play together with an adult.
             </p>
         </div>
     );

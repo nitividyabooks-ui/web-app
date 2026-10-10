@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     default: "NitiVidya Books - Indian Story Books for Kids Ages 0-5",
     template: "%s | NitiVidya Books",
   },
-  description: "Indian cultural books for toddlers. Bilingual Hindi-English board books featuring Miko the elephant — safe, durable, and educational.",
+  description: "Indian cultural picture books for young children. Explore Miko paperback books in Hindi and English for parent-led reading about animals, festivals, and first words.",
 };
 
 export default function RootLayout({
