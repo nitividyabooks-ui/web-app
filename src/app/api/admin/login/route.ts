@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
+import { COMMUNICATION_COOKIE, COMMUNICATION_SESSION_SECONDS, createCommunicationSession } from "@/lib/admin-communication-session";
 
 const loginSchema = z.object({
     email: z.string().email(),
@@ -51,6 +52,19 @@ export async function POST(request: Request) {
             maxAge: 60 * 60 * 24 * 60, // 60 days
             path: "/",
         });
+
+        const communicationSession = createCommunicationSession(admin.id);
+        if (communicationSession) {
+            cookieStore.set(COMMUNICATION_COOKIE, communicationSession, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "strict",
+                maxAge: COMMUNICATION_SESSION_SECONDS,
+                path: "/",
+            });
+        } else {
+            cookieStore.delete(COMMUNICATION_COOKIE);
+        }
 
         return NextResponse.json({ success: true });
     } catch (error) {

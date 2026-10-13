@@ -76,6 +76,7 @@ export default function CheckoutPage() {
             const userResult = await identifyUser({
                 mobile: data.phone,
                 name: data.name,
+                email: data.email || undefined,
                 source: "checkout",
                 addresses: [{
                     name: data.name,
@@ -128,6 +129,7 @@ export default function CheckoutPage() {
                     customer: {
                         name: deliveryData.name,
                         phone: deliveryData.phone,
+                        email: deliveryData.email,
                         address: deliveryData.address,
                         pincode: deliveryData.pincode,
                         city: deliveryData.city,
@@ -297,6 +299,7 @@ export default function CheckoutPage() {
                     customer: {
                         name: deliveryData.name,
                         phone: deliveryData.phone,
+                        email: deliveryData.email,
                         address: deliveryData.address,
                         pincode: deliveryData.pincode,
                         city: deliveryData.city,

@@ -25,12 +25,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             <Link href="/" target="_blank">
                                 <Button variant="outline" size="sm">View Site</Button>
                             </Link>
-                            <Link href="/admin/login">
+                            <form action="/api/admin/logout" method="post">
                                 <Button variant="secondary" size="sm" className="inline-flex items-center gap-1.5">
                                     <LogOut className="h-3.5 w-3.5" />
                                     <span className="hidden sm:inline">Logout</span>
                                 </Button>
-                            </Link>
+                            </form>
                         </div>
                     </div>
                 </header>

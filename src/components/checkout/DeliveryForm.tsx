@@ -9,6 +9,7 @@ import { trackGenerateLead } from "@/lib/analytics";
 export interface DeliveryFormData {
     name: string;
     phone: string;
+    email: string;
     pincode: string;
     city: string;
     state: string;
@@ -34,6 +35,7 @@ export function DeliveryForm({ initialData, onSubmit, isLoading }: DeliveryFormP
     const [formData, setFormData] = useState<DeliveryFormData>({
         name: initialData?.name || "",
         phone: initialData?.phone || "",
+        email: initialData?.email || "",
         pincode: initialData?.pincode || "",
         city: initialData?.city || "",
         state: initialData?.state || "",
@@ -47,6 +49,7 @@ export function DeliveryForm({ initialData, onSubmit, isLoading }: DeliveryFormP
 
     const nameRef = useRef<HTMLInputElement>(null);
     const phoneRef = useRef<HTMLInputElement>(null);
+    const emailRef = useRef<HTMLInputElement>(null);
     const pincodeRef = useRef<HTMLInputElement>(null);
     const addressRef = useRef<HTMLTextAreaElement>(null);
 
@@ -105,6 +108,9 @@ export function DeliveryForm({ initialData, onSubmit, isLoading }: DeliveryFormP
             case "pincode":
                 if (!value) return "Pincode is required";
                 if (!/^\d{6}$/.test(value)) return "Enter a valid 6-digit pincode";
+                break;
+            case "email":
+                if (value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) return "Enter a valid email address";
                 break;
             case "address":
                 if (!value.trim()) return "Address is required";
@@ -179,13 +185,14 @@ export function DeliveryForm({ initialData, onSubmit, isLoading }: DeliveryFormP
             const firstError = Object.keys(newErrors)[0] as keyof DeliveryFormData;
             if (firstError === "name") nameRef.current?.focus();
             else if (firstError === "phone") phoneRef.current?.focus();
+            else if (firstError === "email") emailRef.current?.focus();
             else if (firstError === "pincode") pincodeRef.current?.focus();
             else if (firstError === "address") addressRef.current?.focus();
             return;
         }
 
         capturePhoneLead(formData.phone);
-        onSubmit(formData);
+        onSubmit({ ...formData, email: formData.email.trim() });
     };
 
     return (
@@ -241,6 +248,28 @@ export function DeliveryForm({ initialData, onSubmit, isLoading }: DeliveryFormP
                         className={inputClass(errors.name)}
                     />
                     {errors.name && <p className="mt-1.5 text-sm text-terracotta-deep">{errors.name}</p>}
+                </div>
+
+                <div>
+                    <label htmlFor="email" className="block text-sm font-semibold text-ink mb-1.5">
+                        Email (optional)
+                    </label>
+                    <input
+                        ref={emailRef}
+                        id="email"
+                        type="email"
+                        autoComplete="email"
+                        placeholder="For order updates by email"
+                        value={formData.email}
+                        maxLength={320}
+                        onChange={(e) => handleChange("email", e.target.value)}
+                        onBlur={() => handleBlur("email")}
+                        className={inputClass(errors.email)}
+                        aria-describedby="checkout-email-help"
+                        aria-invalid={!!errors.email}
+                    />
+                    {errors.email && <p className="mt-1.5 text-sm text-terracotta-deep">{errors.email}</p>}
+                    <p id="checkout-email-help" className="mt-1 text-xs text-ink-soft">Use email for order updates if WhatsApp is unavailable.</p>
                 </div>
 
                 {/* Pincode */}

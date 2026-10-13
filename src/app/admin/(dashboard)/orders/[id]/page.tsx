@@ -5,7 +5,10 @@ import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+import { COMMUNICATION_COOKIE, verifyCommunicationSession } from "@/lib/admin-communication-session";
+import { CustomerCommunicationPanel } from "@/components/admin/CustomerCommunicationPanel";
+import type { CommunicationChannel, CommunicationStatus } from "@/lib/customer-communication";
 import {
     formatAdminDateTime,
     formatPaise,
@@ -46,6 +49,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
         where: { id },
         include: { 
             items: true,
+            communications: { orderBy: { createdAt: "desc" } },
             user: {
                 select: {
                     id: true,
@@ -74,12 +78,14 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
     const fullAddress = addressParts.length > 0 ? addressParts.join(", ") : "—";
 
     // Parse meta JSON safely
-    let metaData: any = null;
+    let metaData: unknown = null;
     try {
         metaData = order.meta ? (typeof order.meta === "string" ? JSON.parse(order.meta) : order.meta) : null;
     } catch (e) {
         console.error("Failed to parse order meta:", e);
     }
+    const cookieStore = await cookies();
+    const sessionReady = !!verifyCommunicationSession(cookieStore.get(COMMUNICATION_COOKIE)?.value);
 
     return (
         <div className="space-y-8">
@@ -139,7 +145,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                         />
                         <AdminDetailRow 
                             label="Email" 
-                            value={order.customerEmail || "—"} 
+                            value={order.customerEmail || order.user?.email || "—"}
                         />
                         <AdminDetailRow 
                             label="Address" 
@@ -227,7 +233,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                     </dl>
 
                     {/* Meta Data (collapsible) */}
-                    {metaData && (
+                    {!!metaData && (
                         <details className="mt-6">
                             <summary className="cursor-pointer text-sm font-medium text-slate-700 hover:text-slate-900">
                                 Technical Details (JSON)
@@ -239,6 +245,13 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                     )}
                 </div>
             </div>
+
+            <CustomerCommunicationPanel
+                order={{ id: order.id, customerName: order.customerName, customerPhone: order.customerPhone, customerEmail: order.customerEmail || order.user?.email || null, status: order.status }}
+                initialHistory={order.communications.map(entry => ({ id: entry.id, requestKey: entry.requestKey, channel: entry.channel as CommunicationChannel, recipient: entry.recipient, subject: entry.subject, message: entry.message, status: entry.status as CommunicationStatus, createdAt: entry.createdAt.toISOString(), providerMessageId: entry.providerMessageId }))}
+                emailConfigured={!!process.env.RESEND_API_KEY}
+                sessionReady={sessionReady}
+            />
 
             {/* Status Update Actions */}
             {allowedTransitions.length > 0 && (

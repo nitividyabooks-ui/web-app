@@ -38,3 +38,11 @@ Files: src/components/admin/CustomerCommunicationPanel.tsx, src/app/admin/(dashb
 4. Add optional checkout email validation and pass email through both order paths.
 5. Run desktop/mobile UI checks, remove the temporary fixture, run targeted ESLint, TypeScript, regression tests and production build.
 6. Review the diff; commit only this feature on the isolated branch. Report local completion and required production setup without pushing or sending real communications.
+
+### Validation and deployment notes
+
+Validated with 13 mocked communication/session tests, 23 existing commerce/cart regressions, 12 desktop/mobile UI checks, targeted ESLint, TypeScript, Prisma schema validation and generated SQL comparison. The UI suite creates and removes its own local admin fixture when COMMUNICATION_PREVIEW=1; run a separate local dev server with a dummy DATABASE_URL, then `COMMUNICATION_PREVIEW=1 BASE_URL=http://localhost:3011 npx playwright test tests/e2e/customer-communication-ui.spec.ts`.
+
+Production compilation and type checking pass. The full build stops during existing product/blog static page data collection because the isolated checkout has no test database. Docker could not fetch PostgreSQL because its credential helper blocked; that attempt was cancelled and no container was started. No production database, customer provider or NimbusPost configuration was used or changed during validation.
+
+Before deployment, apply the OrderCommunication migration using the project's database migration process, configure a random ADMIN_SESSION_SECRET of at least 32 characters, confirm RESEND_API_KEY and the verified ALERT_EMAIL sender, and sign in again. The new order-page query depends on the table, so apply the migration before serving the updated app. The signed communication cookie lasts 24 hours; the logout button now clears both dashboard and communication cookies.

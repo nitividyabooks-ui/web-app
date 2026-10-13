@@ -42,6 +42,7 @@ model Order {
   razorpayOrderId String?    // Razorpay order ID (order_xxxxx)
   paymentMethod String?      // RAZORPAY, WHATSAPP, COD
   items         OrderItem[]
+  communications OrderCommunication[]
   meta          Json?
 
   @@index([paymentId])
@@ -49,6 +50,26 @@ model Order {
   @@index([customerPhone])
   @@index([userId])
   @@index([status])
+}
+
+model OrderCommunication {
+  id                String   @id @default(cuid())
+  requestKey        String   @unique
+  orderId           String
+  order             Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  adminId           String
+  channel           String
+  recipient         String
+  subject           String?
+  message           String
+  status            String
+  emailFrom         String?
+  emailReplyTo      String?
+  providerMessageId String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([orderId, createdAt])
 }
 
 model OrderItem {
