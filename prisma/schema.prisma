@@ -44,6 +44,7 @@ model Order {
   items         OrderItem[]
   communications OrderCommunication[]
   meta          Json?
+  nimbusPostSync NimbusPostOrderSync?
 
   @@index([paymentId])
   @@index([razorpayOrderId])
@@ -70,6 +71,45 @@ model OrderCommunication {
   updatedAt         DateTime @updatedAt
 
   @@index([orderId, createdAt])
+}
+
+model NimbusPostOrderSync {
+  id                  String                    @id @default(cuid())
+  orderId             String                    @unique
+  order               Order                     @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  merchantOrderNumber String                    @unique
+  status              NimbusPostOrderSyncStatus @default(PENDING)
+  paymentType         NimbusPostPaymentType
+  providerOrderId     String?                   @unique
+  payloadSnapshot     Json?
+  payloadHash         String?
+  attemptCount        Int                       @default(0)
+  nextAttemptAt       DateTime                  @default(now())
+  leaseToken          String?
+  leaseExpiresAt      DateTime?
+  lastAttemptAt       DateTime?
+  dispatchStartedAt   DateTime?
+  syncedAt            DateTime?
+  lastErrorCode       String?
+  lastErrorSafe       String?
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
+
+  @@index([status, nextAttemptAt])
+}
+
+enum NimbusPostOrderSyncStatus {
+  PENDING
+  PROCESSING
+  RETRY
+  SYNCED
+  REVIEW
+  SKIPPED
+}
+
+enum NimbusPostPaymentType {
+  PREPAID
+  COD
 }
 
 model OrderItem {

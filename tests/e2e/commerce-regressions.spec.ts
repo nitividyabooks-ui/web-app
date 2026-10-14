@@ -21,7 +21,15 @@ function loadRoute(path: string, overrides: Record<string, unknown>) {
     const exports: Record<string, (...args: unknown[]) => Promise<Response>> = {};
     runInNewContext(compiled, {
         exports, Buffer, process: { env: { RAZORPAY_KEY_ID: 'test_key', RAZORPAY_KEY_SECRET: 'test_secret' } }, console,
-        require: (name: string) => name in overrides ? overrides[name] : requireModule(name),
+        require: (name: string) => {
+            if (name in overrides) return overrides[name];
+            if (name === '@/lib/order-confirmation') return { confirmOrderAndEnqueue: async (orderId: string, evidence: { paymentId: string; razorpayOrderId: string }) => {
+                const { prisma } = overrides['@/lib/prisma'] as { prisma: { order: { updateMany: (args: unknown) => Promise<{ count: number }> } } };
+                const result = await prisma.order.updateMany({ where: { id: orderId, status: 'PENDING_PAYMENT', razorpayOrderId: evidence.razorpayOrderId }, data: { status: 'CONFIRMED', paymentId: evidence.paymentId } });
+                return { won: result.count === 1, confirmed: result.count === 1 };
+            } };
+            return requireModule(name);
+        },
     });
     return exports;
 }
@@ -126,7 +134,7 @@ test('a confirmed legacy order without payment evidence is not reported paid', a
     expect(await response.json()).toMatchObject({ success: false, state: 'PENDING' });
 });
 
-for (const override of [{ amount: 100 }, { order_id: 'wrong-rzp' }, { currency: 'USD' }]) {
+for (const override of [{ amount: 100 }, { order_id: 'wrong-rzp' }, { currency: 'USD' }, { id: 'different-payment' }]) {
     test(`captured payment with mismatched details is rejected: ${JSON.stringify(override)}`, async () => {
         let mutations = 0;
         class Provider { payments = { fetch: async () => ({ id: 'payment', order_id: 'stored-rzp', status: 'captured', amount: 22300, currency: 'INR', ...override }) }; }
@@ -167,4 +175,16 @@ test('concurrent payment initiation cannot replace the first provider order bind
     const payloads = await Promise.all(results.map(result => result.json()));
     expect(payloads.map(data => data.razorpayOrderId)).toEqual(['provider-1', 'provider-1']);
     expect(order.razorpayOrderId).toBe('provider-1');
+});
+
+
+test('payment verification rejects malformed hexadecimal signatures even when their decoded prefix matches', async () => {
+    let providerReads = 0;
+    class Provider { payments = { fetch: async () => { providerReads++; return { id: 'payment', order_id: 'stored-rzp', status: 'captured', amount: 22300, currency: 'INR' }; } }; }
+    const route = loadRoute('src/app/api/payment/verify/route.ts', {
+        '@/lib/prisma': { prisma: { order: { findUnique: async () => ({ id: 'internal', status: 'PENDING_PAYMENT', razorpayOrderId: 'stored-rzp', totalAmount: 22300 }), updateMany: async () => ({ count: 1 }) } } }, razorpay: Provider,
+    });
+    const signature = crypto.createHmac('sha256', 'test_secret').update('stored-rzp|payment').digest('hex');
+    expect((await route.POST(request({ orderId: 'internal', razorpay_order_id: 'stored-rzp', razorpay_payment_id: 'payment', razorpay_signature: signature + 'invalid' }))).status).toBe(400);
+    expect(providerReads).toBe(0);
 });

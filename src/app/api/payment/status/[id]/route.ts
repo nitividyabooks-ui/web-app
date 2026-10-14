@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import Razorpay from "razorpay";
-import { notifyPaymentSuccess } from "@/lib/whatsapp-notifications";
-import { emailPaymentSuccess } from "@/lib/email-notifications";
+import { confirmOrderAndEnqueue } from "@/lib/order-confirmation";
 
 /**
  * Check Razorpay payment status
@@ -74,7 +73,7 @@ export async function GET(
         };
 
         // If order is already confirmed or failed, return current status
-        if (["CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED"].includes(order.status) && order.paymentId) {
+        if (["CONFIRMED", "SHIPPED", "FULFILLED"].includes(order.status) && order.paymentId) {
             return NextResponse.json({
                 success: true,
                 ...receipt,
@@ -86,18 +85,8 @@ export async function GET(
             });
         }
 
-        if (order.status === "PAYMENT_FAILED") {
-            return NextResponse.json({
-                success: false,
-                state: "FAILED",
-                orderStatus: "PAYMENT_FAILED",
-                orderId: order.id,
-                message: "Payment was not completed.",
-            });
-        }
-
         // For pending payments, check with Razorpay
-        if (order.razorpayOrderId && order.status === "PENDING_PAYMENT") {
+        if (order.razorpayOrderId && ["PENDING_PAYMENT", "PAYMENT_FAILED"].includes(order.status)) {
             const razorpay = new Razorpay({
                 key_id: keyId,
                 key_secret: keySecret,
@@ -118,24 +107,11 @@ export async function GET(
                     );
 
                     if (!successfulPayment) return NextResponse.json({ success: false, state: "PENDING", orderId: order.id, message: "Payment is being verified." });
-                    const updated = await prisma.order.updateMany({
-                        where: { id: order.id, status: "PENDING_PAYMENT", razorpayOrderId: order.razorpayOrderId },
-                        data: {
-                            status: "CONFIRMED",
-                            paymentId: successfulPayment?.id || null,
-                            meta: {
-                                ...(typeof order.meta === 'object' && order.meta !== null ? order.meta : {}),
-                                razorpayStatus: razorpayOrder.status,
-                                razorpayPaymentId: successfulPayment?.id,
-                                paymentCompletedAt: new Date().toISOString(),
-                            },
-                        },
+                    const confirmation = await confirmOrderAndEnqueue(order.id, {
+                        kind: "RAZORPAY_CAPTURED", paymentId: successfulPayment.id, razorpayOrderId: successfulPayment.order_id,
+                        amount: Number(successfulPayment.amount), currency: successfulPayment.currency, status: "captured",
                     });
-
-                    if (updated.count === 0) return NextResponse.json({ success: false, state: "PENDING", orderId: order.id, message: "Checking order status..." });
-                    const notification = { orderId: order.id, customerName: order.customerName, amount: order.totalAmount / 100, paymentMethod: "Razorpay", paymentId: successfulPayment.id };
-                    notifyPaymentSuccess(notification).catch(console.error);
-                    emailPaymentSuccess(notification).catch(console.error);
+                    if (!confirmation.confirmed) return NextResponse.json({ success: false, state: "PENDING", orderId: order.id, message: "Checking order status..." });
                     return NextResponse.json({
                         success: true,
                         ...receipt,
@@ -184,9 +160,9 @@ export async function GET(
                     message: "Waiting for payment...",
                 });
 
-            } catch (razorpayError) {
-                console.error("Razorpay API error:", razorpayError);
-                // Fall through to return current DB status
+            } catch {
+                console.error("Payment status recovery failed");
+                return NextResponse.json({ success: false, state: "PENDING", error: "Payment verification is temporarily unavailable. Please retry." }, { status: 503 });
             }
         }
 
@@ -198,7 +174,7 @@ export async function GET(
 
         const latest = latestOrder || order;
         const currentStatus = latest.status;
-        const isPaid = ["CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED"].includes(currentStatus) && Boolean(latest.paymentId);
+        const isPaid = ["CONFIRMED", "SHIPPED", "FULFILLED"].includes(currentStatus) && Boolean(latest.paymentId);
 
         return NextResponse.json({
             success: isPaid,
@@ -215,8 +191,8 @@ export async function GET(
             paymentId: latestOrder?.paymentId || order.paymentId,
         });
 
-    } catch (error) {
-        console.error("Payment status check error:", error);
+    } catch {
+        console.error("Payment status check failed");
         return NextResponse.json(
             { success: false, error: "Failed to check payment status" },
             { status: 500 }

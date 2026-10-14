@@ -11,6 +11,7 @@ export const PAGE_SIZE = 25;
 export function formatAdminDate(date: Date | string): string {
     const d = typeof date === "string" ? new Date(date) : date;
     return d.toLocaleDateString("en-IN", {
+        timeZone: "Asia/Kolkata",
         day: "numeric",
         month: "short",
         year: "numeric",
@@ -20,6 +21,7 @@ export function formatAdminDate(date: Date | string): string {
 export function formatAdminDateTime(date: Date | string): string {
     const d = typeof date === "string" ? new Date(date) : date;
     return d.toLocaleDateString("en-IN", {
+        timeZone: "Asia/Kolkata",
         day: "numeric",
         month: "short",
         year: "numeric",

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { Resend } from "resend";
 import { prisma } from "@/lib/prisma";
-import { COMMUNICATION_COOKIE, verifyCommunicationSession } from "@/lib/admin-communication-session";
+import { getCurrentAdmin, assertSameOrigin } from "@/lib/admin-session";
 import { hasUnfilledMessageDetails, normalizeWhatsAppPhone } from "@/lib/customer-communication";
 
 export const runtime = "nodejs";
@@ -17,15 +17,13 @@ const schema = z.object({
 const pendingError = "Email outcome is uncertain. Retry this same update, or check Resend before composing another email.";
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-    if (request.headers.get("origin") !== request.nextUrl.origin) {
+    try { assertSameOrigin(request); } catch {
         return NextResponse.json({ error: "Only same-origin requests are allowed" }, { status: 403 });
     }
-    const adminId = verifyCommunicationSession(request.cookies.get(COMMUNICATION_COOKIE)?.value);
-    if (!adminId) return NextResponse.json({ error: "Sign in again to send customer updates. An admin session secret must be configured." }, { status: 401 });
-
     try {
-        const admin = await prisma.adminUser.findUnique({ where: { id: adminId }, select: { id: true } });
-        if (!admin) return NextResponse.json({ error: "Admin session is no longer valid" }, { status: 401 });
+        const admin = await getCurrentAdmin(request);
+        if (!admin) return NextResponse.json({ error: "Sign in again to send customer updates." }, { status: 401 });
+        const adminId = admin.id;
         const parsed = schema.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return NextResponse.json({ error: "Check the recipient, subject and message. Replace any [add ...] details before sending." }, { status: 400 });
         const input = parsed.data;

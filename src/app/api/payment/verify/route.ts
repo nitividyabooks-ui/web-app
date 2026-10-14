@@ -3,8 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import crypto from "crypto";
 import Razorpay from "razorpay";
-import { notifyPaymentSuccess } from "@/lib/whatsapp-notifications";
-import { emailPaymentSuccess } from "@/lib/email-notifications";
+import { confirmOrderAndEnqueue } from "@/lib/order-confirmation";
 
 const verifySchema = z.object({
     razorpay_order_id: z.string().min(1, "Razorpay order ID is required"),
@@ -60,61 +59,32 @@ export async function POST(req: NextRequest) {
             .update(`${order.razorpayOrderId}|${razorpay_payment_id}`).digest("hex");
         const receivedSignature = Buffer.from(razorpay_signature, "hex");
         const expectedBytes = Buffer.from(expectedSignature, "hex");
-        if (receivedSignature.length !== expectedBytes.length || !crypto.timingSafeEqual(receivedSignature, expectedBytes)) {
+        if (!/^[a-fA-F0-9]{64}$/.test(razorpay_signature) || receivedSignature.length !== expectedBytes.length || !crypto.timingSafeEqual(receivedSignature, expectedBytes)) {
             // An unauthenticated callback must never change an order's status.
             return NextResponse.json({ success: false, error: "Payment verification failed" }, { status: 400 });
         }
-        if (order.status === "CONFIRMED" && order.paymentId === razorpay_payment_id) {
+        if (["CONFIRMED", "SHIPPED", "FULFILLED"].includes(order.status) && order.paymentId === razorpay_payment_id) {
             return NextResponse.json({ success: true, orderId, paymentId: order.paymentId });
         }
-        if (order.status !== "PENDING_PAYMENT") {
+        if (!["PENDING_PAYMENT", "PAYMENT_FAILED"].includes(order.status)) {
             return NextResponse.json({ success: false, error: "Order is not pending payment" }, { status: 409 });
         }
         const keyId = process.env.RAZORPAY_KEY_ID;
         if (!keyId) return NextResponse.json({ success: false, error: "Payment service not configured" }, { status: 500 });
         const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
         const payment = await razorpay.payments.fetch(razorpay_payment_id);
-        if (payment.order_id !== order.razorpayOrderId || Number(payment.amount) !== order.totalAmount || payment.currency !== "INR") {
+        if (payment.id !== razorpay_payment_id || payment.order_id !== order.razorpayOrderId || Number(payment.amount) !== order.totalAmount || payment.currency !== "INR") {
             return NextResponse.json({ success: false, error: "Payment details do not match this order" }, { status: 400 });
         }
         if (payment.status !== "captured") {
             return NextResponse.json({ success: false, error: "Payment is still being processed", state: "PENDING" }, { status: 409 });
         }
-        // Update only pending orders so concurrent retries cannot overwrite final state.
-        const result = await prisma.order.updateMany({
-            where: { id: orderId, status: "PENDING_PAYMENT", razorpayOrderId: order.razorpayOrderId },
-            data: {
-                status: "CONFIRMED", paymentId: razorpay_payment_id,
-                meta: {
-                    ...(typeof order.meta === "object" && order.meta !== null ? order.meta : {}),
-                    razorpayPaymentId: razorpay_payment_id,
-                    paymentVerifiedAt: new Date().toISOString(),
-                },
-            },
+        const result = await confirmOrderAndEnqueue(orderId, {
+            kind: "RAZORPAY_CAPTURED", paymentId: razorpay_payment_id, razorpayOrderId: payment.order_id,
+            amount: Number(payment.amount), currency: payment.currency, status: "captured",
         });
-        if (result.count === 0) {
-            const latest = await prisma.order.findUnique({ where: { id: orderId } });
-            if (latest?.status !== "CONFIRMED" || latest.paymentId !== razorpay_payment_id) {
-                return NextResponse.json({ success: false, error: "Order state changed. Please check payment status." }, { status: 409 });
-            }
-        }
-        if (result.count > 0) {
-            // Send notifications for payment success
-            notifyPaymentSuccess({
-                orderId,
-                customerName: order.customerName,
-                amount: order.totalAmount / 100,
-                paymentMethod: "Razorpay",
-                paymentId: razorpay_payment_id,
-            }).catch(console.error);
-
-            emailPaymentSuccess({
-                orderId,
-                customerName: order.customerName,
-                amount: order.totalAmount / 100,
-                paymentMethod: "Razorpay",
-                paymentId: razorpay_payment_id,
-            }).catch(console.error);
+        if (!result.confirmed) {
+            return NextResponse.json({ success: false, error: "Order state changed. Please check payment status." }, { status: 409 });
         }
 
         return NextResponse.json({
@@ -124,8 +94,8 @@ export async function POST(req: NextRequest) {
             paymentId: razorpay_payment_id,
         });
 
-    } catch (error) {
-        console.error("Payment verification error:", error);
+    } catch {
+        console.error("Payment verification failed");
         return NextResponse.json(
             { success: false, error: "Payment verification failed. Please contact support." },
             { status: 500 }

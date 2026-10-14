@@ -18,8 +18,11 @@ function load<T>(path: string, overrides: Record<string, unknown> = {}, variable
         require: (name: string) => name in overrides ? overrides[name] : requireModule(name) });
     return exports as T;
 }
-type Session = { COMMUNICATION_COOKIE: string; createCommunicationSession: (id: string, now?: number) => string | null; verifyCommunicationSession: (value?: string, now?: number) => string | null };
-const session = () => load<Session>('src/lib/admin-communication-session.ts');
+type Session = { createAdminSession: (id: string, now?: number) => string; getCurrentAdmin: (request: Request) => Promise<{ id: string } | null>; assertSameOrigin: (request: Request) => void };
+const session = (authenticated = true, variables = env) => load<Session>('src/lib/admin-session.ts', {
+    '@/lib/prisma': { prisma: { adminUser: { findUnique: async () => authenticated ? { id: 'admin-1' } : null } } },
+    'next/headers': {}, 'next/navigation': {},
+}, variables);
 type Messages = { normalizeWhatsAppPhone: (phone: string) => string | null; buildCustomerMessage: (template: string, order: { id: string; customerName: string }) => { subject: string; message: string } };
 
 test('WhatsApp normalization handles a local number beginning with 91 without dropping the country code', () => {
@@ -38,16 +41,15 @@ test('shipping templates require actual tracking details and use the customer/or
     expect(result.message).toContain('[add tracking link]');
 });
 
-test('communication sessions reject raw admin IDs, forged signatures and expired cookies', () => {
+test('communications reuse the dashboard signed session and reject raw, forged, expired and unconfigured tokens', async () => {
     const auth = session();
-    const value = auth.createCommunicationSession('admin-1', 1000000)!;
-    expect(auth.verifyCommunicationSession(value, 1000001)).toBe('admin-1');
-    expect(auth.verifyCommunicationSession('admin-1', 1000001)).toBeNull();
-    expect(auth.verifyCommunicationSession(`${value.slice(0, -1)}!`, 1000001)).toBeNull();
-    expect(auth.verifyCommunicationSession(value, 1000000 + 24 * 60 * 60 * 1000)).toBeNull();
-    const disabled = load<Session>('src/lib/admin-communication-session.ts', {}, {});
-    expect(disabled.createCommunicationSession('admin-1')).toBeNull();
-    expect(disabled.verifyCommunicationSession(value)).toBeNull();
+    const valid = auth.createAdminSession('admin-1');
+    const request = (cookie: string) => new Request('http://localhost', { headers: { cookie: `admin_session=${cookie}` } });
+    expect(await auth.getCurrentAdmin(request(valid))).toEqual({ id: 'admin-1' });
+    expect(await auth.getCurrentAdmin(request('admin-1'))).toBeNull();
+    expect(await auth.getCurrentAdmin(request(`${valid.slice(0, -1)}!`))).toBeNull();
+    expect(await auth.getCurrentAdmin(request(auth.createAdminSession('admin-1', 0)))).toBeNull();
+    expect(await session(true, {} as typeof env).getCurrentAdmin(request(valid))).toBeNull();
 });
 
 type Entry = { id: string; requestKey: string; orderId: string; adminId: string; channel: string; recipient: string; subject: string | null; message: string; status: string; createdAt: Date; providerMessageId?: string };
@@ -56,7 +58,7 @@ function harness(options: { authenticated?: boolean; email?: string | null; prov
     const entries = new Map<string, Entry>();
     const order = { id: 'order-1', customerPhone: '9876543210', customerEmail: options.email === undefined ? 'customer@example.com' : options.email, user: null };
     const sends: Array<{ data: Record<string, unknown>; key: string }> = [];
-    const auth = session();
+    const auth = session(options.authenticated !== false);
     class Provider {
         emails = { send: async (data: Record<string, unknown>, settings: { idempotencyKey: string }) => {
             sends.push({ data, key: settings.idempotencyKey });
@@ -75,11 +77,11 @@ function harness(options: { authenticated?: boolean; email?: string | null; prov
         },
     };
     const route = load<{ POST: (request: NextRequest, context: { params: Promise<{ id: string }> }) => Promise<Response> }>('src/app/api/admin/orders/[id]/communications/route.ts', {
-        '@/lib/prisma': { prisma: db }, '@/lib/admin-communication-session': auth,
+        '@/lib/prisma': { prisma: db }, '@/lib/admin-session': auth,
         '@/lib/customer-communication': load<Messages>('src/lib/customer-communication.ts'), resend: { Resend: Provider },
     }, options.configured === false ? { ADMIN_SESSION_SECRET: env.ADMIN_SESSION_SECRET } : env);
-    const post = (body: unknown = input, origin = 'http://localhost', cookie = auth.createCommunicationSession('admin-1')!) => route.POST(new NextRequest('http://localhost/api/admin/orders/order-1/communications', {
-        method: 'POST', headers: { 'content-type': 'application/json', origin, cookie: `${auth.COMMUNICATION_COOKIE}=${cookie}` }, body: JSON.stringify(body),
+    const post = (body: unknown = input, origin = 'http://localhost', cookie = auth.createAdminSession('admin-1')) => route.POST(new NextRequest('http://localhost/api/admin/orders/order-1/communications', {
+        method: 'POST', headers: { 'content-type': 'application/json', origin, cookie: `admin_session=${cookie}` }, body: JSON.stringify(body),
     }), { params: Promise.resolve({ id: 'order-1' }) });
     return { post, entries, sends, order, options };
 }
@@ -166,7 +168,7 @@ test('concurrent retries reserve one history entry and use one provider idempote
 
 test('admin logout clears both the dashboard and signed communication sessions', async () => {
     const route = load<{ POST: (request: NextRequest) => Promise<Response> }>('src/app/api/admin/logout/route.ts', {
-        '@/lib/admin-communication-session': session(),
+        '@/lib/admin-session': session(),
     });
     const response = await route.POST(new NextRequest('http://localhost/api/admin/logout', { method: 'POST', headers: { origin: 'http://localhost' } }));
     expect(response.status).toBe(303);
@@ -176,19 +178,20 @@ test('admin logout clears both the dashboard and signed communication sessions',
     expect((await route.POST(new NextRequest('http://localhost/api/admin/logout', { method: 'POST', headers: { origin: 'https://attacker.example' } }))).status).toBe(403);
 });
 
-test('successful admin login issues a verifiable communication cookie; invalid passwords issue none', async () => {
+test('successful admin login issues one shared signed session; invalid passwords issue none', async () => {
     const auth = session();
     const cookieValues = new Map<string, string>();
     let passwordMatches = true;
     const route = load<{ POST: (request: Request) => Promise<Response> }>('src/app/api/admin/login/route.ts', {
-        '@/lib/admin-communication-session': auth,
+        '@/lib/admin-session': auth,
         '@/lib/prisma': { prisma: { adminUser: { findUnique: async () => ({ id: 'admin-1', password: 'mock-hash' }) } } },
         bcryptjs: { compare: async () => passwordMatches },
         'next/headers': { cookies: async () => ({ set: (name: string, value: string) => cookieValues.set(name, value), delete: (name: string) => cookieValues.delete(name) }) },
     });
     const request = () => new Request('http://localhost/api/admin/login', { method: 'POST', body: JSON.stringify({ email: 'admin@example.com', password: 'test-only-password' }) });
     expect((await route.POST(request())).status).toBe(200);
-    expect(auth.verifyCommunicationSession(cookieValues.get(auth.COMMUNICATION_COOKIE))).toBe('admin-1');
+    expect(await auth.getCurrentAdmin(new Request('http://localhost', { headers: { cookie: `admin_session=${cookieValues.get('admin_session')}` } }))).toEqual({ id: 'admin-1' });
+    expect(cookieValues.size).toBe(1);
     cookieValues.clear();
     passwordMatches = false;
     expect((await route.POST(request())).status).toBe(401);

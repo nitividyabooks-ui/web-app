@@ -1,4 +1,6 @@
+import { NIMBUSPOST_STATUS_LABELS } from "@/lib/nimbuspost-order-sync";
 import { prisma } from "@/lib/prisma";
+import { requireAdminPage } from "@/lib/admin-session";
 import { Badge } from "@/components/ui/Badge";
 import Link from "next/link";
 import { AdminStatsCard } from "@/components/admin/AdminStatsCard";
@@ -7,7 +9,6 @@ import { AdminFilterPills } from "@/components/admin/AdminFilterPills";
 import { AdminPagination } from "@/components/admin/AdminPagination";
 import {
     formatAdminDate,
-    formatAdminDateTime,
     formatPaise,
     ORDER_STATUS_CONFIG,
     getPaginationParams,
@@ -15,7 +16,7 @@ import {
 } from "@/lib/admin-utils";
 import { Package } from "lucide-react";
 import { Suspense } from "react";
-import type { OrderStatus } from "@prisma/client";
+import { OrderStatus, type Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
@@ -30,12 +31,13 @@ const statusFilters = [
 ];
 
 async function OrdersList({ searchParams }: { searchParams: Record<string, string> }) {
+    await requireAdminPage();
     const query = searchParams.q || "";
     const statusFilter = searchParams.status;
-    const { page, skip, take } = getPaginationParams(new URLSearchParams(searchParams as any));
+    const { page, skip, take } = getPaginationParams(new URLSearchParams(searchParams));
 
     // Build where clause
-    const where: any = {};
+    const where: Prisma.OrderWhereInput = {};
     
     if (query) {
         where.OR = [
@@ -46,7 +48,7 @@ async function OrdersList({ searchParams }: { searchParams: Record<string, strin
         ];
     }
 
-    if (statusFilter && statusFilter !== "all") {
+    if (statusFilter && Object.values(OrderStatus).includes(statusFilter as OrderStatus)) {
         where.status = statusFilter as OrderStatus;
     }
 
@@ -55,7 +57,7 @@ async function OrdersList({ searchParams }: { searchParams: Record<string, strin
         prisma.order.findMany({
             where,
             orderBy: { createdAt: "desc" },
-            include: { items: true },
+            include: { items: true, nimbusPostSync: { select: { status: true, providerOrderId: true } } },
             skip,
             take,
         }),
@@ -126,6 +128,7 @@ async function OrdersList({ searchParams }: { searchParams: Record<string, strin
                                 <th className="px-6 py-4 font-medium text-slate-700">Items</th>
                                 <th className="px-6 py-4 font-medium text-slate-700">Payment</th>
                                 <th className="px-6 py-4 font-medium text-slate-700">Status</th>
+                                <th className="px-6 py-4 font-medium text-slate-700">NimbusPost</th>
                                 <th className="px-6 py-4 font-medium text-slate-700">Total</th>
                                 <th className="px-6 py-4 font-medium text-slate-700">Date</th>
                                 <th className="px-6 py-4 font-medium text-slate-700">Actions</th>
@@ -134,7 +137,7 @@ async function OrdersList({ searchParams }: { searchParams: Record<string, strin
                         <tbody className="divide-y divide-slate-100">
                             {orders.length === 0 ? (
                                 <tr>
-                                    <td colSpan={8} className="px-6 py-16 text-center">
+                                    <td colSpan={9} className="px-6 py-16 text-center">
                                         <div className="flex flex-col items-center gap-3">
                                             <Package className="h-12 w-12 text-slate-300" />
                                             <div className="text-slate-500 font-medium">No orders found</div>
@@ -178,6 +181,10 @@ async function OrdersList({ searchParams }: { searchParams: Record<string, strin
                                                 </Badge>
                                             </td>
                                             <td className="px-6 py-4">
+                                                <div>{order.nimbusPostSync ? NIMBUSPOST_STATUS_LABELS[order.nimbusPostSync.status] : "Not queued"}</div>
+                                                {order.nimbusPostSync?.providerOrderId && <div className="text-xs text-slate-500 break-all">{order.nimbusPostSync.providerOrderId}</div>}
+                                            </td>
+                                            <td className="px-6 py-4">
                                                 <span className="font-semibold text-slate-900">
                                                     {formatPaise(order.totalAmount)}
                                                 </span>
@@ -186,6 +193,7 @@ async function OrdersList({ searchParams }: { searchParams: Record<string, strin
                                                 <div>{formatAdminDate(order.createdAt)}</div>
                                                 <div className="text-xs">
                                                     {new Date(order.createdAt).toLocaleTimeString("en-IN", { 
+                                                        timeZone: "Asia/Kolkata",
                                                         hour: "2-digit", 
                                                         minute: "2-digit" 
                                                     })}
@@ -219,6 +227,7 @@ export default async function OrdersPage({
 }: {
     searchParams: Promise<Record<string, string>>;
 }) {
+    await requireAdminPage();
     const params = await searchParams;
 
     return (
