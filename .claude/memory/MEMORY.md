@@ -7,3 +7,5 @@ Non-obvious technical facts about this codebase. Agent memory files
 - [Local dev image optimizer 500s](local-dev-image-optimizer-proxy.md) — corporate TLS proxy breaks /_next/image fetch locally; verify images on Vercel, not localhost
 - [EmailSubscriber table missing from prod DB](email-subscriber-table-missing.md) — all email capture 500s; fix SQL in docs/sql/; migrate diff hangs through pooler; local dev hits PROD DB (test leads to clean up)
 - [Root loading.tsx soft-404](root-loading-tsx-soft-404.md) — root loading boundary made notFound() return 200; deleted it, don't reintroduce
+
+- [Manual customer updates integration and validation](../../docs/plans/2026-10-13-manual-customer-updates.md#production-integration--14-october-2026) — communications share the NimbusPost signed admin session; 136 checks and full build passed against disposable PostgreSQL. Keep temporary UI fixture out of releases and preserve pending email payload/idempotency keys.
